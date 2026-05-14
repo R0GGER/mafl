@@ -1,11 +1,9 @@
-<h1 align="center">Mafl</h1>
+<h1 align="center">Mafl </h1>
 <p align="center">
-  <i>A minimalistic and flexible homepage dashboard — forked from <a href="https://github.com/hywax/mafl">hywax/mafl</a> with extended layout options, search, tabs and more.</i>
-  <br/><br/>
-  <img width="130" alt="Mafl" src="https://raw.githubusercontent.com/hywax/mafl/main/docs/public/logotype.svg"/>
+  <i>A minimalistic and flexible homepage dashboard — forked from <a href="https://github.com/hywax/mafl">hywax/mafl</a> with extended layout options, search, tabs and more.</i><br><br>
+  <img src="docs/screenshots/screenshot1.png"></img><br>  
+  <a href="docs/screenshots/screenshot2.png">screenshot 2</a> | <a href="docs/screenshots/screenshot3.png">screenshot 3</a>
 </p>
-
-
 
 > **Note** — This is an independent fork. It is **not** affiliated with the upstream [hywax/mafl](https://github.com/hywax/mafl) project.
 
@@ -15,7 +13,6 @@
 * [Features](#-features)
 * [Getting started](#-getting-started)
   * [Docker](#docker)
-  * [Node](#node)
 * [Configuration](#%EF%B8%8F-configuration)
   * [Layout](#layout)
   * [Styles](#styles)
@@ -84,18 +81,6 @@ services:
 ```
 
 Place your `config.yml` (and optional background images) inside the `./mafl/` directory.
-
-### Node
-
-```shell
-git clone https://github.com/R0GGER/mafl.git
-cd mafl
-yarn install
-yarn build
-yarn preview
-```
-
-The application reads its configuration from the `data` folder.
 
 ## ⚙️ Configuration
 
