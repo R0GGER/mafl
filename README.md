@@ -253,8 +253,6 @@ icon:
   favicon: github.com
 ```
 
-Default: `https://favicon-api.hibbit.cloud`
-
 ### Status indicator
 
 Enable a live ping indicator per service. The position can be set to `left` or `right` (default).
