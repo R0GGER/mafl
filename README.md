@@ -1,4 +1,4 @@
-<h1 align="center">Mafl </h1>
+<h1 align="center">Mafl+</h1>
 <p align="center">
   <i>A minimalistic and flexible homepage dashboard — forked from <a href="https://github.com/hywax/mafl">hywax/mafl</a> with extended layout options, search, tabs and more.</i><br><br>
   <img src="docs/screenshots/screenshot1.png"></img><br>  
