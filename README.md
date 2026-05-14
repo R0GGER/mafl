@@ -26,6 +26,7 @@
 * [Icons](#-icons)
 * [Themes](#-themes)
 * [Languages](#-multi-language)
+* [Wiki](https://github.com/R0GGER/mafl/wiki)
 * [License](#-license)
 
 ## 🆕 What's different?
@@ -80,7 +81,7 @@ services:
       - ./mafl/:/app/data/
 ```
 
-Place your `config.yml` (and optional background images) inside the `./mafl/` directory.
+Place your [config.yml](.example/config.yml) (and optional background images) inside the `./mafl/` directory. 
 
 ## ⚙️ Configuration
 
@@ -304,6 +305,9 @@ lang: en
 ```
 
 Supported languages: `en`, `ru`, `zh`, `hi`, `es`, `ar`, `pl`, `fr`, `de`, `gr`
+
+## 📒 Wiki
+A step-by-step guide covering installation, configuration (layout, styles, backgrounds, tabs, search), icon types, and service tags: [mafl/wiki](https://github.com/R0GGER/mafl/wiki)
 
 ## 📄 License
 
