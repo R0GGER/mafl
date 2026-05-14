@@ -13,9 +13,24 @@ export default defineNuxtPlugin(async () => {
   })
 
   const asyncData = await useFetch<CompleteConfig>('/api/settings')
-  const { services, ...settings } = asyncData.data.value!
+  const { services, tabs, ...settings } = asyncData.data.value!
+
+  const activeTabIndex = useState('activeTabIndex', () => 0)
+
+  const activeServices = computed(() => {
+    if (tabs && tabs.length > 0) {
+      return tabs[activeTabIndex.value]?.services ?? []
+    }
+    return services
+  })
 
   return {
-    provide: { services, settings },
+    provide: {
+      services,
+      settings,
+      tabs: tabs ?? [],
+      activeTabIndex,
+      activeServices,
+    },
   }
 })

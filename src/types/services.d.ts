@@ -4,11 +4,13 @@ export interface ServiceStatus {
   enabled?: boolean
   interval?: number
   animation?: boolean
+  position?: 'left' | 'right'
 }
 
 export interface ServiceIcon {
   url?: string
   name?: string
+  favicon?: string
   wrap?: boolean
   background?: string
   color?: string

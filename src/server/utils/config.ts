@@ -2,7 +2,7 @@ import crypto from 'node:crypto'
 import yaml from 'yaml'
 import defu from 'defu'
 import { ZodError } from 'zod'
-import type { CompleteConfig, Service, Tag } from '~/types'
+import type { CompleteConfig, Service, ServicesGroup, Tab, Tag } from '~/types'
 import { configSchema } from '~/server/validations'
 
 type DraftService = Omit<Service, 'id'>
@@ -35,6 +35,17 @@ export function getDefaultConfig(): CompleteConfig {
     title: 'Mafl Home Page',
     lang: 'en',
     theme: 'system',
+    background: '',
+    backgroundOverlay: {
+      color: '#000000',
+      opacity: 0.5,
+    },
+    faviconApi: 'https://favicon-api.hibbit.cloud',
+    styles: {
+      category: {},
+      title: {},
+      description: {},
+    },
     checkUpdates: true,
     layout: {
       grid: {
@@ -43,13 +54,55 @@ export function getDefaultConfig(): CompleteConfig {
         large: 3,
         xlarge: 4,
       },
+      list: {
+        small: 2,
+        medium: 3,
+        large: 4,
+        xlarge: 5,
+      },
+      spacing: {
+        group: '2.5rem',
+        item: '0.5rem',
+      },
     },
     behaviour: {
       target: '_blank',
     },
+    searchProvider: 'google',
     tags: [],
     services: [],
+    tabs: [],
   }
+}
+
+function parseRawServices(raw: unknown, tags: TagMap): ServicesGroup[] {
+  const services: ServicesGroup[] = []
+
+  if (Array.isArray(raw)) {
+    services.push({
+      items: determineService(raw as DraftService[], tags),
+    })
+  } else if (raw && typeof raw === 'object') {
+    const entries = Object.entries(raw)
+
+    for (const [title, value] of entries) {
+      if (Array.isArray(value)) {
+        services.push({
+          title,
+          items: determineService(value as DraftService[], tags),
+        })
+      } else {
+        const group = value as { display?: 'grid' | 'list'; items: DraftService[] }
+        services.push({
+          title,
+          display: group.display,
+          items: determineService(group.items, tags),
+        })
+      }
+    }
+  }
+
+  return services
 }
 
 function createTagMap(tags: Tag[]): TagMap {
@@ -74,27 +127,25 @@ export async function loadConfig(): Promise<CompleteConfig> {
 
     const raw = await storage.getItem<string>(configFileName)
     const config = yaml.parse(raw || '') || {}
-    const services: CompleteConfig['services'] = []
     const tags: TagMap = createTagMap(config.tags || [])
 
     configSchema.parse(config)
 
-    if (Array.isArray(config.services)) {
-      services.push({
-        items: determineService(config.services, tags),
-      })
-    } else {
-      const entries = Object.entries<DraftService[]>(config.services || [])
+    let services: ServicesGroup[] = []
+    let tabs: Tab[] = []
 
-      for (const [title, items] of entries) {
-        services.push({
-          title,
-          items: determineService(items, tags),
-        })
-      }
+    if (Array.isArray(config.tabs) && config.tabs.length > 0) {
+      tabs = config.tabs.map((tab: { name: string; icon?: string; services: unknown }) => ({
+        name: tab.name,
+        icon: tab.icon,
+        services: parseRawServices(tab.services, tags),
+      }))
+      services = tabs[0].services
+    } else {
+      services = parseRawServices(config.services, tags)
     }
 
-    return defu({ ...config, services }, defaultConfig)
+    return defu({ ...config, services, tabs }, defaultConfig)
   } catch (e) {
     logger.error(e)
 
@@ -150,7 +201,11 @@ export function extractSafelyConfig(config: CompleteConfig) {
  * Create Map services
  */
 export function extractServicesFromConfig(config: CompleteConfig): Record<string, Service> {
-  return config.services.reduce<Record<string, Service>>((acc, group) => {
+  const allGroups = config.tabs && config.tabs.length > 0
+    ? config.tabs.flatMap(tab => tab.services)
+    : config.services
+
+  return allGroups.reduce<Record<string, Service>>((acc, group) => {
     for (const item of group.items) {
       acc[item.id] = item
     }

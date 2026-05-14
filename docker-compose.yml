@@ -7,4 +7,4 @@ services:
       - '3000:3000'
     volumes:
       - ./mafl/config.yml:/app/data/config.yml
-      - ./mafl/favicons://app/public/favicons
+      #- ./mafl/favicons://app/public/favicons

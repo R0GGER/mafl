@@ -1,62 +1,81 @@
 <h1 align="center">Mafl</h1>
 <p align="center">
-  <i>Mafl is an intuitive service for organizing your homepage. Customize Mafl to your individual needs and work even more efficiently!</i>
+  <i>A minimalistic and flexible homepage dashboard — forked from <a href="https://github.com/hywax/mafl">hywax/mafl</a> with extended layout options, search, tabs and more.</i>
   <br/><br/>
   <img width="130" alt="Mafl" src="https://raw.githubusercontent.com/hywax/mafl/main/docs/public/logotype.svg"/>
-  <br/><br/>
-  <b><a href="https://mafl.hywax.space/community/showcase.html">User Showcase</a></b> | <b><a href="https://mafl.hywax.space">Documentation</a></b> | <b><a href="https://github.com/hywax/mafl">GitHub</a></b>
-  <br/><br/>
-  <a href="https://github.com/hywax/mafl/blob/main/CHANGELOG.md"><img src="https://img.shields.io/github/package-json/v/hywax/mafl?logo=hackthebox&color=609966&logoColor=fff" alt="Current Version"/></a>
-  <a target="_blank" href="https://github.com/hywax/mafl"><img src="https://img.shields.io/github/last-commit/hywax/mafl?logo=github&color=609966&logoColor=fff" alt="Last commit"/></a>
-  <a target="_blank" href="https://hub.docker.com/r/hywax/mafl"><img src="https://img.shields.io/docker/pulls/hywax/mafl?logo=docker&color=609966&logoColor=fff" alt="Docker pulls"/></a>
-  <a href="https://github.com/hywax/mafl/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-609966?logo=opensourceinitiative&logoColor=fff" alt="License MIT"/></a>
-  <br/><br/>
-  <img src="https://raw.githubusercontent.com/hywax/mafl/main/docs/public/cover.png" alt="Mafl" width="100%"/>
 </p>
 
-<details>
-  <summary><b>Table of Contents</b></summary>
 
+
+> **Note** — This is an independent fork. It is **not** affiliated with the upstream [hywax/mafl](https://github.com/hywax/mafl) project.
+
+
+## Table of Contents
+* [What's different?](#-whats-different)
 * [Features](#-features)
 * [Getting started](#-getting-started)
   * [Docker](#docker)
   * [Node](#node)
-  * [Proxmox](#proxmox)
+* [Configuration](#%EF%B8%8F-configuration)
+  * [Layout](#layout)
+  * [Styles](#styles)
+  * [Background](#background)
+  * [Tabs](#tabs)
+  * [Search](#search)
+  * [Display modes](#display-modes)
+  * [Favicon API](#favicon-api)
+  * [Status indicator](#status-indicator)
 * [Services](#-services)
-* [Themes](#-themes)
 * [Icons](#-icons)
+* [Themes](#-themes)
 * [Languages](#-multi-language)
-* [Credits](#-credits)
-  * [Contributors](#contributors)
 * [License](#-license)
-</details>
+
+## 🆕 What's different?
+
+This fork adds several features on top of the original [Mafl](https://github.com/hywax/mafl):
+
+| Area | What changed |
+|------|-------------|
+| **Layout: Grid** | Responsive grid with up to 6 columns (`small` / `medium` / `large` / `xlarge`). |
+| **Layout: List** | Compact list display mode per group, with its own column configuration. |
+| **Layout: Spacing** | Configurable spacing between groups and between items. |
+| **Styles** | Per-element styling for category headers, titles and descriptions (color, fontSize, fontWeight, fontStyle, etc.). |
+| **Background image** | Full-screen background image served from the data volume. |
+| **Background overlay** | Color overlay with configurable opacity for better text readability. |
+| **Tabs** | Organise services into switchable tabs, each with its own icon. |
+| **Search bar** | Filters bookmarks across all tabs; falls back to Google or DuckDuckGo web search. Keyboard shortcuts: `/`, `Ctrl+K`. |
+| **Favicon API** | Retrieve service icons automatically via a configurable favicon API. |
+| **Status position** | Align the status indicator to the `left` or `right` (default) of a service. |
+| **Check updates** | Temporarily disabled in this fork. |
 
 ## 🎯 Features
 
-* 🔐 **Privacy**. All requests to third-party services occur in backend.
-* ⚡ **Real-time**. Interactive cards with extra information.
-* 🌎 **Multi-language**. Supports multiple languages.
-* 🎨 **Themes**. Customize the look to your liking.
-* 🗂️ **Grouping**. Create custom service groups.
-* 🏷️ **Tags**. Add tags to your services.
-* 👌 **Easy setup**. A few lines of yaml and your homepage is ready to go.
-* 🚀 **Fast**. Everything is fast and free of hang-ups.
-* 🐳 **Docker**. Optimized docker images for popular platforms.
-* ✨ **Free**. Mafl is completely free and open source.
-* 📲 **PWA**. Installable application.
+* 🔐 **Privacy** — All requests to third-party services happen server-side.
+* ⚡ **Real-time** — Interactive service cards with live status information.
+* 🔍 **Search** — Filter bookmarks instantly; fall back to Google or DuckDuckGo.
+* 📑 **Tabs** — Organise services into switchable tabs.
+* 🖼️ **Backgrounds** — Full-screen background images with color overlay.
+* 🎨 **Themes** — Six built-in themes or full custom styling.
+* 🗂️ **Grouping** — Grid and list display modes per group.
+* 🏷️ **Tags** — Add tags to your services.
+* 🌎 **Multi-language** — Automatic language detection with 10 locales.
+* 👌 **Easy setup** — A few lines of YAML and your homepage is ready.
+* 🚀 **Fast** — Powered by Nuxt 3 — everything is snappy.
+* 🐳 **Docker** — Optimised container images.
+* ✨ **Free & open source** — MIT licensed.
+* 📲 **PWA** — Installable as a progressive web app.
 
 ## 🚀 Getting started
 
 ### Docker
 
-This Docker image is published to both Docker Hub and the GitHub container registry. Depending on your preferences and needs, you can reference both `hywax/mafl` as well as `ghcr.io/hywax/mafl`.
+The image is published to the **GitHub Container Registry**.
 
 ```yaml
-version: '3.8'
-
 services:
   mafl:
-    image: hywax/mafl
+    image: ghcr.io/r0gger/mafl
     restart: unless-stopped
     ports:
       - '3000:3000'
@@ -64,98 +83,247 @@ services:
       - ./mafl/:/app/data/
 ```
 
+Place your `config.yml` (and optional background images) inside the `./mafl/` directory.
+
 ### Node
 
-First, clone the repository:
-
 ```shell
-git clone https://github.com/hywax/mafl.git
-```
-
-Then install dependencies and build the production bundle (I'm using `yarn` here, you can use `npm` or `pnpm` if you like):
-
-```shell
+git clone https://github.com/R0GGER/mafl.git
+cd mafl
 yarn install
 yarn build
-```
-
-Finally, run the server:
-
-```shell
 yarn preview
 ```
 
-The application will start with a basic configuration, which is located in the `data` folder.
+The application reads its configuration from the `data` folder.
 
-### Proxmox
+## ⚙️ Configuration
 
-To create a new Proxmox VE Mafl LXC, run the command below in the Proxmox VE Shell.
+All settings live in a single `config.yml` file inside the data volume.
 
-```shell
-bash -c "$(wget -qLO - https://github.com/community-scripts/ProxmoxVE/raw/main/ct/mafl.sh)"
+### Layout
+
+Control the responsive grid columns and spacing.
+
+```yaml
+layout:
+  grid:
+    small: 2      # ≥640px
+    medium: 2     # ≥768px
+    large: 3      # ≥1024px
+    xlarge: 5     # ≥1280px
+  list:
+    small: 2
+    medium: 3
+    large: 4
+    xlarge: 5
+  spacing:
+    group: 1.5rem
+    item: 0.25rem
 ```
 
-Configure the application by editing the `config.yml` file:
+Column values range from `1` to `6`. The `list` key provides separate column settings for groups displayed as lists.
 
-```shell
-nano /opt/mafl/data/config.yml
+### Styles
+
+Customise the appearance of category headers, service titles and descriptions.
+
+```yaml
+styles:
+  category:
+    color: '#ffffff'
+    fontSize: 1.5rem
+    fontWeight: 600
+  title:
+    color: '#ffffff'
+    fontSize: 0.875rem
+  description:
+    color: '#cccccc'
+    fontStyle: italic
 ```
 
-Many thanks to [@tteck](https://github.com/tteck) for helping me create lxc script.
+Supported properties: `fontFamily`, `fontSize`, `fontWeight`, `fontStyle`, `textDecoration`, `color`.
+
+### Background
+
+Set a full-screen background image. Place the image file in your data volume (next to `config.yml`).
+
+```yaml
+background: background.jpg
+```
+
+Supported formats: `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.svg`, `.avif`
+
+#### Background overlay
+
+Add a semi-transparent color layer over the background to improve readability.
+
+```yaml
+backgroundOverlay:
+  color: '#000000'
+  opacity: 0.5
+```
+
+| Property  | Description | Default |
+|-----------|-------------|---------|
+| `color`   | Any valid CSS color | `#000000` |
+| `opacity` | `0` (transparent) – `1` (opaque) | `0.5` |
+
+### Tabs
+
+Split your services across multiple tabs. Each tab has a name, an optional icon and its own set of service groups.
+
+```yaml
+tabs:
+  - name: Personal
+    icon: mdi:home
+    services:
+      Favorites:
+        display: grid
+        items:
+          - title: GitHub
+            link: https://github.com
+            icon:
+              name: simple-icons:github
+              wrap: true
+      News:
+        display: list
+        items:
+          - title: Hacker News
+            link: https://news.ycombinator.com
+            icon:
+              favicon: news.ycombinator.com
+  - name: Work
+    icon: mdi:briefcase
+    services:
+      Tools:
+        display: list
+        items:
+          - title: Grafana
+            link: https://grafana.local
+            icon:
+              name: simple-icons:grafana
+              color: '#f46800'
+```
+
+When `tabs` is defined the top-level `services` key is ignored.
+
+### Search
+
+A search bar is displayed at the top of every page. It filters bookmarks across all tabs as you type and offers web search when no match is found.
+
+```yaml
+searchProvider: google
+```
+
+Values: `google`, `duckduckgo` — Default: `google`
+
+**Keyboard shortcuts:**
+| Key | Action |
+|-----|--------|
+| `/` | Focus the search bar |
+| `Ctrl+K` / `Cmd+K` | Focus the search bar |
+| `↑` / `↓` | Navigate results |
+| `Enter` | Open selected result |
+| `Escape` | Clear / close |
+
+### Display modes
+
+Each service group can be rendered as a **grid** (cards with icon, title and description) or a **list** (compact rows).
+
+```yaml
+services:
+  Favorites:
+    display: grid
+    items:
+      - title: Home Assistant
+        description: Home automation
+        link: https://ha.local
+        icon:
+          name: simple-icons:homeassistant
+          wrap: true
+          color: '#3dbcf3'
+  Monitoring:
+    display: list
+    items:
+      - title: Grafana
+        link: https://grafana.local
+        icon:
+          name: simple-icons:grafana
+          color: '#f46800'
+```
+
+### Favicon API
+
+Automatically fetch service icons by domain name using a favicon API. Set the base URL globally:
+
+```yaml
+faviconApi: https://favicon.vemetric.com/
+```
+
+Then reference a domain in any service icon:
+
+```yaml
+icon:
+  favicon: github.com
+```
+
+Default: `https://favicon-api.hibbit.cloud`
+
+### Status indicator
+
+Enable a live ping indicator per service. The position can be set to `left` or `right` (default).
+
+```yaml
+- title: Home Assistant
+  link: https://ha.local
+  status:
+    enabled: true
+    position: left
+    animation: true
+```
 
 ## 📊 Services
 
-The basic concept of `Mafl` is to create not just a homepage, but to create an interactive homepage page. You can combine different services with each other. You can combine different services to create the perfect customized homepage for you.
+Services are the building blocks of your homepage. Each service can have a title, description, link, icon, status indicator and tags.
 
-List of services:
-* **[Base](https://mafl.hywax.space/services/base.html)** - The main card of the service. Other services are created on the basis of this service.
-* **[IP API](https://mafl.hywax.space/services/ip-api.html)** - Shows information about your IP address.
-* **[Weather](https://mafl.hywax.space/services/openweathermap.html)** - Shows weather information for your location.
-
-## 🎨 Themes
-
-There are several ready-made themes in `Mafl`. But nothing prevents you from creating your own design themes and sharing them with other users
-
-<img src="https://raw.githubusercontent.com/hywax/mafl/main/docs/public/themes.png" alt="Mafl themes" width="100%"/>
+Built-in service types:
+* **Base** — Standard card with icon, title, description and optional status ping.
+* **IP API** — Displays your public IP address information.
+* **OpenWeatherMap** — Shows current weather for a given location.
 
 ## 🖼 Icons
 
-Services can have icons. With support for several different icon packs, you can find the perfect thumbnail for any application or service.
+Services support multiple icon sources:
 
-Supported types:
-* **[Iconify](https://icon-sets.iconify.design/)** - Over 200,000 open source vector icons
-* **Emoji** - Any valid emoji can be used as an icon
-* **URL** - Pass the URL of any matching image so that it can be found and displayed.
-* **Local** - Store custom images locally and reference them by file name
+| Type | Description |
+|------|-------------|
+| [Iconify](https://icon-sets.iconify.design/) | 200,000+ open-source vector icons (e.g. `simple-icons:github`, `mdi:home`) |
+| Emoji | Any valid emoji character |
+| URL | Direct URL to an image |
+| Local | Image file stored in the data volume |
+| Favicon | Auto-fetched via the configured [favicon API](#favicon-api) by domain name |
+
+## 🎨 Themes
+
+Six built-in themes: `system`, `light`, `dark`, `deep`, `sepia`, `bluer`.
+
+```yaml
+theme: dark
+```
 
 ## 🌎 Multi-language
 
-`Mafl` supports multiple languages and locales. The app should automatically detect your language and set it in the settings. If not, set it in `config.yml` with the `lang` property.
+The app detects your browser language automatically. Override it in `config.yml`:
 
-Supported Languages:
-* 🇬🇧 **English** - `en`
-* 🇷🇺 **Russian** - `ru`
-* 🇨🇳 **Chinese** - `zh`
-* 🇨🇮 **Hindi** - `hi`
-* 🇪🇸 **Spanish** - `es`
-* 🇸🇦 **Arabic** - `ar` (by [@mohmadhabib](https://github.com/mohmadhabib))
-* 🇵🇱 **Polish** - `pl` (by [@UberDudePL](https://github.com/UberDudePL))
-* 🇫🇷 **France** - `fr` (by [@maxim31cote](https://github.com/maxim31cote))
-* 🇩🇪 **German** - `de` (by [@gehno](https://github.com/gehno))
-* 🇬🇷 **Greek** - `gr` (by [@sthivaios](https://github.com/sthivaios))
+```yaml
+lang: en
+```
 
-If you haven't found your language, it can easily be added! Use the instructions in the section [contributing](https://mafl.hywax.space/community/contributing.html) on docs.
-
-## 🏆 Credits
-
-A huge thank you to everyone who is helping to improve Mafl. Thanks to you, the project can evolve!
-
-### Contributors
-
-To become a contributor, please follow our [contributing guide](https://mafl.hywax.space/community/contributing.html).
-
-<img src="https://raw.githubusercontent.com/hywax/mafl/main/docs/public/contributors.svg" alt="Mafl Contributors" width="100%"/>
+Supported languages: `en`, `ru`, `zh`, `hi`, `es`, `ar`, `pl`, `fr`, `de`, `gr`
 
 ## 📄 License
 
-This app is open-sourced software licensed under the [MIT license](https://github.com/hywax/mafl/blob/main/LICENSE).
+This project is open-source software licensed under the [MIT license](LICENSE).
+
+Based on [hywax/mafl](https://github.com/hywax/mafl) — thank you to the original author and all contributors.

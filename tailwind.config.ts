@@ -8,7 +8,7 @@ export default <Partial<Config>>{
       variants: ['dark'],
     },
     {
-      pattern: /grid-cols-./,
+      pattern: /grid-cols-(1[0-2]|[1-9])/,
       variants: ['sm', 'md', 'lg', 'xl'],
     },
   ],

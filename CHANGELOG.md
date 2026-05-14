@@ -1,6 +1,43 @@
 # Changelog
 
 
+## Fork and modifications
+
+> Independent fork by [@R0GGER](https://github.com/R0GGER) — not affiliated with upstream [hywax/mafl](https://github.com/hywax/mafl).
+
+### 🚀 Enhancements
+
+- **layout:** Responsive grid with up to 6 columns (`small` / `medium` / `large` / `xlarge`)
+- **layout:** List display mode per group with separate column configuration
+- **layout:** Configurable spacing between groups (`group`) and items (`item`)
+- **styles:** Per-element styling for category headers, titles and descriptions (`color`, `fontSize`, `fontWeight`, `fontStyle`, `fontFamily`, `textDecoration`)
+- **background:** Full-screen background image served from the data volume
+- **background:** Color overlay with configurable color and opacity (`backgroundOverlay`)
+- **tabs:** Organise services into switchable tabs, each with its own name and icon
+- **search:** Search bar that filters bookmarks across all tabs with keyboard shortcuts (`/`, `Ctrl+K`)
+- **search:** Web search fallback to Google or DuckDuckGo (`searchProvider`)
+- **icons:** Retrieve service icons automatically via a configurable favicon API (`faviconApi`)
+- **icons:** Favicon icon type — reference a domain to auto-fetch its icon (`icon.favicon`)
+- **status:** Align status indicator to `left` or `right` (default) per service (`status.position`)
+- **display:** Grid and list display modes per service group (`display: grid | list`)
+
+### 🩹 Fixes
+
+- **assets:** Serve background images and local assets from the data volume via `/api/assets/`
+
+### 💅 Refactors
+
+- **config:** Extended config schema with `background`, `backgroundOverlay`, `faviconApi`, `styles`, `layout.list`, `layout.spacing`, `searchProvider` and `tabs`
+- **config:** Default layout now includes separate grid and list column defaults
+- **settings:** Plugin provides `$tabs`, `$activeTabIndex` and `$activeServices` for tab switching
+- **layout:** Default layout renders search bar, tab navigation and section-based grid/list grouping
+- **services:** `ListItem` component for compact list rows with icon, title and status
+
+### 🏡 Chore
+
+- **docker:** Image published to `ghcr.io/r0gger/mafl` via GitHub Actions
+- **updates:** Check updates temporarily disabled
+
 ## v0.15.4
 
 [compare changes](https://github.com/hywax/mafl/compare/v0.15.3...v0.15.4)

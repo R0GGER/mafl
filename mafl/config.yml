@@ -1,7 +1,7 @@
 title: bookmarks
 lang: en
 theme: dark
-background: background.jpg
+background: background1.jpg
 faviconApi: https://favicon.vemetric.com/
 backgroundOverlay:
   color: '#000000'
@@ -569,3 +569,4 @@ tabs:
             icon:
               name: simple-icons:mattermost
               color: '#0058cc'
+

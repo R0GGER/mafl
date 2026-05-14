@@ -1,6 +1,7 @@
 <template>
   <div :class="wrapClasses" :style="wrapStyles">
     <Icon v-if="props?.name" :name="props.name" :class="iconClasses" />
+    <img v-else-if="props?.favicon" :src="faviconUrl" alt="" :class="iconClasses">
     <img v-else-if="props?.url" :src="props.url" alt="" :class="iconClasses">
   </div>
 </template>
@@ -9,8 +10,16 @@
 import type { ServiceIcon } from '~/types'
 
 const props = defineProps<ServiceIcon>()
+const { $settings } = useNuxtApp()
 
 const iconClasses = 'block h-full w-full'
+
+const faviconUrl = computed(() => {
+  if (!props.favicon) return ''
+  const domain = props.favicon.replace(/^https?:\/\//, '').replace(/\/.*$/, '')
+  const baseUrl = ($settings.faviconApi || 'https://favicon-api.hibbit.cloud').replace(/\/$/, '')
+  return `${baseUrl}/${domain}`
+})
 
 const wrapClasses = computed(() => ({
   'bg-fg/5 dark:bg-fg/10': props?.wrap && !props?.background,

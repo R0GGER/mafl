@@ -1,6 +1,9 @@
 <template>
   <ServicePlaceholder v-if="loadingOverlay" />
   <Component :is="isLink ? 'a' : 'div'" v-else :href="link" :target="target" class="p-4 flex gap-4 hover:bg-fg/5 dark:hover:bg-fg/9 rounded-2xl transition-all">
+    <slot v-if="status && status.enabled && statusPosition === 'left'" name="status" :data="data">
+      <ServiceBaseStatus :ping="{ ...data?.ping, animation: status?.animation }" class="flex-shrink-0 self-center" />
+    </slot>
     <div class="flex-shrink-0 flex">
       <div class="self-center w-16 h-16 overflow-hidden">
         <slot name="icon" :service="data">
@@ -9,16 +12,16 @@
       </div>
     </div>
     <div>
-      <h3 class="text-lg pr-1 font-semibold line-clamp-1 flex gap-2 items-center">
+      <h3 class="text-lg pr-1 font-semibold line-clamp-1 flex gap-2 items-center" :style="titleStyle">
         <slot name="title" :service="data">
           {{ title }}
         </slot>
-        <slot v-if="status && status.enabled" name="status" :data="data">
+        <slot v-if="status && status.enabled && statusPosition === 'right'" name="status" :data="data">
           <ServiceBaseStatus :ping="{ ...data?.ping, animation: status?.animation }" />
         </slot>
       </h3>
 
-      <p class="text-sm text-fg-dimmed line-clamp-1">
+      <p class="text-sm text-fg-dimmed line-clamp-1" :style="descriptionStyle">
         <slot name="description" :service="data">
           {{ description }}
         </slot>
@@ -35,13 +38,29 @@
 </template>
 
 <script setup lang="ts">
-import type { Service, ServiceClient } from '~/types'
+import type { Service, ServiceClient, TextStyle } from '~/types'
 
 const props = defineProps<ServiceClient<Service>>()
 
 const { $settings } = useNuxtApp()
 const isLink = computed(() => isUrl(props.link || ''))
 const target = computed(() => props.target || $settings.behaviour.target)
+
+function toCSS(style?: TextStyle): Record<string, string | undefined> {
+  if (!style) return {}
+  return {
+    fontFamily: style.fontFamily,
+    fontSize: style.fontSize,
+    fontWeight: style.fontWeight,
+    fontStyle: style.fontStyle,
+    textDecoration: style.textDecoration,
+    color: style.color,
+  }
+}
+
+const titleStyle = computed(() => toCSS($settings.styles?.title))
+const descriptionStyle = computed(() => toCSS($settings.styles?.description))
+const statusPosition = computed(() => props.status?.position ?? 'right')
 
 const immediate = computed(() => props.status?.enabled || !!props.type || false)
 const { data, pauseUpdate } = useServiceData<Service>(props, {

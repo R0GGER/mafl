@@ -4,11 +4,13 @@ export const statusSchema = z.object({
   enabled: z.boolean().optional(),
   interval: z.number().optional(),
   animation: z.boolean().optional(),
+  position: z.enum(['left', 'right']).optional(),
 })
 
 export const iconSchema = z.object({
   url: z.string().optional(),
   name: z.string().optional(),
+  favicon: z.string().optional(),
   wrap: z.boolean().optional(),
   background: z.string().optional(),
   color: z.string().optional(),

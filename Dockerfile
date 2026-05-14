@@ -1,6 +1,6 @@
-ARG NODE=node:20.18.1-alpine
+ARG NODE=node:22-alpine
 
-FROM $NODE as build
+FROM $NODE AS build
 
 WORKDIR /app
 
@@ -16,11 +16,8 @@ RUN yarn run build
 FROM $NODE
 
 LABEL org.opencontainers.image.title="Mafl" \
-      org.opencontainers.image.description="Minimalistic flexible homepage" \
-      org.opencontainers.image.url="https://mafl.hywax.space" \
-      org.opencontainers.image.documentation="https://mafl.hywax.space/guide/getting-started.html" \
-      org.opencontainers.image.source="https://github.com/hywax/mafl" \
-      org.opencontainers.image.authors="Hywax <me@hywax.space>" \
+      org.opencontainers.image.description="Minimalistic flexible homepage" \      
+      org.opencontainers.image.source="https://github.com/r0gger/mafl" \
       org.opencontainers.image.licenses="MIT"
 
 WORKDIR /app

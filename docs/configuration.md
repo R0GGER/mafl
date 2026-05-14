@@ -1,7 +1,320 @@
+# Configuration: config.yml
+
+Services, icons, language and other settings are set in a single `config.yml` file.
+
+## Title
+
+You can customize the page header if you wish.
+
+```yaml
+title: My Home Page
+```
+
+Default: `Mafl Home Page`
+
+## Language
+
+Set the desired language with:
+
+```yaml
+lang: en
+```
+
+Values: `en`, `ru`, `zh`, `hi`, `es`, `ar`, `pl`, `fr`, `de`, `gr`, `nl`
+
+Default: `en`
+
+## Theme
+
+You can customize fixed themes by passing the `theme` option as shown below:
+
+```yaml
+theme: dark
+```
+
+Values: `system`, `light`, `dark`, `deep`, `sepia`, `bluer`
+
+Default: `system`
+
+## Background
+
+Display a background image on the homepage. The image file must be placed in the data volume
+(the same directory as `config.yml`).
+
+```yaml
+background: background.jpg
+```
+
+Supported formats: `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.svg`, `.avif`
+
+Default: _none_
+
+### Background overlay
+
+Add a color overlay on top of the background image to improve text readability.
+Only takes effect when `background` is set.
+
+```yaml
+background: background.jpg
+backgroundOverlay:
+  color: '#000000'
+  opacity: 0.5
+```
+
+| Property  | Description                                | Default     |
+|-----------|--------------------------------------------|-------------|
+| `color`   | Any valid CSS color (hex, rgb, named, etc) | `#000000`   |
+| `opacity` | Value between `0` (transparent) and `1` (opaque) | `0.5` |
+
+## Styles
+
+Customize the font family, size, weight, style, decoration and color for category headers,
+service titles and service descriptions.
+
+```yaml
+styles:
+  category:
+    fontFamily: 'Arial, sans-serif'
+    fontSize: 1.5rem
+    fontWeight: bold
+    fontStyle: normal
+    textDecoration: none
+    color: '#ffffff'
+  title:
+    fontSize: 1.1rem
+    fontWeight: 600
+    color: '#ffffff'
+  description:
+    fontSize: 0.8rem
+    fontStyle: italic
+    color: '#cccccc'
+```
+
+All three elements (`category`, `title`, `description`) support the same properties:
+
+| Property         | Description          | Examples                                   |
+|------------------|----------------------|--------------------------------------------|
+| `fontFamily`     | Font family          | `'Arial, sans-serif'`, `'Georgia, serif'`  |
+| `fontSize`       | Font size            | `1.5rem`, `18px`, `1.2em`                  |
+| `fontWeight`     | Font weight          | `bold`, `normal`, `600`, `lighter`          |
+| `fontStyle`      | Font style           | `italic`, `normal`                         |
+| `textDecoration` | Text decoration      | `underline`, `line-through`, `none`         |
+| `color`          | Text color           | `'#ffffff'`, `'rgb(255,255,255)'`           |
+
+All properties are optional — only specify what you want to customize.
+
+Default: _inherits from theme_
+
+## Check updates (watchtower)
+
+```bash
+docker run --name watchtower -d --restart always -v /var/run/docker.sock:/var/run/docker.sock nickfedor/watchtower --cleanup
+```
+
+## Behaviour
+
+A group of parameters responsible for the behavior of the application.
+
+### Target
+
+Browser behavior when the service is clicked.
+With this property, you can make the service open in the current or a new window.
+
+```yaml
+behaviour:
+  target: _blank
+```
+
+Values:
+
+| Value     | Description                                                                                                                     |
+|-----------|---------------------------------------------------------------------------------------------------------------------------------|
+| `_blank`  | Usually a new tab, but users can configure browsers to open a new window instead                                                |
+| `_self`   | The current browsing context                                                                                                    |
+| `_parent` | The parent browsing context of the current one. If no parent, behaves as `_self`                                                |
+| `_top`    | The topmost browsing context (the "highest" context that's an ancestor of the current one). If no ancestors, behaves as `_self` |
+
+Default: `_blank`
+
+::: warning
+If a field is defined in the service `target` it will be prioritized. More details can be found in the [basic service](../services/base.md#target).
+:::
+
+## Search
+
+A search bar is displayed at the top of the page. It filters your bookmarks as you type and offers web search as a fallback. You can choose the preferred search engine:
+
+```yaml
+searchProvider: google
+```
+
+Values: `google`, `duckduckgo`
+
+Default: `google`
+
+**Keyboard shortcuts:**
+- Press `/` to focus the search bar
+- Press `Ctrl+K` (or `Cmd+K` on macOS) to focus the search bar
+- Press `Escape` to clear or close
+- Use `Arrow Up` / `Arrow Down` to navigate results
+- Press `Enter` to open the selected result
+
+## Tags 
+
+Tags allow you to differentiate between services.
+
+```yaml
+tags:
+  - name: Home
+    color: green
+  - name: Work
+    color: blue
+```
+
+More info in: Tags
+
+## Layout
+
+A group of parameters responsible for the application layout.
+
+### Grid
+
+Allows you to set the number of columns at different screen resolutions.
+
+```yaml
+layout:
+  grid:
+    small: 2
+    medium: 2
+    large: 3
+    xlarge: 5
+```
+
+Values: range `1 - 6`
+
+You can only specify one value, the others will be set automatically.
+
+### Spacing
+
+Control the vertical spacing between groups and the gap between service items.
+
+```yaml
+layout:
+  spacing:
+    group: 1.5rem
+    item: 0.25rem
+```
+
+| Property | Description                                      | Default   |
+|----------|--------------------------------------------------|-----------|
+| `group`  | Vertical padding around each category group      | `2.5rem`  |
+| `item`   | Gap between service cards within a group         | `0.5rem`  |
+
+Any valid CSS unit works (`rem`, `px`, `em`, etc).
+
+## Services
+
+All services that are displayed on the home page are set in this parameter.
+It supports both list and grouping. The number of services is not limited.
+
+::: warning Services list
+A full list of all services can be viewed in the left sidebar under **Services**.
+We recommend to start familiarization with [base service](../services/base.md), on which all other services are based.
+:::
+
+### Flat
+```yaml
+services:
+  - title: Home Assistant
+    description: Home automation
+    link: https://home-assistant.home.local/
+```
+
+### Groups
+
+```yaml
+services:
+  Group 1:
+    - title: Home Assistant
+      description: Home automation
+      link: https://home-assistant.home.local/
+  Group 2:
+    - title: Home Assistant
+      description: Home automation
+      link: https://home-assistant.home.local/
+```
+
+### Display mode (grid / list)
+
+Each group can use a different display mode. Use `display: grid` for larger cards with icon, title and description (default), or `display: list` for a compact view with small icons and titles only.
+
+```yaml
+services:
+  Favorites:
+    display: grid
+    items:
+      - title: Home Assistant
+        description: Home automation
+        link: https://home-assistant.home.local/
+        icon:
+          name: simple-icons:homeassistant
+          wrap: true
+          color: '#3dbcf3'
+  Tools:
+    display: list
+    items:
+      - title: Portainer
+        link: https://portainer.home.local/
+        icon:
+          name: simple-icons:portainer
+      - title: Grafana
+        link: https://grafana.home.local/
+        icon:
+          name: simple-icons:grafana
+  Selfhost:
+    display: list
+    items:
+      - title: selfh.st
+        link: https://selfh.st
+        icon:
+          url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/selfh-st.svg
+      - title: OS Alternatives
+        link: https://osalt.com
+        icon:
+          favicon: osalt.com
+      - title: Awesome Selfhosted
+        link: https://awesome-selfhosted.net
+        icon:
+          name: mdi:rocket
+          color: '#2d6cec'
+```
+
+| Value  | Description                                              |
+|--------|----------------------------------------------------------|
+| `grid` | Cards with icon, title and description (default)         |
+| `list` | Compact rows with small icon and title only              |
+
+When using `display`, services must be nested under `items`. Groups without a `display` key can still use the simple array format.
+
+This is a required parameter, without it the homepage will not open.
+You can see more detailed examples below.
+
+## Demo: config.yml 
+
+**Tab: Personal**
+10 Favorites
+10 Groups with each 5 listed items
+Weather
+
+**Tab: Work**
+5 Favorites
+5 Groups with each 5 listed items
+
+```yaml
 title: bookmarks
 lang: en
 theme: dark
-background: background.jpg
+background: background1.jpg
 faviconApi: https://favicon.vemetric.com/
 backgroundOverlay:
   color: '#000000'
@@ -387,7 +700,7 @@ tabs:
               lon: 4.895168
               units: metric
             secrets:
-              apiKey: 31531441300a9ace7345acc0b6e59805
+              apiKey: ****
 
   - name: Work
     icon: mdi:work
@@ -569,3 +882,9 @@ tabs:
             icon:
               name: simple-icons:mattermost
               color: '#0058cc'
+
+
+```
+
+
+
