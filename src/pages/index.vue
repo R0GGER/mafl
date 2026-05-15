@@ -39,7 +39,7 @@ const listGrid = computed(() => $settings.layout.list ?? { small: 2, medium: 3, 
 const listRowClasses = computed(() => [
   'grid',
   'grid-cols-1',
-  'gap-6',
+  'gap-6 lg:gap-8 xl:gap-12',
   `sm:grid-cols-${listGrid.value.small}`,
   `md:grid-cols-${listGrid.value.medium}`,
   `lg:grid-cols-${listGrid.value.large}`,

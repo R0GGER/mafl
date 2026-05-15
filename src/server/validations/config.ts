@@ -57,6 +57,7 @@ export const configSchema = z.object({
   title: z.string().optional(),
   lang: z.string().optional(),
   theme: z.string().optional(),
+  logo: z.string().optional(),
   background: z.string().optional(),
   backgroundOverlay: backgroundOverlaySchema,
   faviconApi: z.string().optional(),

@@ -1,10 +1,13 @@
 services:
   mafl:
+   # build:
+   #   context: .
+   #   dockerfile: Dockerfile
     image: ghcr.io/r0gger/mafl
     container_name: mafl
     restart: unless-stopped
     ports:
       - '3000:3000'
     volumes:
-      - ./mafl/config.yml:/app/data/config.yml
-      #- ./mafl/favicons://app/public/favicons
+      - ./mafl:/app/data
+      #- ./mafl/favicons:/app/public/favicons

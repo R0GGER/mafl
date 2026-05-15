@@ -1,4 +1,10 @@
 <template>
+  <img
+    v-if="$settings.logo"
+    :src="`/api/assets/${$settings.logo}`"
+    :alt="$settings.title || 'Logo'"
+    class="hidden sm:block fixed top-5 left-5 sm:top-6 sm:left-6 z-50 h-6 sm:h-7 md:h-8 w-auto object-contain pointer-events-none drop-shadow-md"
+  >
   <div class="min-h-screen relative">
     <div
       v-if="$settings.background"
@@ -13,7 +19,7 @@
         opacity: overlay.opacity,
       }"
     />
-    <div class="max-w-screen-2xl mx-auto xl:flex-row px-4">
+    <div class="mx-auto px-4 sm:px-6 lg:px-8" :style="{ maxWidth: containerMaxWidth }">
       <div class="pt-6 pb-2">
         <SearchBar />
       </div>
@@ -48,4 +54,11 @@ const overlay = computed(() => ({
   color: $settings.backgroundOverlay?.color ?? '#000000',
   opacity: $settings.backgroundOverlay?.opacity ?? 0.5,
 }))
+
+const containerMaxWidth = computed(() => {
+  const gridCols = $settings.layout?.grid?.xlarge ?? 5
+  const listCols = $settings.layout?.list?.xlarge ?? 5
+  const maxCols = Math.max(gridCols, listCols)
+  return `${maxCols * 240 + 80}px`
+})
 </script>

@@ -18,7 +18,7 @@
         <ListItem v-bind="item" />
       </template>
     </div>
-    <div v-else :class="gridClasses" :style="{ gap: itemSpacing }">
+    <div v-else :class="gridClasses">
       <template v-for="item in items" :key="item.id">
         <Item v-bind="item" />
       </template>
@@ -42,7 +42,6 @@ const props = defineProps<Props>()
 const { $settings } = useNuxtApp()
 
 const groupSpacing = computed(() => props.spacing?.group ?? '2.5rem')
-const itemSpacing = computed(() => props.spacing?.item ?? '0.5rem')
 
 function toCSS(style?: TextStyle): Record<string, string | undefined> {
   if (!style) return {}
@@ -61,6 +60,7 @@ const categoryStyle = computed(() => toCSS($settings.styles?.category))
 const gridClasses = computed(() => [
   'grid',
   'grid-cols-1',
+  'gap-2 lg:gap-4 xl:gap-6',
   `sm:grid-cols-${props.grid.small}`,
   `md:grid-cols-${props.grid.medium}`,
   `lg:grid-cols-${props.grid.large}`,
@@ -70,6 +70,7 @@ const gridClasses = computed(() => [
 const listGridClasses = computed(() => [
   'grid',
   'grid-cols-1',
+  'gap-2 lg:gap-4 xl:gap-6',
   `sm:grid-cols-${props.grid.small}`,
   `md:grid-cols-${props.grid.medium}`,
   `lg:grid-cols-${props.grid.large}`,

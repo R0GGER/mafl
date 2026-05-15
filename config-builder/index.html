@@ -116,7 +116,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block text-xs text-gray-400 mb-1">Title</label>
-              <input type="text" id="cfg-title" value="bookmarks" class="w-full bg-surface border border-gray-600 rounded px-3 py-1.5 text-sm" oninput="generateYaml()">
+              <input type="text" id="cfg-title" value="MAFL+" class="w-full bg-surface border border-gray-600 rounded px-3 py-1.5 text-sm" oninput="generateYaml()">
             </div>
             <div>
               <label class="block text-xs text-gray-400 mb-1">Language</label>
@@ -129,6 +129,10 @@
               <select id="cfg-theme" class="w-full bg-surface border border-gray-600 rounded px-3 py-1.5 text-sm" onchange="generateYaml()">
                 <option value="dark">dark</option><option value="light">light</option><option value="system">system</option><option value="deep">deep</option><option value="sepia">sepia</option><option value="bluer">bluer</option>
               </select>
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Logo</label>
+              <input type="text" id="cfg-logo" placeholder="logo.png" class="w-full bg-surface border border-gray-600 rounded px-3 py-1.5 text-sm" oninput="generateYaml()">
             </div>
             <div>
               <label class="block text-xs text-gray-400 mb-1">Background</label>
@@ -176,12 +180,19 @@
           <span class="chevron">&#9654;</span>
         </button>
         <div class="collapsible-content px-4 pb-4">
-          <label class="block text-xs text-gray-400 mb-2">Grid Columns (1-6)</label>
+          <label class="block text-xs text-gray-400 mb-2">Grid Columns (1-12)</label>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div><label class="text-xs text-gray-500">Small</label><input type="number" id="cfg-grid-small" min="1" max="6" value="2" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
-            <div><label class="text-xs text-gray-500">Medium</label><input type="number" id="cfg-grid-medium" min="1" max="6" value="2" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
-            <div><label class="text-xs text-gray-500">Large</label><input type="number" id="cfg-grid-large" min="1" max="6" value="3" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
-            <div><label class="text-xs text-gray-500">XLarge</label><input type="number" id="cfg-grid-xlarge" min="1" max="6" value="5" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
+            <div><label class="text-xs text-gray-500">Small</label><input type="number" id="cfg-grid-small" min="1" max="12" value="2" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
+            <div><label class="text-xs text-gray-500">Medium</label><input type="number" id="cfg-grid-medium" min="1" max="12" value="2" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
+            <div><label class="text-xs text-gray-500">Large</label><input type="number" id="cfg-grid-large" min="1" max="12" value="3" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
+            <div><label class="text-xs text-gray-500">XLarge</label><input type="number" id="cfg-grid-xlarge" min="1" max="12" value="5" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
+          </div>
+          <label class="block text-xs text-gray-400 mb-2 mt-3">List Columns (1-12)</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div><label class="text-xs text-gray-500">Small</label><input type="number" id="cfg-list-small" min="1" max="12" value="2" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
+            <div><label class="text-xs text-gray-500">Medium</label><input type="number" id="cfg-list-medium" min="1" max="12" value="3" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
+            <div><label class="text-xs text-gray-500">Large</label><input type="number" id="cfg-list-large" min="1" max="12" value="4" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
+            <div><label class="text-xs text-gray-500">XLarge</label><input type="number" id="cfg-list-xlarge" min="1" max="12" value="5" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
           </div>
           <label class="block text-xs text-gray-400 mb-2 mt-3">Spacing</label>
           <div class="grid grid-cols-2 gap-3">
@@ -351,12 +362,20 @@ function removeGroup(tabIndex, groupIndex) {
   generateYaml();
 }
 
-function addItem(tabIndex, groupIndex) {
-  state.tabs[tabIndex].groups[groupIndex].items.push({
+function newItem(serviceType = 'bookmark') {
+  const base = {
+    serviceType,
     title: '', description: '', link: '', target: '',
     iconType: 'favicon', iconFavicon: '', iconUrl: '', iconName: '', iconColor: '', iconWrap: false,
-    statusEnabled: false, tags: []
-  });
+    statusEnabled: false, tags: [],
+    owmLat: '', owmLon: '', owmUnits: 'metric', owmApiKey: '',
+    ipapiFlagIcon: 'true'
+  };
+  return base;
+}
+
+function addItem(tabIndex, groupIndex, serviceType = 'bookmark') {
+  state.tabs[tabIndex].groups[groupIndex].items.push(newItem(serviceType));
   renderTabs();
   generateYaml();
 }
@@ -378,6 +397,10 @@ function moveItem(tabIndex, groupIndex, itemIndex, direction) {
 
 function renderTabs() {
   const container = document.getElementById('tabs-container');
+  const openPanels = new Set();
+  container.querySelectorAll('[id^="item-edit-"]').forEach(el => {
+    if (!el.classList.contains('hidden')) openPanels.add(el.id);
+  });
   container.innerHTML = state.tabs.map((tab, ti) => `
     <div class="border border-gray-600 rounded-lg p-3">
       <div class="flex items-center gap-2 mb-3">
@@ -391,6 +414,10 @@ function renderTabs() {
       <button onclick="addGroup(${ti})" class="mt-2 ml-2 text-xs text-accent hover:text-accent-hover">+ Add Group</button>
     </div>
   `).join('');
+  openPanels.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('hidden');
+  });
 }
 
 function renderGroup(ti, gi, group) {
@@ -407,23 +434,52 @@ function renderGroup(ti, gi, group) {
       <div class="space-y-1">
         ${group.items.map((item, ii) => renderItem(ti, gi, ii, item)).join('')}
       </div>
-      <button onclick="addItem(${ti},${gi})" class="mt-1 text-xs text-accent hover:text-accent-hover">+ Add Bookmark</button>
+      <div class="flex gap-1 mt-1">
+        <button onclick="addItem(${ti},${gi},'bookmark')" class="text-xs text-accent hover:text-accent-hover">+ Bookmark</button>
+        ${group.display === 'grid' ? `
+        <span class="text-xs text-gray-500">|</span>
+        <button onclick="addItem(${ti},${gi},'openweathermap')" class="text-xs text-accent hover:text-accent-hover">+ Weather</button>
+        <span class="text-xs text-gray-500">|</span>
+        <button onclick="addItem(${ti},${gi},'ip-api')" class="text-xs text-accent hover:text-accent-hover">+ IP API</button>
+        ` : ''}
+      </div>
     </div>
   `;
 }
 
 function renderItem(ti, gi, ii, item) {
   const uid = `${ti}-${gi}-${ii}`;
-  return `
-    <div class="border border-gray-700 rounded p-2 bg-surface-lighter text-xs">
-      <div class="flex items-center gap-1 mb-1">
-        <button onclick="moveItem(${ti},${gi},${ii},-1)" class="text-gray-400 hover:text-white px-1" title="Move up">&#9650;</button>
-        <button onclick="moveItem(${ti},${gi},${ii},1)" class="text-gray-400 hover:text-white px-1" title="Move down">&#9660;</button>
-        <span class="flex-1 font-medium text-gray-200 truncate">${escHtml(item.title) || '(untitled)'}</span>
-        <button onclick="toggleItemEdit('item-edit-${uid}')" class="text-blue-400 hover:text-blue-300 px-1 text-xs">edit</button>
-        <button onclick="removeItem(${ti},${gi},${ii})" class="text-red-400 hover:text-red-300 px-1">&times;</button>
+  const sType = item.serviceType || 'bookmark';
+  const typeLabel = sType === 'openweathermap' ? 'Weather' : sType === 'ip-api' ? 'IP API' : '';
+  const typeBadge = typeLabel ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-accent/20 text-accent">${typeLabel}</span>` : '';
+  const displayTitle = escHtml(item.title) || (sType !== 'bookmark' ? typeLabel : '(untitled)');
+
+  let typeFields = '';
+  if (sType === 'openweathermap') {
+    typeFields = `
+      <div class="grid grid-cols-2 gap-2">
+        <div><label class="text-gray-500">Latitude</label><input type="text" value="${escHtml(item.owmLat)}" placeholder="51.5085" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].owmLat=this.value; generateYaml()"></div>
+        <div><label class="text-gray-500">Longitude</label><input type="text" value="${escHtml(item.owmLon)}" placeholder="-0.1257" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].owmLon=this.value; generateYaml()"></div>
       </div>
-      <div id="item-edit-${uid}" class="hidden mt-2 space-y-2">
+      <div class="grid grid-cols-2 gap-2">
+        <div><label class="text-gray-500">Units</label><select class="w-full bg-surface border border-gray-600 rounded px-2 py-1" onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].owmUnits=this.value; generateYaml()">
+          <option value="metric" ${item.owmUnits === 'metric' ? 'selected' : ''}>metric</option>
+          <option value="imperial" ${item.owmUnits === 'imperial' ? 'selected' : ''}>imperial</option>
+          <option value="standard" ${item.owmUnits === 'standard' ? 'selected' : ''}>standard</option>
+        </select></div>
+        <div><label class="text-gray-500">API Key</label><input type="text" value="${escHtml(item.owmApiKey)}" placeholder="your-api-key" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].owmApiKey=this.value; generateYaml()"></div>
+      </div>`;
+  } else if (sType === 'ip-api') {
+    typeFields = `
+      <div class="grid grid-cols-2 gap-2">
+        <div><label class="text-gray-500">Flag Icon</label><select class="w-full bg-surface border border-gray-600 rounded px-2 py-1" onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].ipapiFlagIcon=this.value; generateYaml()">
+          <option value="true" ${item.ipapiFlagIcon !== 'false' ? 'selected' : ''}>true</option>
+          <option value="false" ${item.ipapiFlagIcon === 'false' ? 'selected' : ''}>false</option>
+        </select></div>
+      </div>`;
+  }
+
+  const bookmarkFields = sType === 'bookmark' ? `
         <div class="grid grid-cols-2 gap-2">
           <div><label class="text-gray-500">Title</label><input type="text" value="${escHtml(item.title)}" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].title=this.value; updateItemLabel(this); generateYaml()"></div>
           <div><label class="text-gray-500">Link</label><input type="text" value="${escHtml(item.link)}" placeholder="https://..." class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].link=this.value; generateYaml()"></div>
@@ -437,8 +493,9 @@ function renderItem(ti, gi, ii, item) {
             <option value="_parent" ${item.target === '_parent' ? 'selected' : ''}>_parent</option>
             <option value="_top" ${item.target === '_top' ? 'selected' : ''}>_top</option>
           </select></div>
-        </div>
-        <!-- Icon -->
+        </div>` : '';
+
+  const iconSection = `
         <div class="border-t border-gray-700 pt-2">
           <label class="text-gray-500 block mb-1">Icon Type</label>
           <div class="flex gap-3 mb-2">
@@ -457,6 +514,7 @@ function renderItem(ti, gi, ii, item) {
               <div class="flex-1"><label class="text-gray-500">URL</label><input type="text" value="${escHtml(item.iconUrl)}" placeholder="https://..." class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].iconUrl=this.value; generateYaml()"></div>
               <label class="flex items-center gap-1"><input type="checkbox" ${item.iconWrap ? 'checked' : ''} onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].iconWrap=this.checked; generateYaml()"> wrap</label>
             </div>
+            <div class="mt-1 text-[10px] text-gray-500">Browse icons: <a href="https://selfh.st/icons/" target="_blank" class="text-accent hover:underline">selfh.st/icons</a> · <a href="https://dashboardicons.com/icons" target="_blank" class="text-accent hover:underline">dashboardicons.com</a></div>
           ` : `
             <div class="flex gap-2 items-end">
               <div class="flex-1"><label class="text-gray-500">Name</label><input type="text" value="${escHtml(item.iconName)}" placeholder="mdi:home" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].iconName=this.value; generateYaml()"></div>
@@ -464,12 +522,29 @@ function renderItem(ti, gi, ii, item) {
               <label class="flex items-center gap-1"><input type="checkbox" ${item.iconWrap ? 'checked' : ''} onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].iconWrap=this.checked; generateYaml()"> wrap</label>
             </div>
           `}
-        </div>
-        <!-- Status & Tags -->
+        </div>`;
+
+  const statusTagsSection = sType === 'bookmark' ? `
         <div class="flex items-center gap-4 border-t border-gray-700 pt-2">
           <label class="flex items-center gap-1"><input type="checkbox" ${item.statusEnabled ? 'checked' : ''} onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].statusEnabled=this.checked; generateYaml()"> Status enabled</label>
           <div class="flex-1"><label class="text-gray-500">Tags</label><input type="text" value="${escHtml((item.tags||[]).join(', '))}" placeholder="tag1, tag2" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].tags=this.value.split(',').map(s=>s.trim()).filter(Boolean); generateYaml()"></div>
-        </div>
+        </div>` : '';
+
+  return `
+    <div class="border border-gray-700 rounded p-2 bg-surface-lighter text-xs">
+      <div class="flex items-center gap-1 mb-1">
+        <button onclick="moveItem(${ti},${gi},${ii},-1)" class="text-gray-400 hover:text-white px-1" title="Move up">&#9650;</button>
+        <button onclick="moveItem(${ti},${gi},${ii},1)" class="text-gray-400 hover:text-white px-1" title="Move down">&#9660;</button>
+        ${typeBadge}
+        <span class="flex-1 font-medium text-gray-200 truncate">${displayTitle}</span>
+        <button onclick="toggleItemEdit('item-edit-${uid}')" class="text-blue-400 hover:text-blue-300 px-1 text-xs">edit</button>
+        <button onclick="removeItem(${ti},${gi},${ii})" class="text-red-400 hover:text-red-300 px-1">&times;</button>
+      </div>
+      <div id="item-edit-${uid}" class="hidden mt-2 space-y-2">
+        ${typeFields}
+        ${bookmarkFields}
+        ${iconSection}
+        ${statusTagsSection}
       </div>
     </div>
   `;
@@ -496,6 +571,9 @@ function generateYaml() {
 
   const theme = val('cfg-theme');
   if (theme) config.theme = theme;
+
+  const logo = val('cfg-logo');
+  if (logo) config.logo = logo;
 
   const bg = val('cfg-background');
   if (bg) config.background = bg;
@@ -525,6 +603,13 @@ function generateYaml() {
   const gl = numVal('cfg-grid-large'); if (gl) grid.large = gl;
   const gx = numVal('cfg-grid-xlarge'); if (gx) grid.xlarge = gx;
   if (Object.keys(grid).length) layout.grid = grid;
+
+  const list = {};
+  const ls = numVal('cfg-list-small'); if (ls) list.small = ls;
+  const lm = numVal('cfg-list-medium'); if (lm) list.medium = lm;
+  const ll = numVal('cfg-list-large'); if (ll) list.large = ll;
+  const lx = numVal('cfg-list-xlarge'); if (lx) list.xlarge = lx;
+  if (Object.keys(list).length) layout.list = list;
 
   const spacing = {};
   const sg = val('cfg-spacing-group'); if (sg) spacing.group = sg;
@@ -564,14 +649,32 @@ function generateYaml() {
         if (!group.name) return;
         const groupObj = { display: group.display, items: [] };
         group.items.forEach(item => {
-          if (!item.title && !item.link) return;
-          const it = {};
-          if (item.title) it.title = item.title;
-          if (item.description) it.description = item.description;
-          if (item.link) it.link = item.link;
-          if (item.target) it.target = item.target;
+          const sType = item.serviceType || 'bookmark';
+          if (sType === 'bookmark' && !item.title && !item.link) return;
 
-          // Icon
+          const it = {};
+
+          if (sType === 'openweathermap') {
+            it.type = 'openweathermap';
+            const opts = {};
+            if (item.owmLat) opts.lat = parseFloat(item.owmLat) || item.owmLat;
+            if (item.owmLon) opts.lon = parseFloat(item.owmLon) || item.owmLon;
+            if (item.owmUnits && item.owmUnits !== 'metric') opts.units = item.owmUnits;
+            if (Object.keys(opts).length) it.options = opts;
+            if (item.owmApiKey) it.secrets = { apiKey: item.owmApiKey };
+          } else if (sType === 'ip-api') {
+            it.type = 'ip-api';
+            if (item.ipapiFlagIcon === 'false') {
+              it.options = { flagIcon: false };
+            }
+          } else {
+            if (item.title) it.title = item.title;
+            if (item.description) it.description = item.description;
+            if (item.link) it.link = item.link;
+            if (item.target) it.target = item.target;
+          }
+
+          // Icon (shared across all types)
           const icon = {};
           if (item.iconType === 'favicon' && item.iconFavicon) {
             icon.favicon = item.iconFavicon;
@@ -587,8 +690,10 @@ function generateYaml() {
           }
           if (Object.keys(icon).length) it.icon = icon;
 
-          if (item.statusEnabled) it.status = { enabled: true };
-          if (item.tags && item.tags.length) it.tags = item.tags;
+          if (sType === 'bookmark') {
+            if (item.statusEnabled) it.status = { enabled: true };
+            if (item.tags && item.tags.length) it.tags = item.tags;
+          }
 
           groupObj.items.push(it);
         });
@@ -639,9 +744,10 @@ function copyYaml() {
 // --- Reset ---
 function resetAll() {
   if (!confirm('Reset all fields?')) return;
-  document.getElementById('cfg-title').value = '';
+  document.getElementById('cfg-title').value = 'MAFL+';
   document.getElementById('cfg-lang').value = 'en';
   document.getElementById('cfg-theme').value = 'dark';
+  document.getElementById('cfg-logo').value = '';
   document.getElementById('cfg-background').value = '';
   document.getElementById('cfg-faviconApi').value = '';
   document.getElementById('cfg-overlay-color').value = '#000000';
@@ -653,6 +759,10 @@ function resetAll() {
   document.getElementById('cfg-grid-medium').value = '2';
   document.getElementById('cfg-grid-large').value = '3';
   document.getElementById('cfg-grid-xlarge').value = '5';
+  document.getElementById('cfg-list-small').value = '2';
+  document.getElementById('cfg-list-medium').value = '3';
+  document.getElementById('cfg-list-large').value = '4';
+  document.getElementById('cfg-list-xlarge').value = '5';
   document.getElementById('cfg-spacing-group').value = '1.5rem';
   document.getElementById('cfg-spacing-item').value = '0.25rem';
   document.querySelectorAll('[data-style]').forEach(el => { el.value = ''; });
@@ -708,11 +818,44 @@ function importFile(file) {
   reader.readAsText(file);
 }
 
+function parseRawItem(raw) {
+  const sType = raw.type || 'bookmark';
+  const item = newItem(sType);
+
+  if (raw.icon) {
+    if (raw.icon.favicon) { item.iconType = 'favicon'; item.iconFavicon = raw.icon.favicon; item.iconColor = raw.icon.color || ''; }
+    else if (raw.icon.url) { item.iconType = 'url'; item.iconUrl = raw.icon.url; }
+    else if (raw.icon.name) { item.iconType = 'name'; item.iconName = raw.icon.name; item.iconColor = raw.icon.color || ''; }
+    item.iconWrap = raw.icon.wrap || false;
+  }
+
+  if (sType === 'openweathermap') {
+    if (raw.options?.lat != null) item.owmLat = String(raw.options.lat);
+    if (raw.options?.lon != null) item.owmLon = String(raw.options.lon);
+    if (raw.options?.units) item.owmUnits = raw.options.units;
+    if (raw.secrets?.apiKey) item.owmApiKey = String(raw.secrets.apiKey);
+  } else if (sType === 'ip-api') {
+    if (raw.options?.flagIcon === false) item.ipapiFlagIcon = 'false';
+  } else {
+    item.title = raw.title || '';
+    item.description = raw.description || '';
+    item.link = raw.link || '';
+    item.target = raw.target || '';
+    if (raw.status?.enabled) item.statusEnabled = true;
+    if (raw.tags && Array.isArray(raw.tags)) {
+      item.tags = raw.tags.map(t => typeof t === 'string' ? t : t.name || '');
+    }
+  }
+
+  return item;
+}
+
 function loadConfig(config) {
   // Global settings
   if (config.title) document.getElementById('cfg-title').value = config.title;
   if (config.lang) document.getElementById('cfg-lang').value = config.lang;
   if (config.theme) document.getElementById('cfg-theme').value = config.theme;
+  if (config.logo) document.getElementById('cfg-logo').value = config.logo;
   if (config.background) document.getElementById('cfg-background').value = config.background;
   if (config.faviconApi) document.getElementById('cfg-faviconApi').value = config.faviconApi;
   if (config.searchProvider) document.getElementById('cfg-searchProvider').value = config.searchProvider;
@@ -732,6 +875,12 @@ function loadConfig(config) {
     if (config.layout.grid.medium) document.getElementById('cfg-grid-medium').value = config.layout.grid.medium;
     if (config.layout.grid.large) document.getElementById('cfg-grid-large').value = config.layout.grid.large;
     if (config.layout.grid.xlarge) document.getElementById('cfg-grid-xlarge').value = config.layout.grid.xlarge;
+  }
+  if (config.layout?.list) {
+    if (config.layout.list.small) document.getElementById('cfg-list-small').value = config.layout.list.small;
+    if (config.layout.list.medium) document.getElementById('cfg-list-medium').value = config.layout.list.medium;
+    if (config.layout.list.large) document.getElementById('cfg-list-large').value = config.layout.list.large;
+    if (config.layout.list.xlarge) document.getElementById('cfg-list-xlarge').value = config.layout.list.xlarge;
   }
   if (config.layout?.spacing) {
     if (config.layout.spacing.group) document.getElementById('cfg-spacing-group').value = config.layout.spacing.group;
@@ -778,40 +927,13 @@ function loadConfig(config) {
           } else if (Array.isArray(groupData)) {
             items = groupData;
           }
-          items.forEach(raw => {
-            const item = {
-              title: raw.title || '', description: raw.description || '', link: raw.link || '',
-              target: raw.target || '', iconType: 'favicon', iconFavicon: '', iconUrl: '', 
-              iconName: '', iconColor: '', iconWrap: false, statusEnabled: false, tags: []
-            };
-            if (raw.icon) {
-              if (raw.icon.favicon) {
-                item.iconType = 'favicon';
-                item.iconFavicon = raw.icon.favicon;
-                item.iconColor = raw.icon.color || '';
-              } else if (raw.icon.url) {
-                item.iconType = 'url';
-                item.iconUrl = raw.icon.url;
-              } else if (raw.icon.name) {
-                item.iconType = 'name';
-                item.iconName = raw.icon.name;
-                item.iconColor = raw.icon.color || '';
-              }
-              item.iconWrap = raw.icon.wrap || false;
-            }
-            if (raw.status?.enabled) item.statusEnabled = true;
-            if (raw.tags && Array.isArray(raw.tags)) {
-              item.tags = raw.tags.map(t => typeof t === 'string' ? t : t.name || '');
-            }
-            group.items.push(item);
-          });
+          items.forEach(raw => group.items.push(parseRawItem(raw)));
           tabObj.groups.push(group);
         });
       }
       state.tabs.push(tabObj);
     });
   } else if (config.services) {
-    // Flat or grouped services (no tabs)
     const tabObj = { name: '', icon: '', groups: [] };
     if (typeof config.services === 'object' && !Array.isArray(config.services)) {
       Object.entries(config.services).forEach(([groupName, groupData]) => {
@@ -823,42 +945,12 @@ function loadConfig(config) {
         } else if (Array.isArray(groupData)) {
           items = groupData;
         }
-        items.forEach(raw => {
-          const item = {
-            title: raw.title || '', description: raw.description || '', link: raw.link || '',
-            target: raw.target || '', iconType: 'favicon', iconFavicon: '', iconUrl: '',
-            iconName: '', iconColor: '', iconWrap: false, statusEnabled: false, tags: []
-          };
-          if (raw.icon) {
-            if (raw.icon.favicon) { item.iconType = 'favicon'; item.iconFavicon = raw.icon.favicon; item.iconColor = raw.icon.color || ''; }
-            else if (raw.icon.url) { item.iconType = 'url'; item.iconUrl = raw.icon.url; }
-            else if (raw.icon.name) { item.iconType = 'name'; item.iconName = raw.icon.name; item.iconColor = raw.icon.color || ''; }
-            item.iconWrap = raw.icon.wrap || false;
-          }
-          if (raw.status?.enabled) item.statusEnabled = true;
-          if (raw.tags) item.tags = raw.tags.map(t => typeof t === 'string' ? t : t.name || '');
-          group.items.push(item);
-        });
+        items.forEach(raw => group.items.push(parseRawItem(raw)));
         tabObj.groups.push(group);
       });
     } else if (Array.isArray(config.services)) {
       const group = { name: 'Services', display: 'list', items: [] };
-      config.services.forEach(raw => {
-        const item = {
-          title: raw.title || '', description: raw.description || '', link: raw.link || '',
-          target: raw.target || '', iconType: 'favicon', iconFavicon: '', iconUrl: '',
-          iconName: '', iconColor: '', iconWrap: false, statusEnabled: false, tags: []
-        };
-        if (raw.icon) {
-          if (raw.icon.favicon) { item.iconType = 'favicon'; item.iconFavicon = raw.icon.favicon; item.iconColor = raw.icon.color || ''; }
-          else if (raw.icon.url) { item.iconType = 'url'; item.iconUrl = raw.icon.url; }
-          else if (raw.icon.name) { item.iconType = 'name'; item.iconName = raw.icon.name; item.iconColor = raw.icon.color || ''; }
-          item.iconWrap = raw.icon.wrap || false;
-        }
-        if (raw.status?.enabled) item.statusEnabled = true;
-        if (raw.tags) item.tags = raw.tags.map(t => typeof t === 'string' ? t : t.name || '');
-        group.items.push(item);
-      });
+      config.services.forEach(raw => group.items.push(parseRawItem(raw)));
       tabObj.groups.push(group);
     }
     state.tabs.push(tabObj);
@@ -874,9 +966,10 @@ function setStyleVal(key, value) {
 
 // --- Load Example ---
 function loadExample() {
-  const exampleYaml = `title: bookmarks
+  const exampleYaml = `title: MAFL+
 lang: en
 theme: dark
+logo: logo.png
 background: background.jpg
 faviconApi: https://favicon.vemetric.com/
 backgroundOverlay:
@@ -893,6 +986,11 @@ layout:
     small: 2
     medium: 2
     large: 3
+    xlarge: 5
+  list:
+    small: 2
+    medium: 3
+    large: 4
     xlarge: 5
   spacing:
     group: 1.5rem
@@ -1116,6 +1214,17 @@ tabs:
             icon:
               name: mdi:heart-pulse
               color: '#ef4444'
+      Widgets:
+        display: grid
+        items:
+          - type: openweathermap
+            options:
+              lat: 52.3676
+              lon: 4.9041
+              units: metric
+            secrets:
+              apiKey: your-api-key-here
+          - type: ip-api
 `;
   try {
     const config = jsyaml.load(exampleYaml);

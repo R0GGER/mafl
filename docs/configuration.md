@@ -40,6 +40,19 @@ Values: `system`, `light`, `dark`, `deep`, `sepia`, `bluer`
 
 Default: `system`
 
+## Logo
+
+Display a logo in the top-left corner of the homepage. The image file must be placed in the data volume
+(the same directory as `config.yml`). The logo is fixed-positioned and responsive — it scales automatically across mobile, tablet and desktop.
+
+```yaml
+logo: logo.png
+```
+
+Supported formats: `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.svg`, `.avif`
+
+Default: _none_
+
 ## Background
 
 Display a background image on the homepage. The image file must be placed in the data volume
@@ -306,18 +319,19 @@ You can see more detailed examples below.
 ## Demo: config.yml 
 
 **Tab: Personal**
-10 Favorites
-10 Groups with each 5 listed items
-Weather
+* 10 Favorites
+* 10 Groups with each 5 listed items
+* Weather
 
 **Tab: Work**
-5 Favorites
-5 Groups with each 5 listed items
+* 5 Favorites
+* 5 Groups with each 5 listed items
 
 ```yaml
 title: bookmarks
 lang: en
 theme: dark
+logo: logo.png
 background: background1.jpg
 faviconApi: https://favicon.vemetric.com/
 backgroundOverlay:

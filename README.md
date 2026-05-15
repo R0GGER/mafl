@@ -16,6 +16,7 @@
 * [Configuration](#%EF%B8%8F-configuration)
   * [Layout](#layout)
   * [Styles](#styles)
+  * [Logo](#logo)
   * [Background](#background)
   * [Tabs](#tabs)
   * [Search](#search)
@@ -40,6 +41,7 @@ This fork adds several features on top of the original [Mafl](https://github.com
 | **Layout: List** | Compact list display mode per group, with its own column configuration. |
 | **Layout: Spacing** | Configurable spacing between groups and between items. |
 | **Styles** | Per-element styling for category headers, titles and descriptions (color, fontSize, fontWeight, fontStyle, etc.). |
+| **Logo** | Fixed responsive logo in the top-left corner, served from the data volume. |
 | **Background image** | Full-screen background image served from the data volume. |
 | **Background overlay** | Color overlay with configurable opacity for better text readability. |
 | **Tabs** | Organise services into switchable tabs, each with its own icon. |
@@ -130,6 +132,16 @@ styles:
 ```
 
 Supported properties: `fontFamily`, `fontSize`, `fontWeight`, `fontStyle`, `textDecoration`, `color`.
+
+### Logo
+
+Display a logo in the top-left corner of the homepage. Place the image file in your data volume (next to `config.yml`). The logo is fixed-positioned and scales responsively across mobile, tablet and desktop.
+
+```yaml
+logo: logo.png
+```
+
+Supported formats: `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.svg`, `.avif`
 
 ### Background
 

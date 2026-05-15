@@ -7,8 +7,11 @@
 
 ### 🚀 Enhancements
 
-- **layout:** Responsive grid with up to 6 columns (`small` / `medium` / `large` / `xlarge`)
+- **logo:** Fixed responsive logo in the top-left corner, served from the data volume; hidden on mobile
+- **layout:** Responsive grid with up to 12 columns (`small` / `medium` / `large` / `xlarge`)
 - **layout:** List display mode per group with separate column configuration
+- **layout:** Dynamic container width based on configured column count
+- **layout:** Responsive gap scaling for grid and list views (`gap-2 lg:gap-4 xl:gap-6`)
 - **layout:** Configurable spacing between groups (`group`) and items (`item`)
 - **styles:** Per-element styling for category headers, titles and descriptions (`color`, `fontSize`, `fontWeight`, `fontStyle`, `fontFamily`, `textDecoration`)
 - **background:** Full-screen background image served from the data volume
@@ -20,15 +23,32 @@
 - **icons:** Favicon icon type — reference a domain to auto-fetch its icon (`icon.favicon`)
 - **status:** Align status indicator to `left` or `right` (default) per service (`status.position`)
 - **display:** Grid and list display modes per service group (`display: grid | list`)
+- **config-builder:** Logo field in General settings
+- **config-builder:** List column configuration alongside grid columns
+- **config-builder:** OpenWeatherMap widget support (lat, lon, units, API key)
+- **config-builder:** IP API widget support (with flag icon toggle)
+- **config-builder:** Load example configuration with one click
+- **config-builder:** Remember open/collapsed item panels across re-renders
 
 ### 🩹 Fixes
 
 - **assets:** Serve background images and local assets from the data volume via `/api/assets/`
+- **layout:** Center content with dynamic `maxWidth` instead of fixed `max-w-screen-2xl`
+- **docker:** Removed stray slash in volume mount path (`favicons://` → `favicons:/`)
+- **docker:** Simplified volume mapping to mount full data directory (`./mafl:/app/data`)
+
+### 📖 Documentation
+
+- **logo:** Added Logo section to README and configuration docs
+- **openweathermap:** Dedicated documentation page for the OpenWeatherMap widget
+- **ip-api:** Dedicated documentation page for the IP API widget
+- **configuration:** Improved formatting of the demo config section
 
 ### 💅 Refactors
 
-- **config:** Extended config schema with `background`, `backgroundOverlay`, `faviconApi`, `styles`, `layout.list`, `layout.spacing`, `searchProvider` and `tabs`
+- **config:** Extended config schema with `logo`, `background`, `backgroundOverlay`, `faviconApi`, `styles`, `layout.list`, `layout.spacing`, `searchProvider` and `tabs`
 - **config:** Default layout now includes separate grid and list column defaults
+- **config-builder:** Extracted `newItem()` and `parseRawItem()` helpers to reduce duplication
 - **settings:** Plugin provides `$tabs`, `$activeTabIndex` and `$activeServices` for tab switching
 - **layout:** Default layout renders search bar, tab navigation and section-based grid/list grouping
 - **services:** `ListItem` component for compact list rows with icon, title and status
@@ -36,6 +56,7 @@
 ### 🏡 Chore
 
 - **docker:** Image published to `ghcr.io/r0gger/mafl` via GitHub Actions
+- **docker:** Added local `build` block to `docker-compose.yml` for development
 - **updates:** Check updates temporarily disabled
 
 ## v0.15.4

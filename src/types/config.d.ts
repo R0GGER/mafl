@@ -63,6 +63,7 @@ export interface Config {
   title?: string
   lang?: 'en' | 'ru' | 'zh' | 'hi' | 'es' | 'ar' | 'pl' | 'fr' | 'de' | 'gr'
   theme?: 'system' | 'light' | 'dark' | 'deep' | 'sepia' | 'bluer'
+  logo?: string
   background?: string
   backgroundOverlay?: BackgroundOverlay
   faviconApi?: string
