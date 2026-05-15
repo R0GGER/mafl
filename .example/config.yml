@@ -387,7 +387,7 @@ tabs:
               lon: 4.895168
               units: metric
             secrets:
-              apiKey: ****
+              apiKey:
 
   - name: Work
     icon: mdi:work
