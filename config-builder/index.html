@@ -92,6 +92,7 @@
           <svg id="icon-sun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
           <svg id="icon-moon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
         </button>
+        <button onclick="loadExample()" class="text-sm px-3 py-1.5 rounded border transition" style="background:var(--surface-lighter); border-color:var(--border);">Load Example</button>
         <label class="cursor-pointer text-sm px-3 py-1.5 rounded border transition" style="background:var(--surface-lighter); border-color:var(--border);">
           Import config.yml
           <input type="file" id="file-import" accept=".yml,.yaml" class="hidden">
@@ -869,6 +870,259 @@ function loadConfig(config) {
 function setStyleVal(key, value) {
   const el = document.querySelector(`[data-style="${key}"]`);
   if (el) el.value = value;
+}
+
+// --- Load Example ---
+function loadExample() {
+  const exampleYaml = `title: bookmarks
+lang: en
+theme: dark
+background: background.jpg
+faviconApi: https://favicon.vemetric.com/
+backgroundOverlay:
+  color: '#000000'
+  opacity: 0.5
+
+behaviour:
+  target: _blank
+
+searchProvider: google
+
+layout:
+  grid:
+    small: 2
+    medium: 2
+    large: 3
+    xlarge: 5
+  spacing:
+    group: 1.5rem
+    item: 0.25rem
+
+styles:
+  category:
+    color: '#ffffff'
+    fontSize: 1.5rem
+    fontWeight: 600
+  title:
+    color: '#ffffff'
+    fontSize: 0.875rem
+  description:
+    color: '#cccccc'
+    fontStyle: italic
+
+tabs:
+  - name: Personal
+    icon: mdi:home
+    services:
+      FAVORITES:
+        display: grid
+        items:
+          - title: iperf3serverlist.net
+            description: website
+            link: https://iperf3serverlist.net
+            icon:
+              favicon: iperf3serverlist.net
+              wrap: true
+            status:
+              enabled: true
+          - title: Proton Mail
+            description: mail.proton.me
+            link: https://mail.proton.me
+            icon:
+              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/proton.svg
+              wrap: true
+          - title: Proton Calendar
+            description: calendar.proton.me
+            link: https://calendar.proton.me
+            icon:
+              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/proton-calendar.svg
+              wrap: true
+          - title: Google Drive
+            description: drive.google.com
+            link: https://drive.google.com
+            icon:
+              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/google-drive.svg
+              wrap: true
+          - title: Gmail
+            description: mail.google.com
+            link: https://mail.google.com
+            icon:
+              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/gmail.svg
+              wrap: true
+          - title: Bitwarden
+            description: bitwarden.com
+            link: https://vault.bitwarden.com
+            icon:
+              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/bitwarden.svg
+              wrap: true
+          - title: YouTube
+            description: youtube.com
+            link: https://youtube.com
+            icon:
+              favicon: youtube.com
+              wrap: true
+          - title: Reddit
+            description: reddit.com
+            link: https://reddit.com
+            icon:
+              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/reddit.svg
+              wrap: true
+          - title: GitHub
+            description: github.com
+            link: https://github.com
+            icon:
+              name: simple-icons:github
+              wrap: true
+          - title: Spotify
+            description: open.spotify.com
+            link: https://open.spotify.com
+            icon:
+              favicon: spotify.com
+              wrap: true
+      News:
+        display: list
+        items:
+          - title: NOS
+            link: https://nos.nl
+            icon:
+              favicon: nos.nl
+          - title: New York Times
+            link: https://www.nytimes.com
+            icon:
+              favicon: nytimes.com
+          - title: Tweakers
+            link: https://tweakers.net
+            icon:
+              url: https://favicon-3j1.pages.dev/favicon/tweakers.net?larger=true
+          - title: Ars Technica
+            link: https://arstechnica.com
+            icon:
+              favicon: arstechnica.com
+          - title: The Verge
+            link: https://theverge.com
+            icon:
+              favicon: theverge.com
+      Selfhost:
+        display: list
+        items:
+          - title: selfh.st
+            link: https://selfh.st
+            icon:
+              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/selfh-st.svg
+          - title: OS Alternatives
+            link: https://osalt.com
+            icon:
+              favicon: osalt.com
+          - title: Awesome Selfhosted
+            link: https://awesome-selfhosted.net
+            icon:
+              favicon: awesome-selfhosted.net
+          - title: NOTED
+            link: https://noted.lol
+            icon:
+              favicon: noted.lol
+          - title: Awesome Lists
+            link: https://github.com/sindresorhus/awesome
+            icon:
+              name: mdi:format-list-bulleted
+              color: '#ec4899'
+      Financials:
+        display: list
+        items:
+          - title: ABN AMRO
+            link: https://abnamro.nl
+            icon:
+              favicon: abnamro.nl
+          - title: Rabo
+            link: https://rabobank.nl
+            icon:
+              name: mdi:bank-outline
+              color: '#f97316'
+          - title: ONZV
+            link: https://onzv.nl
+            icon:
+              url: https://www.onvz.nl/assets/favicons/apple-touch-icon.png
+          - title: Kasboek
+            link: https://kasboek.app
+            icon:
+              name: mdi:book-open-variant
+              color: '#10b981'
+          - title: Tikkie
+            link: https://tikkie.me
+            icon:
+              favicon: tikkie.me
+  - name: Work
+    icon: mdi:work
+    services:
+      FAVORITES:
+        display: grid
+        items:
+          - title: Proton Mail
+            description: mail.proton.me
+            link: https://mail.proton.me
+            icon:
+              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/proton.svg
+              wrap: true
+          - title: Google Drive
+            description: drive.google.com
+            link: https://drive.google.com
+            icon:
+              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/google-drive.svg
+              wrap: true
+          - title: Bitwarden
+            description: bitwarden.com
+            link: https://vault.bitwarden.com
+            icon:
+              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/bitwarden.svg
+              wrap: true
+      Dev:
+        display: list
+        items:
+          - title: Proxmox
+            link: https://proxmox.local
+            icon:
+              name: simple-icons:proxmox
+              color: '#e57000'
+          - title: GitHub
+            link: https://github.com
+            icon:
+              name: simple-icons:github
+              color: '#ffffff'
+          - title: Gitea
+            link: https://gitea.local
+            icon:
+              name: simple-icons:gitea
+              color: '#609926'
+          - title: Cloudflare
+            link: https://dash.cloudflare.com
+            icon:
+              name: simple-icons:cloudflare
+              color: '#f38020'
+      Monitoring:
+        display: list
+        items:
+          - title: Grafana
+            link: https://grafana.local
+            icon:
+              name: simple-icons:grafana
+              color: '#f46800'
+          - title: Uptime Kuma
+            link: https://uptime.local
+            icon:
+              name: simple-icons:uptimekuma
+              color: '#5cdd8b'
+          - title: Healthchecks
+            link: https://healthchecks.local
+            icon:
+              name: mdi:heart-pulse
+              color: '#ef4444'
+`;
+  try {
+    const config = jsyaml.load(exampleYaml);
+    loadConfig(config);
+  } catch (err) {
+    alert('Error loading example: ' + err.message);
+  }
 }
 
 // --- Theme ---
