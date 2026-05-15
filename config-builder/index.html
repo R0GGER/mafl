@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAFL+ Config Builder</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            surface: { DEFAULT: 'var(--surface)', light: 'var(--surface-light)', lighter: 'var(--surface-lighter)' },
+            accent: { DEFAULT: '#7c3aed', hover: '#6d28d9' },
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --surface: #ffffff;
+      --surface-light: #f8fafc;
+      --surface-lighter: #f1f5f9;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --text-faint: #94a3b8;
+    }
+    .dark {
+      --surface: #121212;
+      --surface-light: #1e1e1e;
+      --surface-lighter: #2a2a2a;
+      --border: #3a3a3a;
+      --text: #e4e4e4;
+      --text-muted: #a0a0a0;
+      --text-faint: #6b6b6b;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--surface); color: var(--text); }
+    .collapsible-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.2s ease; padding-top: 0 !important; padding-bottom: 0 !important; }
+    .collapsible-content.open { max-height: none; padding-top: 0 !important; padding-bottom: 1rem !important; }
+    .chevron { transition: transform 0.2s; }
+    .chevron.rotated { transform: rotate(90deg); }
+    .drop-zone.drag-over { border-color: #7c3aed; background: rgba(124, 58, 237, 0.1); }
+    input[type="color"] { -webkit-appearance: none; border: none; cursor: pointer; }
+    input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+    input[type="color"]::-webkit-color-swatch { border: 1px solid var(--border); border-radius: 4px; }
+    #yaml-output { tab-size: 2; }
+    .toast { animation: slideIn 0.3s ease, fadeOut 0.3s ease 2s forwards; }
+    @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+    .section-card { background: var(--surface-light); border: 1px solid var(--border); border-radius: 0.5rem; }
+    .input-field { background: var(--surface); border: 1px solid var(--border); border-radius: 0.375rem; padding: 0.25rem 0.75rem; font-size: 0.875rem; color: var(--text); }
+    .input-field:focus { outline: 2px solid #7c3aed; outline-offset: -1px; }
+    .group-card { background: var(--surface); border: 1px solid var(--border); border-radius: 0.375rem; padding: 0.5rem; }
+    .item-card { background: var(--surface-lighter); border: 1px solid var(--border); border-radius: 0.375rem; padding: 0.5rem; }
+    .label-text { font-size: 0.75rem; color: var(--text-muted); }
+    .label-faint { font-size: 0.75rem; color: var(--text-faint); }
+    .section-title { font-weight: 600; color: var(--text); }
+    .header-bar { background: var(--surface-light); border-bottom: 1px solid var(--border); }
+    /* Override Tailwind color classes with CSS variables for theme support */
+    .bg-surface { background-color: var(--surface) !important; }
+    .bg-surface-light { background-color: var(--surface-light) !important; }
+    .bg-surface-lighter { background-color: var(--surface-lighter) !important; }
+    .border-gray-700, .border-gray-600 { border-color: var(--border) !important; }
+    .text-gray-200 { color: var(--text) !important; }
+    .text-gray-300 { color: var(--text) !important; }
+    .text-gray-400 { color: var(--text-muted) !important; }
+    .text-gray-500 { color: var(--text-faint) !important; }
+    .text-white { color: var(--text) !important; }
+    .bg-accent.text-white, .bg-accent .text-white,
+    .bg-red-600.text-white, .bg-red-600 .text-white,
+    .bg-green-600 .text-white { color: #ffffff !important; }
+    select, input[type="text"], input[type="number"] { background-color: var(--surface) !important; border-color: var(--border) !important; color: var(--text) !important; }
+    select:focus, input[type="text"]:focus, input[type="number"]:focus { outline: 2px solid #7c3aed; outline-offset: -1px; }
+    input[type="range"] { accent-color: #7c3aed; }
+    pre#yaml-output { color: var(--text) !important; }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div id="toast" class="fixed bottom-4 right-4 z-50 hidden">
+    <div class="toast bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg">Copied to clipboard!</div>
+  </div>
+
+  <header class="header-bar sticky top-0 z-40">
+    <div class="max-w-screen-2xl mx-auto px-4 py-3 flex items-center justify-between">
+      <h1 class="text-xl font-bold section-title">MAFL+ Config Builder</h1>
+      <div class="flex gap-2 items-center">
+        <button onclick="toggleTheme()" id="theme-toggle" class="p-2 rounded hover:bg-black/10 dark:hover:bg-white/10 transition" title="Toggle theme">
+          <svg id="icon-sun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <svg id="icon-moon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        </button>
+        <label class="cursor-pointer text-sm px-3 py-1.5 rounded border transition" style="background:var(--surface-lighter); border-color:var(--border);">
+          Import config.yml
+          <input type="file" id="file-import" accept=".yml,.yaml" class="hidden">
+        </label>
+        <button onclick="resetAll()" class="bg-red-600 hover:bg-red-500 text-white text-sm px-3 py-1.5 rounded transition">Reset</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-screen-2xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Left: Form -->
+    <div class="space-y-4" id="form-container">
+
+      <!-- Global Settings -->
+      <section class="bg-surface-light rounded-lg border border-gray-700">
+        <button onclick="toggleSection(this)" class="w-full flex items-center justify-between p-4 text-left">
+          <span class="font-semibold text-white">Global Settings</span>
+          <span class="chevron rotated">&#9654;</span>
+        </button>
+        <div class="collapsible-content open px-4 pb-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Title</label>
+              <input type="text" id="cfg-title" value="bookmarks" class="w-full bg-surface border border-gray-600 rounded px-3 py-1.5 text-sm" oninput="generateYaml()">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Language</label>
+              <select id="cfg-lang" class="w-full bg-surface border border-gray-600 rounded px-3 py-1.5 text-sm" onchange="generateYaml()">
+                <option value="en">en</option><option value="nl">nl</option><option value="de">de</option><option value="fr">fr</option><option value="es">es</option><option value="ru">ru</option><option value="zh">zh</option><option value="hi">hi</option><option value="ar">ar</option><option value="pl">pl</option><option value="gr">gr</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Theme</label>
+              <select id="cfg-theme" class="w-full bg-surface border border-gray-600 rounded px-3 py-1.5 text-sm" onchange="generateYaml()">
+                <option value="dark">dark</option><option value="light">light</option><option value="system">system</option><option value="deep">deep</option><option value="sepia">sepia</option><option value="bluer">bluer</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Background</label>
+              <input type="text" id="cfg-background" placeholder="background.jpg" class="w-full bg-surface border border-gray-600 rounded px-3 py-1.5 text-sm" oninput="generateYaml()">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Favicon API</label>
+              <input type="text" id="cfg-faviconApi" placeholder="https://favicon.vemetric.com/" class="w-full bg-surface border border-gray-600 rounded px-3 py-1.5 text-sm" oninput="generateYaml()">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Search Provider</label>
+              <select id="cfg-searchProvider" class="w-full bg-surface border border-gray-600 rounded px-3 py-1.5 text-sm" onchange="generateYaml()">
+                <option value="google">google</option><option value="duckduckgo">duckduckgo</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Behaviour Target</label>
+              <select id="cfg-target" class="w-full bg-surface border border-gray-600 rounded px-3 py-1.5 text-sm" onchange="generateYaml()">
+                <option value="_blank">_blank</option><option value="_self">_self</option><option value="_parent">_parent</option><option value="_top">_top</option>
+              </select>
+            </div>
+          </div>
+          <!-- Background Overlay -->
+          <div class="mt-3 border-t border-gray-700 pt-3">
+            <label class="block text-xs text-gray-400 mb-2">Background Overlay</label>
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-2">
+                <label class="text-xs text-gray-500">Color</label>
+                <input type="color" id="cfg-overlay-color" value="#000000" class="w-8 h-8 rounded" oninput="generateYaml()">
+              </div>
+              <div class="flex items-center gap-2 flex-1">
+                <label class="text-xs text-gray-500">Opacity</label>
+                <input type="range" id="cfg-overlay-opacity" min="0" max="1" step="0.05" value="0.5" class="flex-1" oninput="document.getElementById('opacity-val').textContent=this.value; generateYaml()">
+                <span id="opacity-val" class="text-xs text-gray-400 w-8">0.5</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Layout -->
+      <section class="bg-surface-light rounded-lg border border-gray-700">
+        <button onclick="toggleSection(this)" class="w-full flex items-center justify-between p-4 text-left">
+          <span class="font-semibold text-white">Layout</span>
+          <span class="chevron">&#9654;</span>
+        </button>
+        <div class="collapsible-content px-4 pb-4">
+          <label class="block text-xs text-gray-400 mb-2">Grid Columns (1-6)</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div><label class="text-xs text-gray-500">Small</label><input type="number" id="cfg-grid-small" min="1" max="6" value="2" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
+            <div><label class="text-xs text-gray-500">Medium</label><input type="number" id="cfg-grid-medium" min="1" max="6" value="2" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
+            <div><label class="text-xs text-gray-500">Large</label><input type="number" id="cfg-grid-large" min="1" max="6" value="3" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
+            <div><label class="text-xs text-gray-500">XLarge</label><input type="number" id="cfg-grid-xlarge" min="1" max="6" value="5" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
+          </div>
+          <label class="block text-xs text-gray-400 mb-2 mt-3">Spacing</label>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="text-xs text-gray-500">Group</label><input type="text" id="cfg-spacing-group" value="1.5rem" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
+            <div><label class="text-xs text-gray-500">Item</label><input type="text" id="cfg-spacing-item" value="0.25rem" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Styles -->
+      <section class="bg-surface-light rounded-lg border border-gray-700">
+        <button onclick="toggleSection(this)" class="w-full flex items-center justify-between p-4 text-left">
+          <span class="font-semibold text-white">Styles</span>
+          <span class="chevron">&#9654;</span>
+        </button>
+        <div class="collapsible-content px-4 pb-4">
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs text-gray-300 font-medium mb-1">Category</label>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="style-category"></div>
+            </div>
+            <div>
+              <label class="block text-xs text-gray-300 font-medium mb-1">Title</label>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="style-title"></div>
+            </div>
+            <div>
+              <label class="block text-xs text-gray-300 font-medium mb-1">Description</label>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="style-description"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tags -->
+      <section class="bg-surface-light rounded-lg border border-gray-700">
+        <button onclick="toggleSection(this)" class="w-full flex items-center justify-between p-4 text-left">
+          <span class="font-semibold text-white">Tags (Global)</span>
+          <span class="chevron">&#9654;</span>
+        </button>
+        <div class="collapsible-content px-4 pb-4">
+          <div id="tags-container" class="space-y-2 mb-2"></div>
+          <button onclick="addTag()" class="text-sm text-accent hover:text-accent-hover">+ Add Tag</button>
+        </div>
+      </section>
+
+      <!-- Tabs -->
+      <section class="bg-surface-light rounded-lg border border-gray-700">
+        <button onclick="toggleSection(this)" class="w-full flex items-center justify-between p-4 text-left">
+          <span class="font-semibold text-white">Tabs &amp; Services</span>
+          <span class="chevron rotated">&#9654;</span>
+        </button>
+        <div class="collapsible-content open px-4 pb-4">
+          <div id="tabs-container" class="space-y-4"></div>
+          <button onclick="addTab()" class="mt-3 text-sm bg-accent hover:bg-accent-hover text-white px-3 py-1.5 rounded transition">+ Add Tab</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Right: YAML Output -->
+    <div class="lg:sticky lg:top-16 lg:self-start">
+      <div class="bg-surface-light rounded-lg border border-gray-700">
+        <div class="flex items-center justify-between p-4 border-b border-gray-700">
+          <span class="font-semibold text-white">YAML Output</span>
+          <button onclick="copyYaml()" class="bg-accent hover:bg-accent-hover text-white text-sm px-3 py-1.5 rounded transition">Copy to Clipboard</button>
+        </div>
+        <div class="p-4 max-h-[80vh] overflow-auto">
+          <pre id="yaml-output" class="text-xs text-gray-300 whitespace-pre font-mono leading-relaxed"></pre>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Drop zone overlay -->
+  <div id="drop-overlay" class="fixed inset-0 bg-black/60 z-50 hidden items-center justify-center pointer-events-none">
+    <div class="border-2 border-dashed border-accent rounded-xl p-12 text-center">
+      <p class="text-xl text-white font-semibold">Drop config.yml here</p>
+    </div>
+  </div>
+
+<script>
+const TAG_COLORS = ['red','orange','amber','yellow','lime','green','emerald','teal','cyan','sky','blue','indigo','violet','purple','fuchsia','pink','rose'];
+
+let state = { tags: [], tabs: [] };
+
+// --- Initialization ---
+function init() {
+  renderStyleFields();
+  generateYaml();
+  setupDragDrop();
+  document.getElementById('file-import').addEventListener('change', handleFileImport);
+}
+
+function renderStyleFields() {
+  ['category', 'title', 'description'].forEach(el => {
+    const container = document.getElementById(`style-${el}`);
+    container.innerHTML = `
+      <div><label class="text-xs text-gray-500">Font Family</label><input type="text" data-style="${el}.fontFamily" placeholder="Arial, sans-serif" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-xs" oninput="generateYaml()"></div>
+      <div><label class="text-xs text-gray-500">Font Size</label><input type="text" data-style="${el}.fontSize" placeholder="1rem" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-xs" oninput="generateYaml()"></div>
+      <div><label class="text-xs text-gray-500">Font Weight</label><input type="text" data-style="${el}.fontWeight" placeholder="600" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-xs" oninput="generateYaml()"></div>
+      <div><label class="text-xs text-gray-500">Font Style</label><select data-style="${el}.fontStyle" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-xs" onchange="generateYaml()"><option value="">—</option><option value="normal">normal</option><option value="italic">italic</option></select></div>
+      <div><label class="text-xs text-gray-500">Text Decoration</label><select data-style="${el}.textDecoration" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-xs" onchange="generateYaml()"><option value="">—</option><option value="none">none</option><option value="underline">underline</option><option value="line-through">line-through</option></select></div>
+      <div><label class="text-xs text-gray-500">Color</label><div class="flex gap-1"><input type="color" data-style="${el}.color" value="#ffffff" class="w-8 h-7 rounded"><input type="text" data-style="${el}.colorText" placeholder="#ffffff" class="flex-1 bg-surface border border-gray-600 rounded px-2 py-1 text-xs" oninput="syncColorFromText(this, '${el}'); generateYaml()"></div></div>
+    `;
+    container.querySelector(`[data-style="${el}.color"]`).addEventListener('input', function() {
+      const textInput = container.querySelector(`[data-style="${el}.colorText"]`);
+      textInput.value = this.value;
+      generateYaml();
+    });
+  });
+}
+
+function syncColorFromText(textInput, el) {
+  const colorInput = textInput.parentElement.querySelector('input[type="color"]');
+  if (/^#[0-9a-fA-F]{6}$/.test(textInput.value)) {
+    colorInput.value = textInput.value;
+  }
+}
+
+// --- Tags ---
+function addTag(name = '', color = 'blue') {
+  state.tags.push({ name, color });
+  renderTags();
+  generateYaml();
+}
+
+function removeTag(index) {
+  state.tags.splice(index, 1);
+  renderTags();
+  generateYaml();
+}
+
+function renderTags() {
+  const container = document.getElementById('tags-container');
+  container.innerHTML = state.tags.map((tag, i) => `
+    <div class="flex items-center gap-2">
+      <input type="text" value="${escHtml(tag.name)}" placeholder="Tag name" class="flex-1 bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="state.tags[${i}].name=this.value; generateYaml()">
+      <select class="bg-surface border border-gray-600 rounded px-2 py-1 text-sm" onchange="state.tags[${i}].color=this.value; generateYaml()">
+        ${TAG_COLORS.map(c => `<option value="${c}" ${c === tag.color ? 'selected' : ''}>${c}</option>`).join('')}
+      </select>
+      <button onclick="removeTag(${i})" class="text-red-400 hover:text-red-300 text-lg px-1">&times;</button>
+    </div>
+  `).join('');
+}
+
+// --- Tabs ---
+function addTab(name = '', icon = '') {
+  state.tabs.push({ name, icon, groups: [] });
+  renderTabs();
+  generateYaml();
+}
+
+function removeTab(index) {
+  state.tabs.splice(index, 1);
+  renderTabs();
+  generateYaml();
+}
+
+function addGroup(tabIndex, name = '', display = 'list') {
+  state.tabs[tabIndex].groups.push({ name, display, items: [] });
+  renderTabs();
+  generateYaml();
+}
+
+function removeGroup(tabIndex, groupIndex) {
+  state.tabs[tabIndex].groups.splice(groupIndex, 1);
+  renderTabs();
+  generateYaml();
+}
+
+function addItem(tabIndex, groupIndex) {
+  state.tabs[tabIndex].groups[groupIndex].items.push({
+    title: '', description: '', link: '', target: '',
+    iconType: 'favicon', iconFavicon: '', iconUrl: '', iconName: '', iconColor: '', iconWrap: false,
+    statusEnabled: false, tags: []
+  });
+  renderTabs();
+  generateYaml();
+}
+
+function removeItem(tabIndex, groupIndex, itemIndex) {
+  state.tabs[tabIndex].groups[groupIndex].items.splice(itemIndex, 1);
+  renderTabs();
+  generateYaml();
+}
+
+function moveItem(tabIndex, groupIndex, itemIndex, direction) {
+  const items = state.tabs[tabIndex].groups[groupIndex].items;
+  const newIndex = itemIndex + direction;
+  if (newIndex < 0 || newIndex >= items.length) return;
+  [items[itemIndex], items[newIndex]] = [items[newIndex], items[itemIndex]];
+  renderTabs();
+  generateYaml();
+}
+
+function renderTabs() {
+  const container = document.getElementById('tabs-container');
+  container.innerHTML = state.tabs.map((tab, ti) => `
+    <div class="border border-gray-600 rounded-lg p-3">
+      <div class="flex items-center gap-2 mb-3">
+        <input type="text" value="${escHtml(tab.name)}" placeholder="Tab name" class="flex-1 bg-surface border border-gray-600 rounded px-2 py-1.5 text-sm font-medium" oninput="state.tabs[${ti}].name=this.value; generateYaml()">
+        <input type="text" value="${escHtml(tab.icon)}" placeholder="Icon (mdi:home)" class="w-36 bg-surface border border-gray-600 rounded px-2 py-1.5 text-sm" oninput="state.tabs[${ti}].icon=this.value; generateYaml()">
+        <button onclick="removeTab(${ti})" class="text-red-400 hover:text-red-300 text-lg px-2">&times;</button>
+      </div>
+      <div class="space-y-3 ml-2">
+        ${tab.groups.map((group, gi) => renderGroup(ti, gi, group)).join('')}
+      </div>
+      <button onclick="addGroup(${ti})" class="mt-2 ml-2 text-xs text-accent hover:text-accent-hover">+ Add Group</button>
+    </div>
+  `).join('');
+}
+
+function renderGroup(ti, gi, group) {
+  return `
+    <div class="border border-gray-700 rounded p-2 bg-surface">
+      <div class="flex items-center gap-2 mb-2">
+        <input type="text" value="${escHtml(group.name)}" placeholder="Group name" class="flex-1 bg-surface-light border border-gray-600 rounded px-2 py-1 text-sm" oninput="state.tabs[${ti}].groups[${gi}].name=this.value; generateYaml()">
+        <select class="bg-surface-light border border-gray-600 rounded px-2 py-1 text-xs" onchange="state.tabs[${ti}].groups[${gi}].display=this.value; generateYaml()">
+          <option value="list" ${group.display === 'list' ? 'selected' : ''}>list</option>
+          <option value="grid" ${group.display === 'grid' ? 'selected' : ''}>grid</option>
+        </select>
+        <button onclick="removeGroup(${ti},${gi})" class="text-red-400 hover:text-red-300 px-1">&times;</button>
+      </div>
+      <div class="space-y-1">
+        ${group.items.map((item, ii) => renderItem(ti, gi, ii, item)).join('')}
+      </div>
+      <button onclick="addItem(${ti},${gi})" class="mt-1 text-xs text-accent hover:text-accent-hover">+ Add Bookmark</button>
+    </div>
+  `;
+}
+
+function renderItem(ti, gi, ii, item) {
+  const uid = `${ti}-${gi}-${ii}`;
+  return `
+    <div class="border border-gray-700 rounded p-2 bg-surface-lighter text-xs">
+      <div class="flex items-center gap-1 mb-1">
+        <button onclick="moveItem(${ti},${gi},${ii},-1)" class="text-gray-400 hover:text-white px-1" title="Move up">&#9650;</button>
+        <button onclick="moveItem(${ti},${gi},${ii},1)" class="text-gray-400 hover:text-white px-1" title="Move down">&#9660;</button>
+        <span class="flex-1 font-medium text-gray-200 truncate">${escHtml(item.title) || '(untitled)'}</span>
+        <button onclick="toggleItemEdit('item-edit-${uid}')" class="text-blue-400 hover:text-blue-300 px-1 text-xs">edit</button>
+        <button onclick="removeItem(${ti},${gi},${ii})" class="text-red-400 hover:text-red-300 px-1">&times;</button>
+      </div>
+      <div id="item-edit-${uid}" class="hidden mt-2 space-y-2">
+        <div class="grid grid-cols-2 gap-2">
+          <div><label class="text-gray-500">Title</label><input type="text" value="${escHtml(item.title)}" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].title=this.value; updateItemLabel(this); generateYaml()"></div>
+          <div><label class="text-gray-500">Link</label><input type="text" value="${escHtml(item.link)}" placeholder="https://..." class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].link=this.value; generateYaml()"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div><label class="text-gray-500">Description</label><input type="text" value="${escHtml(item.description)}" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].description=this.value; generateYaml()"></div>
+          <div><label class="text-gray-500">Target (override)</label><select class="w-full bg-surface border border-gray-600 rounded px-2 py-1" onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].target=this.value; generateYaml()">
+            <option value="" ${!item.target ? 'selected' : ''}>— (use global)</option>
+            <option value="_blank" ${item.target === '_blank' ? 'selected' : ''}>_blank</option>
+            <option value="_self" ${item.target === '_self' ? 'selected' : ''}>_self</option>
+            <option value="_parent" ${item.target === '_parent' ? 'selected' : ''}>_parent</option>
+            <option value="_top" ${item.target === '_top' ? 'selected' : ''}>_top</option>
+          </select></div>
+        </div>
+        <!-- Icon -->
+        <div class="border-t border-gray-700 pt-2">
+          <label class="text-gray-500 block mb-1">Icon Type</label>
+          <div class="flex gap-3 mb-2">
+            <label class="flex items-center gap-1"><input type="radio" name="icon-type-${uid}" value="favicon" ${item.iconType === 'favicon' ? 'checked' : ''} onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].iconType='favicon'; renderTabs(); generateYaml()"> favicon</label>
+            <label class="flex items-center gap-1"><input type="radio" name="icon-type-${uid}" value="url" ${item.iconType === 'url' ? 'checked' : ''} onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].iconType='url'; renderTabs(); generateYaml()"> url</label>
+            <label class="flex items-center gap-1"><input type="radio" name="icon-type-${uid}" value="name" ${item.iconType === 'name' ? 'checked' : ''} onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].iconType='name'; renderTabs(); generateYaml()"> name</label>
+          </div>
+          ${item.iconType === 'favicon' ? `
+            <div class="flex gap-2 items-end">
+              <div class="flex-1"><label class="text-gray-500">Domain</label><input type="text" value="${escHtml(item.iconFavicon)}" placeholder="example.com" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].iconFavicon=this.value; generateYaml()"></div>
+              <div><label class="text-gray-500">Color</label><input type="text" value="${escHtml(item.iconColor)}" placeholder="#hex" class="w-20 bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].iconColor=this.value; generateYaml()"></div>
+              <label class="flex items-center gap-1"><input type="checkbox" ${item.iconWrap ? 'checked' : ''} onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].iconWrap=this.checked; generateYaml()"> wrap</label>
+            </div>
+          ` : item.iconType === 'url' ? `
+            <div class="flex gap-2 items-end">
+              <div class="flex-1"><label class="text-gray-500">URL</label><input type="text" value="${escHtml(item.iconUrl)}" placeholder="https://..." class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].iconUrl=this.value; generateYaml()"></div>
+              <label class="flex items-center gap-1"><input type="checkbox" ${item.iconWrap ? 'checked' : ''} onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].iconWrap=this.checked; generateYaml()"> wrap</label>
+            </div>
+          ` : `
+            <div class="flex gap-2 items-end">
+              <div class="flex-1"><label class="text-gray-500">Name</label><input type="text" value="${escHtml(item.iconName)}" placeholder="mdi:home" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].iconName=this.value; generateYaml()"></div>
+              <div><label class="text-gray-500">Color</label><input type="text" value="${escHtml(item.iconColor)}" placeholder="#hex" class="w-20 bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].iconColor=this.value; generateYaml()"></div>
+              <label class="flex items-center gap-1"><input type="checkbox" ${item.iconWrap ? 'checked' : ''} onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].iconWrap=this.checked; generateYaml()"> wrap</label>
+            </div>
+          `}
+        </div>
+        <!-- Status & Tags -->
+        <div class="flex items-center gap-4 border-t border-gray-700 pt-2">
+          <label class="flex items-center gap-1"><input type="checkbox" ${item.statusEnabled ? 'checked' : ''} onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].statusEnabled=this.checked; generateYaml()"> Status enabled</label>
+          <div class="flex-1"><label class="text-gray-500">Tags</label><input type="text" value="${escHtml((item.tags||[]).join(', '))}" placeholder="tag1, tag2" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].tags=this.value.split(',').map(s=>s.trim()).filter(Boolean); generateYaml()"></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function toggleItemEdit(id) {
+  document.getElementById(id).classList.toggle('hidden');
+}
+
+function updateItemLabel(input) {
+  const label = input.closest('.border').querySelector('.truncate');
+  if (label) label.textContent = input.value || '(untitled)';
+}
+
+// --- YAML Generation ---
+function generateYaml() {
+  const config = {};
+
+  const title = val('cfg-title');
+  if (title) config.title = title;
+
+  const lang = val('cfg-lang');
+  if (lang) config.lang = lang;
+
+  const theme = val('cfg-theme');
+  if (theme) config.theme = theme;
+
+  const bg = val('cfg-background');
+  if (bg) config.background = bg;
+
+  const faviconApi = val('cfg-faviconApi');
+  if (faviconApi) config.faviconApi = faviconApi;
+
+  const overlayColor = document.getElementById('cfg-overlay-color').value;
+  const overlayOpacity = parseFloat(document.getElementById('cfg-overlay-opacity').value);
+  if (bg && (overlayColor !== '#000000' || overlayOpacity !== 0.5)) {
+    config.backgroundOverlay = { color: overlayColor, opacity: overlayOpacity };
+  } else if (bg) {
+    config.backgroundOverlay = { color: overlayColor, opacity: overlayOpacity };
+  }
+
+  const target = val('cfg-target');
+  if (target) config.behaviour = { target };
+
+  const searchProvider = val('cfg-searchProvider');
+  if (searchProvider) config.searchProvider = searchProvider;
+
+  // Layout
+  const layout = {};
+  const grid = {};
+  const gs = numVal('cfg-grid-small'); if (gs) grid.small = gs;
+  const gm = numVal('cfg-grid-medium'); if (gm) grid.medium = gm;
+  const gl = numVal('cfg-grid-large'); if (gl) grid.large = gl;
+  const gx = numVal('cfg-grid-xlarge'); if (gx) grid.xlarge = gx;
+  if (Object.keys(grid).length) layout.grid = grid;
+
+  const spacing = {};
+  const sg = val('cfg-spacing-group'); if (sg) spacing.group = sg;
+  const si = val('cfg-spacing-item'); if (si) spacing.item = si;
+  if (Object.keys(spacing).length) layout.spacing = spacing;
+  if (Object.keys(layout).length) config.layout = layout;
+
+  // Styles
+  const styles = {};
+  ['category', 'title', 'description'].forEach(el => {
+    const s = {};
+    const ff = getStyleVal(`${el}.fontFamily`); if (ff) s.fontFamily = ff;
+    const fs = getStyleVal(`${el}.fontSize`); if (fs) s.fontSize = fs;
+    const fw = getStyleVal(`${el}.fontWeight`); if (fw) s.fontWeight = isNaN(fw) ? fw : parseInt(fw);
+    const fst = getStyleVal(`${el}.fontStyle`); if (fst) s.fontStyle = fst;
+    const td = getStyleVal(`${el}.textDecoration`); if (td) s.textDecoration = td;
+    const ct = getStyleVal(`${el}.colorText`) || ''; 
+    if (ct) s.color = ct;
+    if (Object.keys(s).length) styles[el] = s;
+  });
+  if (Object.keys(styles).length) config.styles = styles;
+
+  // Tags
+  const validTags = state.tags.filter(t => t.name);
+  if (validTags.length) {
+    config.tags = validTags.map(t => ({ name: t.name, color: t.color }));
+  }
+
+  // Tabs
+  if (state.tabs.length) {
+    config.tabs = state.tabs.map(tab => {
+      const tabObj = {};
+      if (tab.name) tabObj.name = tab.name;
+      if (tab.icon) tabObj.icon = tab.icon;
+      const services = {};
+      tab.groups.forEach(group => {
+        if (!group.name) return;
+        const groupObj = { display: group.display, items: [] };
+        group.items.forEach(item => {
+          if (!item.title && !item.link) return;
+          const it = {};
+          if (item.title) it.title = item.title;
+          if (item.description) it.description = item.description;
+          if (item.link) it.link = item.link;
+          if (item.target) it.target = item.target;
+
+          // Icon
+          const icon = {};
+          if (item.iconType === 'favicon' && item.iconFavicon) {
+            icon.favicon = item.iconFavicon;
+            if (item.iconColor) icon.color = item.iconColor;
+            if (item.iconWrap) icon.wrap = true;
+          } else if (item.iconType === 'url' && item.iconUrl) {
+            icon.url = item.iconUrl;
+            if (item.iconWrap) icon.wrap = true;
+          } else if (item.iconType === 'name' && item.iconName) {
+            icon.name = item.iconName;
+            if (item.iconColor) icon.color = item.iconColor;
+            if (item.iconWrap) icon.wrap = true;
+          }
+          if (Object.keys(icon).length) it.icon = icon;
+
+          if (item.statusEnabled) it.status = { enabled: true };
+          if (item.tags && item.tags.length) it.tags = item.tags;
+
+          groupObj.items.push(it);
+        });
+        services[group.name] = groupObj;
+      });
+      if (Object.keys(services).length) tabObj.services = services;
+      return tabObj;
+    });
+  }
+
+  const yamlStr = jsyaml.dump(config, { 
+    indent: 2, 
+    lineWidth: -1, 
+    noRefs: true,
+    quotingType: "'",
+    forceQuotes: false
+  });
+
+  document.getElementById('yaml-output').textContent = yamlStr;
+}
+
+// --- Helpers ---
+function val(id) { return document.getElementById(id)?.value?.trim() || ''; }
+function numVal(id) { const v = parseInt(val(id)); return isNaN(v) ? null : v; }
+function getStyleVal(key) {
+  const el = document.querySelector(`[data-style="${key}"]`);
+  return el ? el.value.trim() : '';
+}
+function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function toggleSection(btn) {
+  const content = btn.nextElementSibling;
+  const chevron = btn.querySelector('.chevron');
+  content.classList.toggle('open');
+  chevron.classList.toggle('rotated');
+}
+
+// --- Copy ---
+function copyYaml() {
+  const text = document.getElementById('yaml-output').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const toast = document.getElementById('toast');
+    toast.classList.remove('hidden');
+    setTimeout(() => toast.classList.add('hidden'), 2500);
+  });
+}
+
+// --- Reset ---
+function resetAll() {
+  if (!confirm('Reset all fields?')) return;
+  document.getElementById('cfg-title').value = '';
+  document.getElementById('cfg-lang').value = 'en';
+  document.getElementById('cfg-theme').value = 'dark';
+  document.getElementById('cfg-background').value = '';
+  document.getElementById('cfg-faviconApi').value = '';
+  document.getElementById('cfg-overlay-color').value = '#000000';
+  document.getElementById('cfg-overlay-opacity').value = '0.5';
+  document.getElementById('opacity-val').textContent = '0.5';
+  document.getElementById('cfg-target').value = '_blank';
+  document.getElementById('cfg-searchProvider').value = 'google';
+  document.getElementById('cfg-grid-small').value = '2';
+  document.getElementById('cfg-grid-medium').value = '2';
+  document.getElementById('cfg-grid-large').value = '3';
+  document.getElementById('cfg-grid-xlarge').value = '5';
+  document.getElementById('cfg-spacing-group').value = '1.5rem';
+  document.getElementById('cfg-spacing-item').value = '0.25rem';
+  document.querySelectorAll('[data-style]').forEach(el => { el.value = ''; });
+  state = { tags: [], tabs: [] };
+  renderTags();
+  renderTabs();
+  generateYaml();
+}
+
+// --- Import ---
+function setupDragDrop() {
+  let dragCounter = 0;
+  const overlay = document.getElementById('drop-overlay');
+  
+  document.addEventListener('dragenter', e => {
+    e.preventDefault();
+    dragCounter++;
+    overlay.classList.remove('hidden');
+    overlay.classList.add('flex');
+  });
+  document.addEventListener('dragleave', e => {
+    dragCounter--;
+    if (dragCounter === 0) { overlay.classList.add('hidden'); overlay.classList.remove('flex'); }
+  });
+  document.addEventListener('dragover', e => e.preventDefault());
+  document.addEventListener('drop', e => {
+    e.preventDefault();
+    dragCounter = 0;
+    overlay.classList.add('hidden');
+    overlay.classList.remove('flex');
+    const file = e.dataTransfer.files[0];
+    if (file) importFile(file);
+  });
+}
+
+function handleFileImport(e) {
+  const file = e.target.files[0];
+  if (file) importFile(file);
+  e.target.value = '';
+}
+
+function importFile(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const config = jsyaml.load(e.target.result);
+      if (!config || typeof config !== 'object') throw new Error('Invalid YAML');
+      loadConfig(config);
+    } catch (err) {
+      alert('Error parsing YAML: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function loadConfig(config) {
+  // Global settings
+  if (config.title) document.getElementById('cfg-title').value = config.title;
+  if (config.lang) document.getElementById('cfg-lang').value = config.lang;
+  if (config.theme) document.getElementById('cfg-theme').value = config.theme;
+  if (config.background) document.getElementById('cfg-background').value = config.background;
+  if (config.faviconApi) document.getElementById('cfg-faviconApi').value = config.faviconApi;
+  if (config.searchProvider) document.getElementById('cfg-searchProvider').value = config.searchProvider;
+  if (config.behaviour?.target) document.getElementById('cfg-target').value = config.behaviour.target;
+  
+  if (config.backgroundOverlay) {
+    if (config.backgroundOverlay.color) document.getElementById('cfg-overlay-color').value = config.backgroundOverlay.color;
+    if (config.backgroundOverlay.opacity != null) {
+      document.getElementById('cfg-overlay-opacity').value = config.backgroundOverlay.opacity;
+      document.getElementById('opacity-val').textContent = config.backgroundOverlay.opacity;
+    }
+  }
+
+  // Layout
+  if (config.layout?.grid) {
+    if (config.layout.grid.small) document.getElementById('cfg-grid-small').value = config.layout.grid.small;
+    if (config.layout.grid.medium) document.getElementById('cfg-grid-medium').value = config.layout.grid.medium;
+    if (config.layout.grid.large) document.getElementById('cfg-grid-large').value = config.layout.grid.large;
+    if (config.layout.grid.xlarge) document.getElementById('cfg-grid-xlarge').value = config.layout.grid.xlarge;
+  }
+  if (config.layout?.spacing) {
+    if (config.layout.spacing.group) document.getElementById('cfg-spacing-group').value = config.layout.spacing.group;
+    if (config.layout.spacing.item) document.getElementById('cfg-spacing-item').value = config.layout.spacing.item;
+  }
+
+  // Styles
+  if (config.styles) {
+    ['category', 'title', 'description'].forEach(el => {
+      const s = config.styles[el];
+      if (!s) return;
+      if (s.fontFamily) setStyleVal(`${el}.fontFamily`, s.fontFamily);
+      if (s.fontSize) setStyleVal(`${el}.fontSize`, s.fontSize);
+      if (s.fontWeight != null) setStyleVal(`${el}.fontWeight`, String(s.fontWeight));
+      if (s.fontStyle) setStyleVal(`${el}.fontStyle`, s.fontStyle);
+      if (s.textDecoration) setStyleVal(`${el}.textDecoration`, s.textDecoration);
+      if (s.color) {
+        setStyleVal(`${el}.colorText`, s.color);
+        const colorInput = document.querySelector(`[data-style="${el}.color"]`);
+        if (colorInput && /^#[0-9a-fA-F]{6}$/.test(s.color)) colorInput.value = s.color;
+      }
+    });
+  }
+
+  // Tags
+  state.tags = [];
+  if (config.tags && Array.isArray(config.tags)) {
+    config.tags.forEach(t => state.tags.push({ name: t.name || '', color: t.color || 'blue' }));
+  }
+  renderTags();
+
+  // Tabs & services
+  state.tabs = [];
+  if (config.tabs && Array.isArray(config.tabs)) {
+    config.tabs.forEach(tab => {
+      const tabObj = { name: tab.name || '', icon: tab.icon || '', groups: [] };
+      if (tab.services && typeof tab.services === 'object') {
+        Object.entries(tab.services).forEach(([groupName, groupData]) => {
+          const group = { name: groupName, display: 'list', items: [] };
+          let items = [];
+          if (groupData && typeof groupData === 'object' && !Array.isArray(groupData)) {
+            group.display = groupData.display || 'list';
+            items = groupData.items || [];
+          } else if (Array.isArray(groupData)) {
+            items = groupData;
+          }
+          items.forEach(raw => {
+            const item = {
+              title: raw.title || '', description: raw.description || '', link: raw.link || '',
+              target: raw.target || '', iconType: 'favicon', iconFavicon: '', iconUrl: '', 
+              iconName: '', iconColor: '', iconWrap: false, statusEnabled: false, tags: []
+            };
+            if (raw.icon) {
+              if (raw.icon.favicon) {
+                item.iconType = 'favicon';
+                item.iconFavicon = raw.icon.favicon;
+                item.iconColor = raw.icon.color || '';
+              } else if (raw.icon.url) {
+                item.iconType = 'url';
+                item.iconUrl = raw.icon.url;
+              } else if (raw.icon.name) {
+                item.iconType = 'name';
+                item.iconName = raw.icon.name;
+                item.iconColor = raw.icon.color || '';
+              }
+              item.iconWrap = raw.icon.wrap || false;
+            }
+            if (raw.status?.enabled) item.statusEnabled = true;
+            if (raw.tags && Array.isArray(raw.tags)) {
+              item.tags = raw.tags.map(t => typeof t === 'string' ? t : t.name || '');
+            }
+            group.items.push(item);
+          });
+          tabObj.groups.push(group);
+        });
+      }
+      state.tabs.push(tabObj);
+    });
+  } else if (config.services) {
+    // Flat or grouped services (no tabs)
+    const tabObj = { name: '', icon: '', groups: [] };
+    if (typeof config.services === 'object' && !Array.isArray(config.services)) {
+      Object.entries(config.services).forEach(([groupName, groupData]) => {
+        const group = { name: groupName, display: 'list', items: [] };
+        let items = [];
+        if (groupData && typeof groupData === 'object' && !Array.isArray(groupData)) {
+          group.display = groupData.display || 'list';
+          items = groupData.items || [];
+        } else if (Array.isArray(groupData)) {
+          items = groupData;
+        }
+        items.forEach(raw => {
+          const item = {
+            title: raw.title || '', description: raw.description || '', link: raw.link || '',
+            target: raw.target || '', iconType: 'favicon', iconFavicon: '', iconUrl: '',
+            iconName: '', iconColor: '', iconWrap: false, statusEnabled: false, tags: []
+          };
+          if (raw.icon) {
+            if (raw.icon.favicon) { item.iconType = 'favicon'; item.iconFavicon = raw.icon.favicon; item.iconColor = raw.icon.color || ''; }
+            else if (raw.icon.url) { item.iconType = 'url'; item.iconUrl = raw.icon.url; }
+            else if (raw.icon.name) { item.iconType = 'name'; item.iconName = raw.icon.name; item.iconColor = raw.icon.color || ''; }
+            item.iconWrap = raw.icon.wrap || false;
+          }
+          if (raw.status?.enabled) item.statusEnabled = true;
+          if (raw.tags) item.tags = raw.tags.map(t => typeof t === 'string' ? t : t.name || '');
+          group.items.push(item);
+        });
+        tabObj.groups.push(group);
+      });
+    } else if (Array.isArray(config.services)) {
+      const group = { name: 'Services', display: 'list', items: [] };
+      config.services.forEach(raw => {
+        const item = {
+          title: raw.title || '', description: raw.description || '', link: raw.link || '',
+          target: raw.target || '', iconType: 'favicon', iconFavicon: '', iconUrl: '',
+          iconName: '', iconColor: '', iconWrap: false, statusEnabled: false, tags: []
+        };
+        if (raw.icon) {
+          if (raw.icon.favicon) { item.iconType = 'favicon'; item.iconFavicon = raw.icon.favicon; item.iconColor = raw.icon.color || ''; }
+          else if (raw.icon.url) { item.iconType = 'url'; item.iconUrl = raw.icon.url; }
+          else if (raw.icon.name) { item.iconType = 'name'; item.iconName = raw.icon.name; item.iconColor = raw.icon.color || ''; }
+          item.iconWrap = raw.icon.wrap || false;
+        }
+        if (raw.status?.enabled) item.statusEnabled = true;
+        if (raw.tags) item.tags = raw.tags.map(t => typeof t === 'string' ? t : t.name || '');
+        group.items.push(item);
+      });
+      tabObj.groups.push(group);
+    }
+    state.tabs.push(tabObj);
+  }
+  renderTabs();
+  generateYaml();
+}
+
+function setStyleVal(key, value) {
+  const el = document.querySelector(`[data-style="${key}"]`);
+  if (el) el.value = value;
+}
+
+// --- Theme ---
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.classList.contains('dark');
+  if (isDark) {
+    html.classList.remove('dark');
+    localStorage.setItem('mafl-builder-theme', 'light');
+  } else {
+    html.classList.add('dark');
+    localStorage.setItem('mafl-builder-theme', 'dark');
+  }
+  updateThemeIcons();
+}
+
+function updateThemeIcons() {
+  const isDark = document.documentElement.classList.contains('dark');
+  document.getElementById('icon-sun').classList.toggle('hidden', !isDark);
+  document.getElementById('icon-moon').classList.toggle('hidden', isDark);
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('mafl-builder-theme');
+  if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+  }
+  updateThemeIcons();
+}
+
+// --- Boot ---
+initTheme();
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
