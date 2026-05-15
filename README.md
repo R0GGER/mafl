@@ -26,6 +26,7 @@
 * [Icons](#-icons)
 * [Themes](#-themes)
 * [Languages](#-multi-language)
+* [Config Builder](#-config-builder)
 * [Wiki](https://github.com/R0GGER/mafl/wiki)
 * [License](#-license)
 
@@ -305,6 +306,20 @@ lang: en
 ```
 
 Supported languages: `en`, `ru`, `zh`, `hi`, `es`, `ar`, `pl`, `fr`, `de`, `gr`
+
+## 🛠 Config Builder
+
+A standalone visual tool for creating and editing your `config.yml` - no server or dependencies required.
+
+**Open** [`tools/config-builder/index.html`](tools/config-builder/index.html) in your browser.
+
+Features:
+* Edit all global settings (title, language, theme, background, search, etc.)
+* Add and reorder tabs, groups and bookmarks
+* Configure icons (favicon, URL or Iconify name with color)
+* Import an existing `config.yml` to modify it
+* Live YAML preview with one-click copy to clipboard
+* Light and dark theme
 
 ## 📒 Wiki
 A step-by-step guide covering installation, configuration (layout, styles, backgrounds, tabs, search), icon types, and service tags: [mafl/wiki](https://github.com/R0GGER/mafl/wiki)
