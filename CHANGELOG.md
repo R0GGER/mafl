@@ -21,6 +21,7 @@
 
 ### 🩹 Fixes
 
+- **custom-html** — `<script>` tags now execute correctly; Vue's `v-html` uses `innerHTML` which browsers block from running scripts, so the component now dynamically creates script elements via `document.createElement` to ensure execution (e.g. analytics snippets)
 - **timezone/datetime-weather** — Date and time now respect the `lang` setting from config.yml instead of using the browser locale
 - **datetime-weather** — Date and time fit on a single line by defaulting to 24-hour format
 - **date format: eu** — Manually constructed to ensure European day-month order (`Sat 16 May 2026`) instead of US-style (`Sat, May 16, 2026`)
