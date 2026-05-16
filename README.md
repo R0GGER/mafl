@@ -28,7 +28,7 @@
 * [Themes](#-themes)
 * [Languages](#-multi-language)
 * [Config Builder](#-config-builder)
-* [Wiki](https://github.com/R0GGER/mafl/wiki)
+* [Wiki](https://wiki.maflplus.eu/)
 * [License](#-license)
 
 ## 🆕 What's different?
@@ -335,7 +335,7 @@ Features:
 * Light and dark theme
 
 ## 📒 Wiki
-A step-by-step guide covering installation, configuration (layout, styles, backgrounds, tabs, search), icon types, and service tags: [mafl/wiki](https://github.com/R0GGER/mafl/wiki)
+A step-by-step guide covering installation, configuration (layout, styles, backgrounds, tabs, search), icon types, and service tags: [wiki.maflplus.eu](https://wiki.maflplus.eu)
 
 ## 📄 License
 
