@@ -76,7 +76,7 @@ The image is published to the **GitHub Container Registry**.
 ```yaml
 services:
   mafl:
-    image: ghcr.io/r0gger/mafl
+    image: ghcr.io/r0gger/maflplus
     restart: unless-stopped
     ports:
       - '3000:3000'

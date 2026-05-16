@@ -1,6 +1,6 @@
 services:
   mafl:
-    image: ghcr.io/r0gger/mafl
+    image: ghcr.io/r0gger/maflplus
     container_name: mafl
     restart: unless-stopped
     ports:

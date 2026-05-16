@@ -55,7 +55,7 @@
 
 ### 🏡 Chore
 
-- **docker:** Image published to `ghcr.io/r0gger/mafl` via GitHub Actions
+- **docker:** Image published to `ghcr.io/r0gger/maflplus` via GitHub Actions
 - **docker:** Added local `build` block to `docker-compose.yml` for development
 - **updates:** Check updates temporarily disabled
 
