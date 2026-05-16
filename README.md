@@ -28,7 +28,7 @@
 * [Themes](#-themes)
 * [Languages](#-multi-language)
 * [Config Builder](#-config-builder)
-* [Wiki](https://github.com/R0GGER/mafl/wiki)
+* [Wiki](https://wiki.maflplus.eu/)
 * [License](#-license)
 
 ## 🆕 What's different?
