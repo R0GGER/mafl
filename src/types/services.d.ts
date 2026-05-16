@@ -26,6 +26,7 @@ export interface Service {
   icon?: ServiceIcon
   status?: ServiceStatus
   tags: Tag['name'][] | Tag[]
+  span?: number
   options?: Record<string, any>
   secrets?: Record<string, any>
   server?: Record<string, any>
@@ -73,5 +74,62 @@ export interface OpenWeatherMapService extends Service {
     place: string
     description: string
     iconId: number
+  }
+}
+
+export interface TimezoneService extends Service {
+  options: {
+    timezone: string
+    locationName?: string
+    country?: string
+    timeFormat?: '12h' | '24h'
+    dateFormat?: 'short' | 'medium' | 'long' | 'short-eu' | 'compact' | 'iso' | 'eu'
+  }
+  server: {
+    timezone: string
+    locationName: string
+    country: string
+  }
+}
+
+export interface DatetimeWeatherService extends Service {
+  options: {
+    lon: number
+    lat: number
+    units: 'metric' | 'imperial' | 'standard'
+    timezone: string
+    timeFormat?: '12h' | '24h'
+    dateFormat?: 'short' | 'medium' | 'long' | 'short-eu' | 'compact' | 'iso' | 'eu'
+  }
+  secrets: {
+    apiKey: string
+  }
+  server: {
+    temp: number
+    place: string
+    description: string
+    iconId: number
+    timezone: string
+  }
+}
+
+export interface CustomHtmlService extends Service {
+  options: {
+    html: string
+    hidden?: boolean
+  }
+  server: {
+    html: string
+  }
+}
+
+export interface GreetingService extends Service {
+  options: {
+    text: string
+    subtitle?: string
+  }
+  server: {
+    text: string
+    subtitle: string
   }
 }

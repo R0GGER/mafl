@@ -1,9 +1,9 @@
 services:
   mafl:
-   # build:
-   #   context: .
-   #   dockerfile: Dockerfile
-    image: ghcr.io/r0gger/maflplus
+    build:
+      context: .
+      dockerfile: Dockerfile
+   # image: ghcr.io/r0gger/maflplus
     container_name: maflplus
     restart: unless-stopped
     ports:

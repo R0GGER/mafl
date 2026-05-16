@@ -29,6 +29,7 @@ export const serviceSchema = z.object({
   icon: iconSchema.optional(),
   status: statusSchema.optional(),
   type: z.string().optional(),
+  span: z.number().optional(),
   options: z.record(z.any()).optional(),
   secrets: z.record(z.any()).optional(),
 })

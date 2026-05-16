@@ -5,7 +5,7 @@
     :alt="$settings.title || 'Logo'"
     class="hidden sm:block fixed top-5 left-5 sm:top-6 sm:left-6 z-50 h-6 sm:h-7 md:h-8 w-auto object-contain pointer-events-none drop-shadow-md"
   >
-  <div class="min-h-screen relative">
+  <div class="min-h-screen relative flex flex-col">
     <div
       v-if="$settings.background"
       class="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat"
@@ -39,6 +39,7 @@
       </nav>
       <slot />
     </div>
+    <Footer />
   </div>
 </template>
 

@@ -19,16 +19,15 @@ Mount the new volume with the icons folder in your `docker-compose.yml` or pass 
 
 ::: code-group
 ```yaml [docker-compose.yml]
-version: '3.8'
-
 services:
   mafl:
-    image: hywax/mafl
+    image: ghcr.io/r0gger/maflplus
+    container_name: maflplus
     restart: unless-stopped
     ports:
       - '3000:3000'
     volumes:
-      - ./mafl/config.yml:/app/data/config.yml
+      - ./mafl/:/app/data/
       - ./mafl/favicons:/app/public/favicons // [!code ++]
 ```
 :::

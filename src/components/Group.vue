@@ -20,7 +20,10 @@
     </div>
     <div v-else :class="gridClasses">
       <template v-for="item in items" :key="item.id">
-        <Item v-bind="item" />
+        <div v-if="item.span && item.span > 1" :style="{ gridColumn: `span ${item.span}` }">
+          <Item v-bind="item" />
+        </div>
+        <Item v-else v-bind="item" />
       </template>
     </div>
   </div>

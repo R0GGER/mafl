@@ -4,10 +4,10 @@
       <ServiceBaseIcon :name="`wi:owm-${service?.data?.iconId}`" v-bind="iconProps" />
     </template>
     <template #title="{ service }">
-      {{ service.data?.temp.toFixed(1) }} {{ metricSymbol }}
+      {{ service.data?.place ? `${service.data.place}: ` : '' }}{{ service.data?.temp.toFixed(1) }} {{ metricSymbol }}
     </template>
     <template #description="{ service }">
-      {{ service.data?.place ? `${service.data?.place},` : '' }} {{ service.data?.description }}
+      {{ service.data?.description }}
     </template>
   </ServiceBase>
 </template>

@@ -59,6 +59,11 @@ export interface Tab {
   services: ServicesGroup[]
 }
 
+export interface Footer {
+  text?: string
+  html?: string
+}
+
 export interface Config {
   title?: string
   lang?: 'en' | 'ru' | 'zh' | 'hi' | 'es' | 'ar' | 'pl' | 'fr' | 'de' | 'gr'
@@ -75,6 +80,7 @@ export interface Config {
   services: ServicesGroup[]
   tabs?: Tab[]
   checkUpdates: boolean
+  footer?: Footer
 }
 
 export type CompleteConfig = Required<Config> & {

@@ -32,6 +32,22 @@ function resolveByTypeComponent(type: string) {
     return resolveComponent('ServiceOpenWeatherMap')
   }
 
+  if (type === 'timezone') {
+    return resolveComponent('ServiceTimezone')
+  }
+
+  if (type === 'datetime-weather') {
+    return resolveComponent('ServiceDatetimeWeather')
+  }
+
+  if (type === 'greeting') {
+    return resolveComponent('ServiceGreeting')
+  }
+
+  if (type === 'custom-html') {
+    return resolveComponent('ServiceCustomHtml')
+  }
+
   return resolveComponent('ServiceBase')
 }
 

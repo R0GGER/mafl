@@ -1,6 +1,62 @@
 # Changelog
 
 
+## New modules, footer and config builder updates
+
+### 🚀 Enhancements
+
+- **module: timezone** — Live clock widget showing current time and date for any IANA timezone, with optional country flag icon and configurable time/date formats
+- **module: datetime-weather** — Combined live clock and weather widget using OpenWeatherMap, with configurable timezone, time format and date format
+- **module: greeting** — Simple widget displaying a custom greeting message with optional subtitle
+- **module: custom-html** — Renders arbitrary HTML content inside a service card, with a `hidden` option for invisible elements (e.g. tracking pixels)
+- **module: openweathermap** — Updated layout: title now shows `Place: Temp °C`, description shows weather only
+- **layout: span** — Any service item can now span multiple grid columns via the `span` property
+- **layout: footer** — Global footer section with configurable `text` and `html` content, rendered at the bottom of the page
+- **composable: useDateFormat** — Shared date formatting composable with seven formats: `short`, `medium`, `long`, `eu`, `compact`, `short-eu`, `iso`
+- **config-builder** — Added form fields for Timezone, DateTime Weather, Greeting, Custom HTML modules
+- **config-builder** — Added span field to all grid service items
+- **config-builder** — Added Footer section for text and HTML content
+- **config-builder** — Added Wiki button linking to wiki.maflplus.eu
+- **config-builder** — Updated Load Example with new module examples
+
+### 🩹 Fixes
+
+- **timezone/datetime-weather** — Date and time now respect the `lang` setting from config.yml instead of using the browser locale
+- **datetime-weather** — Date and time fit on a single line by defaulting to 24-hour format
+- **date format: eu** — Manually constructed to ensure European day-month order (`Sat 16 May 2026`) instead of US-style (`Sat, May 16, 2026`)
+
+### 💅 Refactors
+
+- **types** — Added `TimezoneService`, `DatetimeWeatherService`, `GreetingService`, `CustomHtmlService` interfaces to `services.d.ts`
+- **types** — Added `span` to the base `Service` interface
+- **types** — Added `Footer` interface to `config.d.ts`
+- **validation** — Extended `serviceSchema` with `span` field and `configSchema` with `footer`
+- **Item.vue** — Added type-to-component mappings for `timezone`, `datetime-weather`, `greeting`, and `custom-html`
+- **Group.vue** — Grid items with `span > 1` are wrapped in a div with `grid-column: span N`
+- **default.vue** — Layout uses `flex flex-col` and renders the `Footer` component
+
+### 📖 Documentation
+
+- **modules.md** — New documentation page covering all modules (Timezone, DateTime Weather, Greeting, Custom HTML), date formats, grid span, and footer
+
+### New files
+
+| File | Purpose |
+|------|---------|
+| `src/components/service/Timezone.vue` | Timezone widget component |
+| `src/components/service/DatetimeWeather.vue` | DateTime Weather widget component |
+| `src/components/service/Greeting.vue` | Greeting widget component |
+| `src/components/service/CustomHtml.vue` | Custom HTML widget component |
+| `src/components/Footer.vue` | Footer component |
+| `src/composables/useDateFormat.ts` | Shared date formatting composable |
+| `src/server/api/services/timezone.ts` | Timezone API handler |
+| `src/server/api/services/datetime-weather.ts` | DateTime Weather API handler (OWM) |
+| `src/server/api/services/greeting.ts` | Greeting API handler |
+| `src/server/api/services/custom-html.ts` | Custom HTML API handler |
+| `docs/modules.md` | Module documentation |
+
+---
+
 ## Fork and modifications
 
 > Independent fork by [@R0GGER](https://github.com/R0GGER) — not affiliated with upstream [hywax/mafl](https://github.com/hywax/mafl).

@@ -53,6 +53,11 @@ const tabSchema = z.object({
   services: servicesSchema,
 })
 
+const footerSchema = z.object({
+  text: z.string().optional(),
+  html: z.string().optional(),
+}).optional()
+
 export const configSchema = z.object({
   title: z.string().optional(),
   lang: z.string().optional(),
@@ -68,6 +73,7 @@ export const configSchema = z.object({
   tags: z.array(tagSchema).optional(),
   tabs: z.array(tabSchema).optional(),
   services: servicesSchema.optional(),
+  footer: footerSchema,
 }).refine(
   data => data.services || data.tabs,
   { message: 'Either "services" or "tabs" must be provided' },

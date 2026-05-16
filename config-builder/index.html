@@ -92,6 +92,7 @@
           <svg id="icon-sun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
           <svg id="icon-moon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
         </button>
+        <a href="https://wiki.maflplus.eu" target="_blank" class="text-sm px-3 py-1.5 rounded border transition" style="background:var(--surface-lighter); border-color:var(--border); text-decoration:none; color:var(--text);">Wiki</a>
         <button onclick="loadExample()" class="text-sm px-3 py-1.5 rounded border transition" style="background:var(--surface-lighter); border-color:var(--border);">Load Example</button>
         <label class="cursor-pointer text-sm px-3 py-1.5 rounded border transition" style="background:var(--surface-lighter); border-color:var(--border);">
           Import config.yml
@@ -168,6 +169,26 @@
                 <input type="range" id="cfg-overlay-opacity" min="0" max="1" step="0.05" value="0.5" class="flex-1" oninput="document.getElementById('opacity-val').textContent=this.value; generateYaml()">
                 <span id="opacity-val" class="text-xs text-gray-400 w-8">0.5</span>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <section class="bg-surface-light rounded-lg border border-gray-700">
+        <button onclick="toggleSection(this)" class="w-full flex items-center justify-between p-4 text-left">
+          <span class="font-semibold text-white">Footer</span>
+          <span class="chevron">&#9654;</span>
+        </button>
+        <div class="collapsible-content px-4 pb-4">
+          <div class="grid grid-cols-1 gap-3">
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Text</label>
+              <input type="text" id="cfg-footer-text" placeholder="© 2026 MAFL+" class="w-full bg-surface border border-gray-600 rounded px-3 py-1.5 text-sm" oninput="generateYaml()">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">HTML</label>
+              <input type="text" id="cfg-footer-html" placeholder="<p>Powered by MAFL+</p>" class="w-full bg-surface border border-gray-600 rounded px-3 py-1.5 text-sm" oninput="generateYaml()">
             </div>
           </div>
         </div>
@@ -365,11 +386,15 @@ function removeGroup(tabIndex, groupIndex) {
 function newItem(serviceType = 'bookmark') {
   const base = {
     serviceType,
-    title: '', description: '', link: '', target: '',
+    title: '', description: '', link: '', target: '', span: '',
     iconType: 'favicon', iconFavicon: '', iconUrl: '', iconName: '', iconColor: '', iconWrap: false,
     statusEnabled: false, tags: [],
     owmLat: '', owmLon: '', owmUnits: 'metric', owmApiKey: '',
-    ipapiFlagIcon: 'true'
+    ipapiFlagIcon: 'true',
+    tzTimezone: '', tzLocationName: '', tzCountry: '', tzTimeFormat: '24h', tzDateFormat: 'medium',
+    dtwLat: '', dtwLon: '', dtwUnits: 'metric', dtwApiKey: '', dtwTimezone: '', dtwTimeFormat: '24h', dtwDateFormat: 'medium',
+    greetText: '', greetSubtitle: '',
+    customHtml: '', customHidden: false
   };
   return base;
 }
@@ -434,13 +459,21 @@ function renderGroup(ti, gi, group) {
       <div class="space-y-1">
         ${group.items.map((item, ii) => renderItem(ti, gi, ii, item)).join('')}
       </div>
-      <div class="flex gap-1 mt-1">
+      <div class="flex flex-wrap gap-1 mt-1">
         <button onclick="addItem(${ti},${gi},'bookmark')" class="text-xs text-accent hover:text-accent-hover">+ Bookmark</button>
         ${group.display === 'grid' ? `
         <span class="text-xs text-gray-500">|</span>
         <button onclick="addItem(${ti},${gi},'openweathermap')" class="text-xs text-accent hover:text-accent-hover">+ Weather</button>
         <span class="text-xs text-gray-500">|</span>
         <button onclick="addItem(${ti},${gi},'ip-api')" class="text-xs text-accent hover:text-accent-hover">+ IP API</button>
+        <span class="text-xs text-gray-500">|</span>
+        <button onclick="addItem(${ti},${gi},'timezone')" class="text-xs text-accent hover:text-accent-hover">+ Timezone</button>
+        <span class="text-xs text-gray-500">|</span>
+        <button onclick="addItem(${ti},${gi},'datetime-weather')" class="text-xs text-accent hover:text-accent-hover">+ DateTime Weather</button>
+        <span class="text-xs text-gray-500">|</span>
+        <button onclick="addItem(${ti},${gi},'greeting')" class="text-xs text-accent hover:text-accent-hover">+ Greeting</button>
+        <span class="text-xs text-gray-500">|</span>
+        <button onclick="addItem(${ti},${gi},'custom-html')" class="text-xs text-accent hover:text-accent-hover">+ Custom HTML</button>
         ` : ''}
       </div>
     </div>
@@ -450,9 +483,17 @@ function renderGroup(ti, gi, group) {
 function renderItem(ti, gi, ii, item) {
   const uid = `${ti}-${gi}-${ii}`;
   const sType = item.serviceType || 'bookmark';
-  const typeLabel = sType === 'openweathermap' ? 'Weather' : sType === 'ip-api' ? 'IP API' : '';
+  const typeLabels = { openweathermap: 'Weather', 'ip-api': 'IP API', timezone: 'Timezone', 'datetime-weather': 'DateTime Weather', greeting: 'Greeting', 'custom-html': 'Custom HTML' };
+  const typeLabel = typeLabels[sType] || '';
   const typeBadge = typeLabel ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-accent/20 text-accent">${typeLabel}</span>` : '';
-  const displayTitle = escHtml(item.title) || (sType !== 'bookmark' ? typeLabel : '(untitled)');
+  const displayTitle = escHtml(item.title) || (sType === 'greeting' && item.greetText ? escHtml(item.greetText) : (sType !== 'bookmark' ? typeLabel : '(untitled)'));
+
+  const dateFormatOptions = ['short','medium','long','eu','compact','short-eu','iso'].map(f => `<option value="${f}" ${item.tzDateFormat === f || item.dtwDateFormat === f ? 'selected' : ''}>${f}</option>`).join('');
+
+  const spanField = `
+      <div class="grid grid-cols-2 gap-2">
+        <div><label class="text-gray-500">Span (columns)</label><input type="number" value="${escHtml(item.span)}" placeholder="1" min="1" max="12" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].span=this.value; generateYaml()"></div>
+      </div>`;
 
   let typeFields = '';
   if (sType === 'openweathermap') {
@@ -468,7 +509,8 @@ function renderItem(ti, gi, ii, item) {
           <option value="standard" ${item.owmUnits === 'standard' ? 'selected' : ''}>standard</option>
         </select></div>
         <div><label class="text-gray-500">API Key</label><input type="text" value="${escHtml(item.owmApiKey)}" placeholder="your-api-key" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].owmApiKey=this.value; generateYaml()"></div>
-      </div>`;
+      </div>
+      ${spanField}`;
   } else if (sType === 'ip-api') {
     typeFields = `
       <div class="grid grid-cols-2 gap-2">
@@ -476,7 +518,69 @@ function renderItem(ti, gi, ii, item) {
           <option value="true" ${item.ipapiFlagIcon !== 'false' ? 'selected' : ''}>true</option>
           <option value="false" ${item.ipapiFlagIcon === 'false' ? 'selected' : ''}>false</option>
         </select></div>
-      </div>`;
+      </div>
+      ${spanField}`;
+  } else if (sType === 'timezone') {
+    const tzDateFmtOpts = ['short','medium','long','eu','compact','short-eu','iso'].map(f => `<option value="${f}" ${item.tzDateFormat === f ? 'selected' : ''}>${f}</option>`).join('');
+    typeFields = `
+      <div class="grid grid-cols-2 gap-2">
+        <div><label class="text-gray-500">Timezone</label><input type="text" value="${escHtml(item.tzTimezone)}" placeholder="Europe/Amsterdam" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].tzTimezone=this.value; generateYaml()"></div>
+        <div><label class="text-gray-500">Location Name</label><input type="text" value="${escHtml(item.tzLocationName)}" placeholder="Amsterdam" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].tzLocationName=this.value; generateYaml()"></div>
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        <div><label class="text-gray-500">Country Code</label><input type="text" value="${escHtml(item.tzCountry)}" placeholder="nl" maxlength="2" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].tzCountry=this.value; generateYaml()"></div>
+        <div><label class="text-gray-500">Time Format</label><select class="w-full bg-surface border border-gray-600 rounded px-2 py-1" onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].tzTimeFormat=this.value; generateYaml()">
+          <option value="24h" ${item.tzTimeFormat === '24h' ? 'selected' : ''}>24h</option>
+          <option value="12h" ${item.tzTimeFormat === '12h' ? 'selected' : ''}>12h</option>
+        </select></div>
+        <div><label class="text-gray-500">Date Format</label><select class="w-full bg-surface border border-gray-600 rounded px-2 py-1" onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].tzDateFormat=this.value; generateYaml()">
+          ${tzDateFmtOpts}
+        </select></div>
+      </div>
+      ${spanField}`;
+  } else if (sType === 'datetime-weather') {
+    const dtwDateFmtOpts = ['short','medium','long','eu','compact','short-eu','iso'].map(f => `<option value="${f}" ${item.dtwDateFormat === f ? 'selected' : ''}>${f}</option>`).join('');
+    typeFields = `
+      <div class="grid grid-cols-2 gap-2">
+        <div><label class="text-gray-500">Latitude</label><input type="text" value="${escHtml(item.dtwLat)}" placeholder="52.370216" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].dtwLat=this.value; generateYaml()"></div>
+        <div><label class="text-gray-500">Longitude</label><input type="text" value="${escHtml(item.dtwLon)}" placeholder="4.895168" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].dtwLon=this.value; generateYaml()"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div><label class="text-gray-500">Timezone</label><input type="text" value="${escHtml(item.dtwTimezone)}" placeholder="Europe/Amsterdam" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].dtwTimezone=this.value; generateYaml()"></div>
+        <div><label class="text-gray-500">API Key</label><input type="text" value="${escHtml(item.dtwApiKey)}" placeholder="your-api-key" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].dtwApiKey=this.value; generateYaml()"></div>
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        <div><label class="text-gray-500">Units</label><select class="w-full bg-surface border border-gray-600 rounded px-2 py-1" onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].dtwUnits=this.value; generateYaml()">
+          <option value="metric" ${item.dtwUnits === 'metric' ? 'selected' : ''}>metric</option>
+          <option value="imperial" ${item.dtwUnits === 'imperial' ? 'selected' : ''}>imperial</option>
+          <option value="standard" ${item.dtwUnits === 'standard' ? 'selected' : ''}>standard</option>
+        </select></div>
+        <div><label class="text-gray-500">Time Format</label><select class="w-full bg-surface border border-gray-600 rounded px-2 py-1" onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].dtwTimeFormat=this.value; generateYaml()">
+          <option value="24h" ${item.dtwTimeFormat === '24h' ? 'selected' : ''}>24h</option>
+          <option value="12h" ${item.dtwTimeFormat === '12h' ? 'selected' : ''}>12h</option>
+        </select></div>
+        <div><label class="text-gray-500">Date Format</label><select class="w-full bg-surface border border-gray-600 rounded px-2 py-1" onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].dtwDateFormat=this.value; generateYaml()">
+          ${dtwDateFmtOpts}
+        </select></div>
+      </div>
+      ${spanField}`;
+  } else if (sType === 'greeting') {
+    typeFields = `
+      <div class="grid grid-cols-2 gap-2">
+        <div><label class="text-gray-500">Text</label><input type="text" value="${escHtml(item.greetText)}" placeholder="Hello!" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].greetText=this.value; generateYaml()"></div>
+        <div><label class="text-gray-500">Subtitle</label><input type="text" value="${escHtml(item.greetSubtitle)}" placeholder="Welcome to your dashboard" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].greetSubtitle=this.value; generateYaml()"></div>
+      </div>
+      ${spanField}`;
+  } else if (sType === 'custom-html') {
+    typeFields = `
+      <div>
+        <label class="text-gray-500">HTML Content</label>
+        <input type="text" value="${escHtml(item.customHtml)}" placeholder="<p>Custom HTML</p>" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].customHtml=this.value; generateYaml()">
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div><label class="flex items-center gap-1"><input type="checkbox" ${item.customHidden ? 'checked' : ''} onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].customHidden=this.checked; generateYaml()"> Hidden</label></div>
+      </div>
+      ${spanField}`;
   }
 
   const bookmarkFields = sType === 'bookmark' ? `
@@ -651,8 +755,14 @@ function generateYaml() {
         group.items.forEach(item => {
           const sType = item.serviceType || 'bookmark';
           if (sType === 'bookmark' && !item.title && !item.link) return;
+          if (sType === 'timezone' && !item.tzTimezone) return;
+          if (sType === 'datetime-weather' && !item.dtwTimezone && !item.dtwLat) return;
+          if (sType === 'greeting' && !item.greetText) return;
+          if (sType === 'custom-html' && !item.customHtml) return;
 
           const it = {};
+
+          if (item.span && parseInt(item.span) > 1) it.span = parseInt(item.span);
 
           if (sType === 'openweathermap') {
             it.type = 'openweathermap';
@@ -667,6 +777,38 @@ function generateYaml() {
             if (item.ipapiFlagIcon === 'false') {
               it.options = { flagIcon: false };
             }
+          } else if (sType === 'timezone') {
+            it.type = 'timezone';
+            const opts = {};
+            if (item.tzTimezone) opts.timezone = item.tzTimezone;
+            if (item.tzLocationName) opts.locationName = item.tzLocationName;
+            if (item.tzCountry) opts.country = item.tzCountry;
+            if (item.tzTimeFormat && item.tzTimeFormat !== '24h') opts.timeFormat = item.tzTimeFormat;
+            if (item.tzDateFormat && item.tzDateFormat !== 'medium') opts.dateFormat = item.tzDateFormat;
+            if (Object.keys(opts).length) it.options = opts;
+          } else if (sType === 'datetime-weather') {
+            it.type = 'datetime-weather';
+            const opts = {};
+            if (item.dtwLat) opts.lat = parseFloat(item.dtwLat) || item.dtwLat;
+            if (item.dtwLon) opts.lon = parseFloat(item.dtwLon) || item.dtwLon;
+            if (item.dtwTimezone) opts.timezone = item.dtwTimezone;
+            if (item.dtwUnits && item.dtwUnits !== 'metric') opts.units = item.dtwUnits;
+            if (item.dtwTimeFormat && item.dtwTimeFormat !== '24h') opts.timeFormat = item.dtwTimeFormat;
+            if (item.dtwDateFormat && item.dtwDateFormat !== 'medium') opts.dateFormat = item.dtwDateFormat;
+            if (Object.keys(opts).length) it.options = opts;
+            if (item.dtwApiKey) it.secrets = { apiKey: item.dtwApiKey };
+          } else if (sType === 'greeting') {
+            it.type = 'greeting';
+            const opts = {};
+            if (item.greetText) opts.text = item.greetText;
+            if (item.greetSubtitle) opts.subtitle = item.greetSubtitle;
+            if (Object.keys(opts).length) it.options = opts;
+          } else if (sType === 'custom-html') {
+            it.type = 'custom-html';
+            const opts = {};
+            if (item.customHtml) opts.html = item.customHtml;
+            if (item.customHidden) opts.hidden = true;
+            if (Object.keys(opts).length) it.options = opts;
           } else {
             if (item.title) it.title = item.title;
             if (item.description) it.description = item.description;
@@ -702,6 +844,15 @@ function generateYaml() {
       if (Object.keys(services).length) tabObj.services = services;
       return tabObj;
     });
+  }
+
+  // Footer
+  const footerText = val('cfg-footer-text');
+  const footerHtml = val('cfg-footer-html');
+  if (footerText || footerHtml) {
+    config.footer = {};
+    if (footerText) config.footer.text = footerText;
+    if (footerHtml) config.footer.html = footerHtml;
   }
 
   const yamlStr = jsyaml.dump(config, { 
@@ -765,6 +916,8 @@ function resetAll() {
   document.getElementById('cfg-list-xlarge').value = '5';
   document.getElementById('cfg-spacing-group').value = '1.5rem';
   document.getElementById('cfg-spacing-item').value = '0.25rem';
+  document.getElementById('cfg-footer-text').value = '';
+  document.getElementById('cfg-footer-html').value = '';
   document.querySelectorAll('[data-style]').forEach(el => { el.value = ''; });
   state = { tags: [], tabs: [] };
   renderTags();
@@ -829,6 +982,8 @@ function parseRawItem(raw) {
     item.iconWrap = raw.icon.wrap || false;
   }
 
+  if (raw.span) item.span = String(raw.span);
+
   if (sType === 'openweathermap') {
     if (raw.options?.lat != null) item.owmLat = String(raw.options.lat);
     if (raw.options?.lon != null) item.owmLon = String(raw.options.lon);
@@ -836,6 +991,26 @@ function parseRawItem(raw) {
     if (raw.secrets?.apiKey) item.owmApiKey = String(raw.secrets.apiKey);
   } else if (sType === 'ip-api') {
     if (raw.options?.flagIcon === false) item.ipapiFlagIcon = 'false';
+  } else if (sType === 'timezone') {
+    if (raw.options?.timezone) item.tzTimezone = raw.options.timezone;
+    if (raw.options?.locationName) item.tzLocationName = raw.options.locationName;
+    if (raw.options?.country) item.tzCountry = raw.options.country;
+    if (raw.options?.timeFormat) item.tzTimeFormat = raw.options.timeFormat;
+    if (raw.options?.dateFormat) item.tzDateFormat = raw.options.dateFormat;
+  } else if (sType === 'datetime-weather') {
+    if (raw.options?.lat != null) item.dtwLat = String(raw.options.lat);
+    if (raw.options?.lon != null) item.dtwLon = String(raw.options.lon);
+    if (raw.options?.timezone) item.dtwTimezone = raw.options.timezone;
+    if (raw.options?.units) item.dtwUnits = raw.options.units;
+    if (raw.options?.timeFormat) item.dtwTimeFormat = raw.options.timeFormat;
+    if (raw.options?.dateFormat) item.dtwDateFormat = raw.options.dateFormat;
+    if (raw.secrets?.apiKey) item.dtwApiKey = String(raw.secrets.apiKey);
+  } else if (sType === 'greeting') {
+    if (raw.options?.text) item.greetText = raw.options.text;
+    if (raw.options?.subtitle) item.greetSubtitle = raw.options.subtitle;
+  } else if (sType === 'custom-html') {
+    if (raw.options?.html) item.customHtml = raw.options.html;
+    if (raw.options?.hidden) item.customHidden = true;
   } else {
     item.title = raw.title || '';
     item.description = raw.description || '';
@@ -903,6 +1078,12 @@ function loadConfig(config) {
         if (colorInput && /^#[0-9a-fA-F]{6}$/.test(s.color)) colorInput.value = s.color;
       }
     });
+  }
+
+  // Footer
+  if (config.footer) {
+    if (config.footer.text) document.getElementById('cfg-footer-text').value = config.footer.text;
+    if (config.footer.html) document.getElementById('cfg-footer-html').value = config.footer.html;
   }
 
   // Tags
@@ -1225,6 +1406,24 @@ tabs:
             secrets:
               apiKey: your-api-key-here
           - type: ip-api
+          - type: timezone
+            options:
+              timezone: Europe/Amsterdam
+              country: nl
+              dateFormat: eu
+          - type: datetime-weather
+            span: 2
+            options:
+              lat: 52.3676
+              lon: 4.9041
+              timezone: Europe/Amsterdam
+              dateFormat: eu
+            secrets:
+              apiKey: your-api-key-here
+          - type: greeting
+            options:
+              text: Hello!
+              subtitle: Welcome to your dashboard
 `;
   try {
     const config = jsyaml.load(exampleYaml);

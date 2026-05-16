@@ -1,20 +1,20 @@
-# Configuration: config.yml
+# Configuration (config.yml)
 
 Services, icons, language and other settings are set in a single `config.yml` file.
 
-::: tip Config Builder
-Prefer a visual editor? Open the [Config Builder](https://config.maflplus.eu/) in your browser to create or edit your `config.yml` without writing YAML by hand. It supports all settings documented below, imports existing config files and generates ready-to-paste YAML output.
-:::
+### Config Builder
+Prefer a visual editor? Open the [**Config Builder**](https://config.maflplus.eu/) in your browser to create or edit your `config.yml` without writing YAML by hand. It supports all settings documented below, imports existing config files and generates ready-to-paste YAML output.
+
 
 ## Title
 
 You can customize the page header if you wish.
 
 ```yaml
-title: My Home Page
+title: MAFL+
 ```
 
-Default: `Mafl Home Page`
+Default: `MAFL+`
 
 ## Language
 
@@ -124,8 +124,9 @@ Default: _inherits from theme_
 
 ## Check updates (watchtower)
 
+Run once: check, update, and when finished remove the Watchtower container.
 ```bash
-docker run --name watchtower -d --restart always -v /var/run/docker.sock:/var/run/docker.sock nickfedor/watchtower --cleanup
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock --pull=always nickfedor/watchtower --run-once --cleanup
 ```
 
 ## Behaviour
@@ -137,11 +138,6 @@ A group of parameters responsible for the behavior of the application.
 Browser behavior when the service is clicked.
 With this property, you can make the service open in the current or a new window.
 
-```yaml
-behaviour:
-  target: _blank
-```
-
 Values:
 
 | Value     | Description                                                                                                                     |
@@ -152,10 +148,6 @@ Values:
 | `_top`    | The topmost browsing context (the "highest" context that's an ancestor of the current one). If no ancestors, behaves as `_self` |
 
 Default: `_blank`
-
-::: warning
-If a field is defined in the service `target` it will be prioritized. More details can be found in the [basic service](../services/base.md#target).
-:::
 
 ## Search
 
@@ -192,11 +184,43 @@ More info in: Tags
 
 ## Layout
 
-A group of parameters responsible for the application layout.
+Controls the responsive column layout and spacing of the dashboard.
 
 ### Grid
 
-Allows you to set the number of columns at different screen resolutions.
+Sets the number of columns for groups using `display: grid` at different screen widths.
+
+```yaml
+layout:
+  grid:
+    small: 2      # ≥640px
+    medium: 2     # ≥768px
+    large: 3      # ≥1024px
+    xlarge: 5     # ≥1280px
+```
+
+Values: `1` – `6`
+
+You can specify only the breakpoints you want to override; the rest will be set automatically.
+
+### List
+
+Sets the number of columns for groups using `display: list` at different screen widths.
+
+```yaml
+layout:
+  list:
+    small: 2      # ≥640px
+    medium: 3     # ≥768px
+    large: 4      # ≥1024px
+    xlarge: 5     # ≥1280px
+```
+
+Values: `1` – `6`
+
+Works exactly like `grid` above, but applies only to groups with `display: list`.
+
+### Full example
 
 ```yaml
 layout:
@@ -205,15 +229,19 @@ layout:
     medium: 2
     large: 3
     xlarge: 5
+  list:
+    small: 2
+    medium: 3
+    large: 4
+    xlarge: 5
+  spacing:
+    group: 1.5rem
+    item: 0.25rem
 ```
-
-Values: range `1 - 6`
-
-You can only specify one value, the others will be set automatically.
 
 ### Spacing
 
-Control the vertical spacing between groups and the gap between service items.
+Controls the vertical spacing between groups and the gap between items.
 
 ```yaml
 layout:
@@ -225,45 +253,53 @@ layout:
 | Property | Description                                      | Default   |
 |----------|--------------------------------------------------|-----------|
 | `group`  | Vertical padding around each category group      | `2.5rem`  |
-| `item`   | Gap between service cards within a group         | `0.5rem`  |
+| `item`   | Gap between items within a group                 | `0.5rem`  |
 
 Any valid CSS unit works (`rem`, `px`, `em`, etc).
 
 ## Services
 
-All services that are displayed on the home page are set in this parameter.
-It supports both list and grouping. The number of services is not limited.
+The `services` key is the main building block of your dashboard. It defines **groups** of **items** (bookmarks, links, modules) that are displayed on the homepage. Think of it as:
 
-::: warning Services list
-A full list of all services can be viewed in the left sidebar under **Services**.
-We recommend to start familiarization with [base service](../services/base.md), on which all other services are based.
-:::
+```
+services
+  └─ Group (e.g. "Favorites", "News", "Tools")
+       └─ Item (a bookmark with title, link, icon, etc.)
+```
 
-### Flat
+There are three ways to structure your services, from simple to advanced.
+
+### Flat (no groups)
+
+A simple list without group headers — all items appear in a single unnamed section.
+
 ```yaml
 services:
   - title: Home Assistant
     description: Home automation
     link: https://home-assistant.home.local/
+  - title: Grafana
+    link: https://grafana.home.local/
 ```
 
-### Groups
+### Named groups
+
+Organise items under named group headers. Each group name becomes a visible category title on the dashboard.
 
 ```yaml
 services:
-  Group 1:
+  Favorites:
     - title: Home Assistant
       description: Home automation
       link: https://home-assistant.home.local/
-  Group 2:
-    - title: Home Assistant
-      description: Home automation
-      link: https://home-assistant.home.local/
+  Tools:
+    - title: Grafana
+      link: https://grafana.home.local/
 ```
 
-### Display mode (grid / list)
+### Groups with display mode
 
-Each group can use a different display mode. Use `display: grid` for larger cards with icon, title and description (default), or `display: list` for a compact view with small icons and titles only.
+Each group can choose its own display mode: **grid** (larger cards) or **list** (compact rows). When using a `display` key, items must be nested under `items`:
 
 ```yaml
 services:
@@ -288,22 +324,6 @@ services:
         link: https://grafana.home.local/
         icon:
           name: simple-icons:grafana
-  Selfhost:
-    display: list
-    items:
-      - title: selfh.st
-        link: https://selfh.st
-        icon:
-          url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/selfh-st.svg
-      - title: OS Alternatives
-        link: https://osalt.com
-        icon:
-          favicon: osalt.com
-      - title: Awesome Selfhosted
-        link: https://awesome-selfhosted.net
-        icon:
-          name: mdi:rocket
-          color: '#2d6cec'
 ```
 
 | Value  | Description                                              |
@@ -311,10 +331,9 @@ services:
 | `grid` | Cards with icon, title and description (default)         |
 | `list` | Compact rows with small icon and title only              |
 
-When using `display`, services must be nested under `items`. Groups without a `display` key can still use the simple array format.
+The column count for each mode is configured separately in the [Layout](#layout) section (`layout.grid` and `layout.list`).
 
-This is a required parameter, without it the homepage will not open.
-You can see more detailed examples below.
+> **Note** — The `services` key is required. Without it the homepage will not render.
 
 ## Demo: config.yml 
 
