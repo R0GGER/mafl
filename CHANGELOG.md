@@ -5,6 +5,12 @@
 
 > Independent fork by [@R0GGER](https://github.com/R0GGER) — not affiliated with upstream [hywax/mafl](https://github.com/hywax/mafl).
 
+### 🏡 Chore
+
+- **repo:** Renamed repository from `mafl` to `maflplus` and updated references across all relevant files
+- **demo:** Published live demo at [maflplus.eu](https://maflplus.eu)
+- **config-builder:** Published Config Builder at [config.maflplus.eu](https://config.maflplus.eu)
+
 ### 🚀 Enhancements
 
 - **logo:** Fixed responsive logo in the top-left corner, served from the data volume; hidden on mobile

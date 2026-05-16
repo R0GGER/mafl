@@ -3,7 +3,7 @@
 Services, icons, language and other settings are set in a single `config.yml` file.
 
 ::: tip Config Builder
-Prefer a visual editor? Open [`tools/config-builder/index.html`](../tools/config-builder/index.html) in your browser to create or edit your `config.yml` without writing YAML by hand. It supports all settings documented below, imports existing config files and generates ready-to-paste YAML output.
+Prefer a visual editor? Open the [Config Builder](https://config.maflplus.eu/) in your browser to create or edit your `config.yml` without writing YAML by hand. It supports all settings documented below, imports existing config files and generates ready-to-paste YAML output.
 :::
 
 ## Title

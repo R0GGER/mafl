@@ -4,7 +4,7 @@ services:
    #   context: .
    #   dockerfile: Dockerfile
     image: ghcr.io/r0gger/maflplus
-    container_name: mafl
+    container_name: maflplus
     restart: unless-stopped
     ports:
       - '3000:3000'

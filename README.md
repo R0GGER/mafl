@@ -66,6 +66,7 @@ This fork adds several features on top of the original [Mafl](https://github.com
 * 🐳 **Docker** — Optimised container images.
 * ✨ **Free & open source** — MIT licensed.
 * 📲 **PWA** — Installable as a progressive web app.
+* 🛠️ **[Config Builder](https://config.maflplus.eu/)** — Visual editor for creating and editing your `config.yml` — no server required.
 
 ## 🚀 Getting started
 
@@ -323,7 +324,7 @@ Supported languages: `en`, `ru`, `zh`, `hi`, `es`, `ar`, `pl`, `fr`, `de`, `gr`
 
 A standalone visual tool for creating and editing your `config.yml` - no server or dependencies required.
 
-**Open** [`tools/config-builder/index.html`](tools/config-builder/index.html) in your browser.
+**Open** the [Config Builder](https://config.maflplus.eu/) in your browser.
 
 Features:
 * Edit all global settings (title, language, theme, background, search, etc.)
