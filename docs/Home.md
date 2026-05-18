@@ -1,11 +1,13 @@
-# Mafl+ Wiki
+# MAFL+ Wiki
 
 **Mafl+** is a minimalistic and flexible homepage dashboard, forked from [hywax/mafl](https://github.com/hywax/mafl) with extended layout options, search, tabs and more.
 
+**Demo: https://maflplus.eu**
+
+![screenshot1.png](screenshot1.png)
+
 > **Note** — This is an independent fork. It is **not** affiliated with the upstream [hywax/mafl](https://github.com/hywax/mafl) project.
-
-![screenshot](screenshots/screenshot1.png)
-
+> 
 ## Key Features
 
 * **Privacy** — All requests to third-party services happen server-side.
@@ -38,14 +40,14 @@ Place your `config.yml` (and optional background images) inside the `./mafl/` di
 
 ## Wiki Pages
 
-| Page | Description |
-|------|-------------|
-| [Configuration](configuration) | Layout, styles, logo, background, tabs, search, display modes, favicon API and status indicators |
-| [Icons & Favicons](favicons) | Icon types: Iconify, emoji, URL, local images and favicon API |
-| [Tags](tags) | Adding tags to services |
-| [IP API](ip-api) | Built-in IP address information service |
-| [OpenWeatherMap](openweathermap) | Built-in weather service |
-| [Modules](modules) | Additional service modules |
+| Page                                 | Description                                                                                      |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| [Home](https://wiki.maflplus.eu)                              |  |
+| [Getting Started](https://wiki.maflplus.eu/1-getting-started) | Lets go!                                                                                                 |
+| [Configuration](https://wiki.maflplus.eu/2-configuration)     | Layout, styles, logo, background, tabs, search, display modes, favicon API and status indicators |
+| [Favicons](https://wiki.maflplus.eu/3-favicons)               | Icon types: Iconify, emoji, URL, local images and favicon API                                    |
+| [Modules](https://wiki.maflplus.eu/4-modules)                 | Additional service modules                                                                       |
+| [Tags](https://wiki.maflplus.eu/5-tags)                       |                                                                                                  |
 
 ## What's Different from Upstream?
 

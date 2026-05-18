@@ -1,6 +1,20 @@
 # Changelog
 
 
+## Logo viewport threshold
+
+### 🚀 Enhancements
+
+- **logo:** Logo in the top-left corner is now only visible on screens wider than 1640px (hidden on 1640px or smaller)
+- **logo:** Visibility is reactive to window resize via `window.innerWidth` listener, so the logo appears/disappears live when the browser is resized across the threshold
+
+### 💅 Refactors
+
+- **default.vue:** Replaced Tailwind responsive classes (`hidden sm:block`) with a JS-driven `showLogo` computed ref to ensure exact 1640px breakpoint and avoid relying on Tailwind's arbitrary breakpoint quirks
+- **default.vue:** Removed responsive size utilities (`h-6 sm:h-7 md:h-8`, `top-5 left-5 sm:top-6 sm:left-6`) since the logo only renders above 1640px — uses a single `h-8`, `top-6 left-6` instead
+
+---
+
 ## New modules, footer and config builder updates
 
 ### 🚀 Enhancements
