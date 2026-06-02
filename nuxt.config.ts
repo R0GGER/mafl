@@ -47,9 +47,22 @@ export default defineNuxtConfig({
     },
     workbox: {
       globPatterns: ['**/*.{js,css,html,txt,png,ico,svg}'],
-      navigateFallbackDenylist: [/^\/api\//],
+      navigateFallbackDenylist: [/^\/api\//, /^\/admin/],
       navigateFallback: '/',
       cleanupOutdatedCaches: true,
+      runtimeCaching: [
+        {
+          urlPattern: /^\/api\/favicon\/.+/,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'favicon-cache',
+            expiration: {
+              maxEntries: 200,
+              maxAgeSeconds: 7 * 24 * 60 * 60,
+            },
+          },
+        },
+      ],
     },
     registerWebManifestInRouteRules: true,
     writePlugin: true,
@@ -144,6 +157,10 @@ export default defineNuxtConfig({
   },
   colorMode: {
     classSuffix: '',
+  },
+  runtimeConfig: {
+    adminPasswordHash: '',
+    sessionPassword: '',
   },
   nitro: {
     storage: {

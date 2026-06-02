@@ -2,7 +2,7 @@
 
 MAFL+ includes several built-in service modules that can be added to your dashboard via `config.yml`. Each module is configured using `type` and optional `options`.
 
-## Timezone
+## Time
 
 Displays a live clock with the current time and date for a specific timezone.
 
@@ -22,7 +22,7 @@ Displays a live clock with the current time and date for a specific timezone.
 
 ```yaml
 services:
-  - type: timezone
+  - type: time
     options:
       timezone: Europe/Amsterdam
 ```
@@ -31,7 +31,7 @@ services:
 
 ```yaml
 services:
-  - type: timezone
+  - type: time
     options:
       timezone: Europe/Amsterdam
       locationName: Amsterdam
@@ -40,20 +40,20 @@ services:
       timeFormat: 24h
 ```
 
-#### Multiple timezones
+#### Multiple time widgets
 
 ```yaml
 services:
-  - type: timezone
+  - type: time
     options:
       timezone: Europe/Amsterdam
       country: nl
-  - type: timezone
+  - type: time
     options:
       timezone: America/New_York
       country: us
       timeFormat: 12h
-  - type: timezone
+  - type: time
     options:
       timezone: Asia/Tokyo
       country: jp
@@ -78,7 +78,7 @@ Combines a live clock with weather data from [OpenWeatherMap](https://openweathe
 
 ### Date Formats
 
-The `timezone` and `datetime-weather` modules support a `dateFormat` option. Available formats:
+The `time` and `datetime-weather` modules support a `dateFormat` option. Available formats:
 
 | Format     | Example (EN)           | Example (NL)         |
 | ---------- | ---------------------- | -------------------- |
@@ -211,6 +211,7 @@ Shows information about your IP address, including a country flag icon based on 
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
+| `locationName` | `string` | – | Custom location name to display. When omitted, the location is auto-detected from the IP address. |
 | `flagIcon` | `boolean` | `true` | Show the country flag icon. When `false`, the configured icon is used instead. |
 
 ### Examples
@@ -220,6 +221,15 @@ Shows information about your IP address, including a country flag icon based on 
 ```yaml
 services:
   - type: ip-api
+```
+
+#### With custom location name
+
+```yaml
+services:
+  - type: ip-api
+    options:
+      locationName: Home Office
 ```
 
 #### With custom icon
@@ -241,7 +251,7 @@ Any service item can span multiple grid columns using the `span` property:
 
 ```yaml
 services:
-  - type: timezone
+  - type: time
     span: 2
     options:
       timezone: Europe/Amsterdam

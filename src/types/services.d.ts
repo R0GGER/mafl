@@ -53,6 +53,7 @@ export interface BaseService extends Service {}
 export interface IpApiService extends Service {
   options?: {
     flagIcon?: boolean
+    locationName?: string
   }
   server: {
     ip: string
@@ -77,7 +78,7 @@ export interface OpenWeatherMapService extends Service {
   }
 }
 
-export interface TimezoneService extends Service {
+export interface TimeService extends Service {
   options: {
     timezone: string
     locationName?: string

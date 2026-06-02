@@ -21,9 +21,13 @@ interface IpApiFetchResponse {
 const cachedIpApiData = defineCachedFunction(async (lang: string = 'en') => {
   const response = await $fetch<IpApiFetchResponse>(`http://ip-api.com/json/?lang=${lang}`)
 
+  const place = response.city === response.regionName
+    ? response.city
+    : `${response.city}, ${response.regionName}`
+
   return {
     ip: response.query,
-    place: `${response.city}, ${response.regionName}`,
+    place,
     country: response.countryCode.toLowerCase(),
   }
 }, { maxAge: 60 * 24, getKey: ({ ip }) => ip })
@@ -33,5 +37,10 @@ export default defineEventHandler(async (event) => {
   const config = await getConfig()
   const ip = await cachedIpApiData(config?.lang)
 
-  return returnServiceWithData(service, ip)
+  const data = {
+    ...ip,
+    place: service.config.options?.locationName || ip.place,
+  }
+
+  return returnServiceWithData(service, data)
 })

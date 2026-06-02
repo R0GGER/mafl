@@ -10,15 +10,13 @@
 import type { ServiceIcon } from '~/types'
 
 const props = defineProps<ServiceIcon>()
-const { $settings } = useNuxtApp()
 
 const iconClasses = 'block h-full w-full'
 
 const faviconUrl = computed(() => {
   if (!props.favicon) return ''
   const domain = props.favicon.replace(/^https?:\/\//, '').replace(/\/.*$/, '')
-  const baseUrl = ($settings.faviconApi || 'https://favicon-api.hibbit.cloud').replace(/\/$/, '')
-  return `${baseUrl}/${domain}`
+  return `/api/favicon/${domain}`
 })
 
 const wrapClasses = computed(() => ({

@@ -1,8 +1,8 @@
-import type { TimezoneService } from '~/types'
+import type { TimeService } from '~/types'
 import { getServiceWithDefaultData, returnServiceWithData } from '~/server/utils/services'
 
 export default defineEventHandler(async (event) => {
-  const service = await getServiceWithDefaultData<TimezoneService>(event)
+  const service = await getServiceWithDefaultData<TimeService>(event)
   const { options } = service.config
 
   return returnServiceWithData(service, {

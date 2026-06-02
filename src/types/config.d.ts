@@ -59,6 +59,25 @@ export interface Tab {
   services: ServicesGroup[]
 }
 
+export interface LogoText {
+  type: 'text'
+  text: string
+  fontSize?: string
+  fontWeight?: string | number
+  fontFamily?: string
+  color?: string
+  backgroundColor?: string
+  borderRadius?: string
+  padding?: string
+}
+
+export interface LogoImage {
+  type: 'image'
+  image: string
+}
+
+export type LogoConfig = string | LogoImage | LogoText
+
 export interface Footer {
   text?: string
   html?: string
@@ -68,7 +87,7 @@ export interface Config {
   title?: string
   lang?: 'en' | 'ru' | 'zh' | 'hi' | 'es' | 'ar' | 'pl' | 'fr' | 'de' | 'gr'
   theme?: 'system' | 'light' | 'dark' | 'deep' | 'sepia' | 'bluer'
-  logo?: string
+  logo?: LogoConfig
   background?: string
   backgroundOverlay?: BackgroundOverlay
   faviconApi?: string

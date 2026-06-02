@@ -132,8 +132,12 @@
               </select>
             </div>
             <div>
-              <label class="block text-xs text-gray-400 mb-1">Logo</label>
-              <input type="text" id="cfg-logo" placeholder="logo.png" class="w-full bg-surface border border-gray-600 rounded px-3 py-1.5 text-sm" oninput="generateYaml()">
+              <label class="block text-xs text-gray-400 mb-1">Logo Type</label>
+              <select id="cfg-logo-type" class="w-full bg-surface border border-gray-600 rounded px-3 py-1.5 text-sm" onchange="toggleLogoFields(); generateYaml()">
+                <option value="none">None</option>
+                <option value="image">Image</option>
+                <option value="text">Text / Letter</option>
+              </select>
             </div>
             <div>
               <label class="block text-xs text-gray-400 mb-1">Background</label>
@@ -156,6 +160,77 @@
               </select>
             </div>
           </div>
+          <!-- Logo Image fields -->
+          <div id="logo-image-fields" class="mt-3 border-t border-gray-700 pt-3 hidden">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-gray-400 mb-1">Logo Image (filename in data/)</label>
+                <input type="text" id="cfg-logo-image" placeholder="logo.png" class="w-full bg-surface border border-gray-600 rounded px-3 py-1.5 text-sm" oninput="generateYaml()">
+              </div>
+            </div>
+          </div>
+
+          <!-- Logo Text fields -->
+          <div id="logo-text-fields" class="mt-3 border-t border-gray-700 pt-3 hidden">
+            <label class="block text-xs text-gray-400 mb-2">Text Logo Settings</label>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div>
+                <label class="text-xs text-gray-500">Text</label>
+                <input type="text" id="cfg-logo-text" placeholder="M+" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="updateLogoPreview(); generateYaml()">
+              </div>
+              <div>
+                <label class="text-xs text-gray-500">Font Family</label>
+                <input type="text" id="cfg-logo-fontFamily" placeholder="Inter, sans-serif" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="updateLogoPreview(); generateYaml()">
+              </div>
+              <div>
+                <label class="text-xs text-gray-500">Font Size</label>
+                <input type="text" id="cfg-logo-fontSize" placeholder="1.5rem" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="updateLogoPreview(); generateYaml()">
+              </div>
+              <div>
+                <label class="text-xs text-gray-500">Font Weight</label>
+                <select id="cfg-logo-fontWeight" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" onchange="updateLogoPreview(); generateYaml()">
+                  <option value="100">100 - Thin</option>
+                  <option value="200">200 - Extra Light</option>
+                  <option value="300">300 - Light</option>
+                  <option value="400">400 - Normal</option>
+                  <option value="500">500 - Medium</option>
+                  <option value="600">600 - Semi Bold</option>
+                  <option value="700" selected>700 - Bold</option>
+                  <option value="800">800 - Extra Bold</option>
+                  <option value="900">900 - Black</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
+              <div>
+                <label class="text-xs text-gray-500">Text Color</label>
+                <div class="flex gap-1">
+                  <input type="color" id="cfg-logo-color" value="#ffffff" class="w-8 h-7 rounded" oninput="document.getElementById('cfg-logo-colorText').value=this.value; updateLogoPreview(); generateYaml()">
+                  <input type="text" id="cfg-logo-colorText" value="#ffffff" placeholder="#ffffff" class="flex-1 bg-surface border border-gray-600 rounded px-2 py-1 text-xs" oninput="if(/^#[0-9a-fA-F]{6}$/.test(this.value)) document.getElementById('cfg-logo-color').value=this.value; updateLogoPreview(); generateYaml()">
+                </div>
+              </div>
+              <div>
+                <label class="text-xs text-gray-500">Background Color</label>
+                <div class="flex gap-1">
+                  <input type="color" id="cfg-logo-bgColor" value="#000000" class="w-8 h-7 rounded" oninput="document.getElementById('cfg-logo-bgColorText').value=this.value; updateLogoPreview(); generateYaml()">
+                  <input type="text" id="cfg-logo-bgColorText" placeholder="transparent" class="flex-1 bg-surface border border-gray-600 rounded px-2 py-1 text-xs" oninput="if(/^#[0-9a-fA-F]{6}$/.test(this.value)) document.getElementById('cfg-logo-bgColor').value=this.value; updateLogoPreview(); generateYaml()">
+                </div>
+              </div>
+              <div>
+                <label class="text-xs text-gray-500">Border Radius</label>
+                <input type="text" id="cfg-logo-borderRadius" placeholder="0.5rem" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="updateLogoPreview(); generateYaml()">
+              </div>
+              <div>
+                <label class="text-xs text-gray-500">Padding</label>
+                <input type="text" id="cfg-logo-padding" placeholder="0.25rem 0.5rem" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="updateLogoPreview(); generateYaml()">
+              </div>
+            </div>
+            <div id="logo-preview" class="mt-3 flex items-center gap-3 hidden">
+              <span class="text-xs text-gray-500">Preview:</span>
+              <span id="logo-preview-text"></span>
+            </div>
+          </div>
+
           <!-- Background Overlay -->
           <div class="mt-3 border-t border-gray-700 pt-3">
             <label class="block text-xs text-gray-400 mb-2">Background Overlay</label>
@@ -390,6 +465,7 @@ function newItem(serviceType = 'bookmark') {
     iconType: 'favicon', iconFavicon: '', iconUrl: '', iconName: '', iconColor: '', iconWrap: false,
     statusEnabled: false, tags: [],
     owmLat: '', owmLon: '', owmUnits: 'metric', owmApiKey: '',
+    ipapiLocationName: '',
     ipapiFlagIcon: 'true',
     tzTimezone: '', tzLocationName: '', tzCountry: '', tzTimeFormat: '24h', tzDateFormat: 'medium',
     dtwLat: '', dtwLon: '', dtwUnits: 'metric', dtwApiKey: '', dtwTimezone: '', dtwTimeFormat: '24h', dtwDateFormat: 'medium',
@@ -467,7 +543,7 @@ function renderGroup(ti, gi, group) {
         <span class="text-xs text-gray-500">|</span>
         <button onclick="addItem(${ti},${gi},'ip-api')" class="text-xs text-accent hover:text-accent-hover">+ IP API</button>
         <span class="text-xs text-gray-500">|</span>
-        <button onclick="addItem(${ti},${gi},'timezone')" class="text-xs text-accent hover:text-accent-hover">+ Timezone</button>
+        <button onclick="addItem(${ti},${gi},'time')" class="text-xs text-accent hover:text-accent-hover">+ Time</button>
         <span class="text-xs text-gray-500">|</span>
         <button onclick="addItem(${ti},${gi},'datetime-weather')" class="text-xs text-accent hover:text-accent-hover">+ DateTime Weather</button>
         <span class="text-xs text-gray-500">|</span>
@@ -483,7 +559,7 @@ function renderGroup(ti, gi, group) {
 function renderItem(ti, gi, ii, item) {
   const uid = `${ti}-${gi}-${ii}`;
   const sType = item.serviceType || 'bookmark';
-  const typeLabels = { openweathermap: 'Weather', 'ip-api': 'IP API', timezone: 'Timezone', 'datetime-weather': 'DateTime Weather', greeting: 'Greeting', 'custom-html': 'Custom HTML' };
+  const typeLabels = { openweathermap: 'Weather', 'ip-api': 'IP API', time: 'Time', 'datetime-weather': 'DateTime Weather', greeting: 'Greeting', 'custom-html': 'Custom HTML' };
   const typeLabel = typeLabels[sType] || '';
   const typeBadge = typeLabel ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-accent/20 text-accent">${typeLabel}</span>` : '';
   const displayTitle = escHtml(item.title) || (sType === 'greeting' && item.greetText ? escHtml(item.greetText) : (sType !== 'bookmark' ? typeLabel : '(untitled)'));
@@ -514,13 +590,14 @@ function renderItem(ti, gi, ii, item) {
   } else if (sType === 'ip-api') {
     typeFields = `
       <div class="grid grid-cols-2 gap-2">
+        <div><label class="text-gray-500">Location Name</label><input type="text" value="${escHtml(item.ipapiLocationName)}" placeholder="(auto-detect from IP)" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].ipapiLocationName=this.value; generateYaml()"></div>
         <div><label class="text-gray-500">Flag Icon</label><select class="w-full bg-surface border border-gray-600 rounded px-2 py-1" onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].ipapiFlagIcon=this.value; generateYaml()">
           <option value="true" ${item.ipapiFlagIcon !== 'false' ? 'selected' : ''}>true</option>
           <option value="false" ${item.ipapiFlagIcon === 'false' ? 'selected' : ''}>false</option>
         </select></div>
       </div>
       ${spanField}`;
-  } else if (sType === 'timezone') {
+  } else if (sType === 'time') {
     const tzDateFmtOpts = ['short','medium','long','eu','compact','short-eu','iso'].map(f => `<option value="${f}" ${item.tzDateFormat === f ? 'selected' : ''}>${f}</option>`).join('');
     typeFields = `
       <div class="grid grid-cols-2 gap-2">
@@ -611,27 +688,27 @@ function renderItem(ti, gi, ii, item) {
             <div class="flex gap-2 items-end">
               <div class="flex-1"><label class="text-gray-500">Domain</label><input type="text" value="${escHtml(item.iconFavicon)}" placeholder="example.com" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].iconFavicon=this.value; generateYaml()"></div>
               <div><label class="text-gray-500">Color</label><input type="text" value="${escHtml(item.iconColor)}" placeholder="#hex" class="w-20 bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].iconColor=this.value; generateYaml()"></div>
-              <label class="flex items-center gap-1"><input type="checkbox" ${item.iconWrap ? 'checked' : ''} onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].iconWrap=this.checked; generateYaml()"> wrap</label>
+              <div><label class="text-gray-500">&nbsp;</label><label class="flex items-center gap-1 bg-surface border border-gray-600 rounded px-2 py-1 cursor-pointer"><input type="checkbox" ${item.iconWrap ? 'checked' : ''} onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].iconWrap=this.checked; generateYaml()"> wrap</label></div>
             </div>
           ` : item.iconType === 'url' ? `
             <div class="flex gap-2 items-end">
               <div class="flex-1"><label class="text-gray-500">URL</label><input type="text" value="${escHtml(item.iconUrl)}" placeholder="https://..." class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].iconUrl=this.value; generateYaml()"></div>
-              <label class="flex items-center gap-1"><input type="checkbox" ${item.iconWrap ? 'checked' : ''} onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].iconWrap=this.checked; generateYaml()"> wrap</label>
+              <div><label class="text-gray-500">&nbsp;</label><label class="flex items-center gap-1 bg-surface border border-gray-600 rounded px-2 py-1 cursor-pointer"><input type="checkbox" ${item.iconWrap ? 'checked' : ''} onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].iconWrap=this.checked; generateYaml()"> wrap</label></div>
             </div>
             <div class="mt-1 text-[10px] text-gray-500">Browse icons: <a href="https://selfh.st/icons/" target="_blank" class="text-accent hover:underline">selfh.st/icons</a> · <a href="https://dashboardicons.com/icons" target="_blank" class="text-accent hover:underline">dashboardicons.com</a></div>
           ` : `
             <div class="flex gap-2 items-end">
               <div class="flex-1"><label class="text-gray-500">Name</label><input type="text" value="${escHtml(item.iconName)}" placeholder="mdi:home" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].iconName=this.value; generateYaml()"></div>
               <div><label class="text-gray-500">Color</label><input type="text" value="${escHtml(item.iconColor)}" placeholder="#hex" class="w-20 bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].iconColor=this.value; generateYaml()"></div>
-              <label class="flex items-center gap-1"><input type="checkbox" ${item.iconWrap ? 'checked' : ''} onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].iconWrap=this.checked; generateYaml()"> wrap</label>
+              <div><label class="text-gray-500">&nbsp;</label><label class="flex items-center gap-1 bg-surface border border-gray-600 rounded px-2 py-1 cursor-pointer"><input type="checkbox" ${item.iconWrap ? 'checked' : ''} onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].iconWrap=this.checked; generateYaml()"> wrap</label></div>
             </div>
           `}
         </div>`;
 
   const statusTagsSection = sType === 'bookmark' ? `
-        <div class="flex items-center gap-4 border-t border-gray-700 pt-2">
-          <label class="flex items-center gap-1"><input type="checkbox" ${item.statusEnabled ? 'checked' : ''} onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].statusEnabled=this.checked; generateYaml()"> Status enabled</label>
-          <div class="flex-1"><label class="text-gray-500">Tags</label><input type="text" value="${escHtml((item.tags||[]).join(', '))}" placeholder="tag1, tag2" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].tags=this.value.split(',').map(s=>s.trim()).filter(Boolean); generateYaml()"></div>
+        <div class="border-t border-gray-700 pt-2 space-y-2">
+          <label class="flex items-center gap-1 text-gray-500">Uptime monitoring <label class="flex items-center gap-1 bg-surface border border-gray-600 rounded px-2 py-1 cursor-pointer"><input type="checkbox" ${item.statusEnabled ? 'checked' : ''} onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].statusEnabled=this.checked; generateYaml()" style="accent-color: #69a870"> enabled</label></label>
+          <div><label class="text-gray-500">Tags (comma separated)</label><input type="text" value="${escHtml((item.tags||[]).join(', '))}" placeholder="tag1, tag2" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].tags=this.value.split(',').map(s=>s.trim()).filter(Boolean); generateYaml()"></div>
         </div>` : '';
 
   return `
@@ -647,7 +724,7 @@ function renderItem(ti, gi, ii, item) {
       <div id="item-edit-${uid}" class="hidden mt-2 space-y-2">
         ${typeFields}
         ${bookmarkFields}
-        ${iconSection}
+        ${sType !== 'time' ? iconSection : ''}
         ${statusTagsSection}
       </div>
     </div>
@@ -676,8 +753,24 @@ function generateYaml() {
   const theme = val('cfg-theme');
   if (theme) config.theme = theme;
 
-  const logo = val('cfg-logo');
-  if (logo) config.logo = logo;
+  const logoType = val('cfg-logo-type');
+  if (logoType === 'image') {
+    const logoImage = val('cfg-logo-image');
+    if (logoImage) config.logo = logoImage;
+  } else if (logoType === 'text') {
+    const logoText = val('cfg-logo-text');
+    if (logoText) {
+      const logoObj = { type: 'text', text: logoText };
+      const lfs = val('cfg-logo-fontSize'); if (lfs) logoObj.fontSize = lfs;
+      const lfw = val('cfg-logo-fontWeight'); if (lfw) logoObj.fontWeight = parseInt(lfw);
+      const lff = val('cfg-logo-fontFamily'); if (lff) logoObj.fontFamily = lff;
+      const lc = val('cfg-logo-colorText'); if (lc) logoObj.color = lc;
+      const lbg = val('cfg-logo-bgColorText'); if (lbg) logoObj.backgroundColor = lbg;
+      const lbr = val('cfg-logo-borderRadius'); if (lbr) logoObj.borderRadius = lbr;
+      const lp = val('cfg-logo-padding'); if (lp) logoObj.padding = lp;
+      config.logo = logoObj;
+    }
+  }
 
   const bg = val('cfg-background');
   if (bg) config.background = bg;
@@ -755,7 +848,7 @@ function generateYaml() {
         group.items.forEach(item => {
           const sType = item.serviceType || 'bookmark';
           if (sType === 'bookmark' && !item.title && !item.link) return;
-          if (sType === 'timezone' && !item.tzTimezone) return;
+          if (sType === 'time' && !item.tzTimezone) return;
           if (sType === 'datetime-weather' && !item.dtwTimezone && !item.dtwLat) return;
           if (sType === 'greeting' && !item.greetText) return;
           if (sType === 'custom-html' && !item.customHtml) return;
@@ -774,11 +867,12 @@ function generateYaml() {
             if (item.owmApiKey) it.secrets = { apiKey: item.owmApiKey };
           } else if (sType === 'ip-api') {
             it.type = 'ip-api';
-            if (item.ipapiFlagIcon === 'false') {
-              it.options = { flagIcon: false };
-            }
-          } else if (sType === 'timezone') {
-            it.type = 'timezone';
+            const opts = {};
+            if (item.ipapiLocationName) opts.locationName = item.ipapiLocationName;
+            if (item.ipapiFlagIcon === 'false') opts.flagIcon = false;
+            if (Object.keys(opts).length) it.options = opts;
+          } else if (sType === 'time') {
+            it.type = 'time';
             const opts = {};
             if (item.tzTimezone) opts.timezone = item.tzTimezone;
             if (item.tzLocationName) opts.locationName = item.tzLocationName;
@@ -875,6 +969,29 @@ function getStyleVal(key) {
 }
 function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+function toggleLogoFields() {
+  const logoType = val('cfg-logo-type');
+  document.getElementById('logo-image-fields').classList.toggle('hidden', logoType !== 'image');
+  document.getElementById('logo-text-fields').classList.toggle('hidden', logoType !== 'text');
+}
+
+function updateLogoPreview() {
+  const text = val('cfg-logo-text');
+  const preview = document.getElementById('logo-preview');
+  const previewText = document.getElementById('logo-preview-text');
+  if (!text) { preview.classList.add('hidden'); return; }
+  preview.classList.remove('hidden');
+  previewText.textContent = text;
+  previewText.style.fontSize = val('cfg-logo-fontSize') || '1.5rem';
+  previewText.style.fontWeight = val('cfg-logo-fontWeight') || '700';
+  previewText.style.fontFamily = val('cfg-logo-fontFamily') || 'inherit';
+  previewText.style.color = val('cfg-logo-colorText') || '#ffffff';
+  previewText.style.backgroundColor = val('cfg-logo-bgColorText') || 'transparent';
+  previewText.style.borderRadius = val('cfg-logo-borderRadius') || '0';
+  previewText.style.padding = val('cfg-logo-padding') || '0';
+  previewText.style.lineHeight = '1';
+}
+
 function toggleSection(btn) {
   const content = btn.nextElementSibling;
   const chevron = btn.querySelector('.chevron');
@@ -898,7 +1015,19 @@ function resetAll() {
   document.getElementById('cfg-title').value = 'MAFL+';
   document.getElementById('cfg-lang').value = 'en';
   document.getElementById('cfg-theme').value = 'dark';
-  document.getElementById('cfg-logo').value = '';
+  document.getElementById('cfg-logo-type').value = 'none';
+  document.getElementById('cfg-logo-image').value = '';
+  document.getElementById('cfg-logo-text').value = '';
+  document.getElementById('cfg-logo-fontSize').value = '';
+  document.getElementById('cfg-logo-fontWeight').value = '700';
+  document.getElementById('cfg-logo-fontFamily').value = '';
+  document.getElementById('cfg-logo-colorText').value = '#ffffff';
+  document.getElementById('cfg-logo-color').value = '#ffffff';
+  document.getElementById('cfg-logo-bgColorText').value = '';
+  document.getElementById('cfg-logo-bgColor').value = '#000000';
+  document.getElementById('cfg-logo-borderRadius').value = '';
+  document.getElementById('cfg-logo-padding').value = '';
+  toggleLogoFields();
   document.getElementById('cfg-background').value = '';
   document.getElementById('cfg-faviconApi').value = '';
   document.getElementById('cfg-overlay-color').value = '#000000';
@@ -972,7 +1101,7 @@ function importFile(file) {
 }
 
 function parseRawItem(raw) {
-  const sType = raw.type || 'bookmark';
+  const sType = raw.type === 'timezone' ? 'time' : (raw.type || 'bookmark');
   const item = newItem(sType);
 
   if (raw.icon) {
@@ -990,8 +1119,9 @@ function parseRawItem(raw) {
     if (raw.options?.units) item.owmUnits = raw.options.units;
     if (raw.secrets?.apiKey) item.owmApiKey = String(raw.secrets.apiKey);
   } else if (sType === 'ip-api') {
+    if (raw.options?.locationName) item.ipapiLocationName = raw.options.locationName;
     if (raw.options?.flagIcon === false) item.ipapiFlagIcon = 'false';
-  } else if (sType === 'timezone') {
+  } else if (sType === 'time') {
     if (raw.options?.timezone) item.tzTimezone = raw.options.timezone;
     if (raw.options?.locationName) item.tzLocationName = raw.options.locationName;
     if (raw.options?.country) item.tzCountry = raw.options.country;
@@ -1030,7 +1160,33 @@ function loadConfig(config) {
   if (config.title) document.getElementById('cfg-title').value = config.title;
   if (config.lang) document.getElementById('cfg-lang').value = config.lang;
   if (config.theme) document.getElementById('cfg-theme').value = config.theme;
-  if (config.logo) document.getElementById('cfg-logo').value = config.logo;
+  if (config.logo) {
+    if (typeof config.logo === 'string') {
+      document.getElementById('cfg-logo-type').value = 'image';
+      document.getElementById('cfg-logo-image').value = config.logo;
+    } else if (config.logo.type === 'image') {
+      document.getElementById('cfg-logo-type').value = 'image';
+      document.getElementById('cfg-logo-image').value = config.logo.image || '';
+    } else if (config.logo.type === 'text') {
+      document.getElementById('cfg-logo-type').value = 'text';
+      document.getElementById('cfg-logo-text').value = config.logo.text || '';
+      if (config.logo.fontSize) document.getElementById('cfg-logo-fontSize').value = config.logo.fontSize;
+      if (config.logo.fontWeight != null) document.getElementById('cfg-logo-fontWeight').value = String(config.logo.fontWeight);
+      if (config.logo.fontFamily) document.getElementById('cfg-logo-fontFamily').value = config.logo.fontFamily;
+      if (config.logo.color) {
+        document.getElementById('cfg-logo-colorText').value = config.logo.color;
+        if (/^#[0-9a-fA-F]{6}$/.test(config.logo.color)) document.getElementById('cfg-logo-color').value = config.logo.color;
+      }
+      if (config.logo.backgroundColor) {
+        document.getElementById('cfg-logo-bgColorText').value = config.logo.backgroundColor;
+        if (/^#[0-9a-fA-F]{6}$/.test(config.logo.backgroundColor)) document.getElementById('cfg-logo-bgColor').value = config.logo.backgroundColor;
+      }
+      if (config.logo.borderRadius) document.getElementById('cfg-logo-borderRadius').value = config.logo.borderRadius;
+      if (config.logo.padding) document.getElementById('cfg-logo-padding').value = config.logo.padding;
+    }
+    toggleLogoFields();
+    updateLogoPreview();
+  }
   if (config.background) document.getElementById('cfg-background').value = config.background;
   if (config.faviconApi) document.getElementById('cfg-faviconApi').value = config.faviconApi;
   if (config.searchProvider) document.getElementById('cfg-searchProvider').value = config.searchProvider;
@@ -1150,18 +1306,20 @@ function loadExample() {
   const exampleYaml = `title: MAFL+
 lang: en
 theme: dark
-logo: logo.png
+logo:
+  type: text
+  text: MAFL+
+  fontSize: 3.5rem
+  fontWeight: 500
+  color: "#ffffff"
 background: background.jpg
-faviconApi: https://favicon.vemetric.com/
+faviconApi: https://favicon.vemetric.com
 backgroundOverlay:
-  color: '#000000'
-  opacity: 0.5
-
+  color: "#000000"
+  opacity: 0.85
 behaviour:
   target: _blank
-
-searchProvider: google
-
+searchProvider: duckduckgo
 layout:
   grid:
     small: 2
@@ -1176,254 +1334,385 @@ layout:
   spacing:
     group: 1.5rem
     item: 0.25rem
-
 styles:
   category:
-    color: '#ffffff'
     fontSize: 1.5rem
     fontWeight: 600
+    color: "#ffffff"
   title:
-    color: '#ffffff'
     fontSize: 0.875rem
+    color: "#ffffff"
   description:
-    color: '#cccccc'
     fontStyle: italic
-
+    color: "#cccccc"
 tabs:
-  - name: Personal
+  - name: MAFL+
     icon: mdi:home
+    services:
+      MAFL+:
+        display: grid
+        items:
+          - title: MAFL+
+            description: maflplus.eu
+            link: https://maflplus.eu
+            icon:
+              name: mdi:plus
+              wrap: true
+          - title: MAFL+ | Config Builder
+            description: config.maflplus.eu
+            link: https://config.maflplus.eu
+            icon:
+              name: mdi:plus
+              wrap: true
+          - title: MAFL+ | Repo
+            description: R0GGER/mafl
+            link: https://github.com/R0GGER/mafl
+            icon:
+              name: simple-icons:github
+              wrap: true
+          - title: MAFL
+            description: Original author
+            link: https://github.com/hywax/mafl
+            icon:
+              url: https://raw.githubusercontent.com/hywax/mafl/refs/heads/main/docs/public/logotype.svg
+          - title: Favicon API
+            description: Vemetric/favicon-api
+            link: https://github.com/Vemetric/favicon-api
+            icon:
+              favicon: vemetric.com
+              wrap: true
+      Social Media:
+        display: list
+        items:
+          - title: Radarr
+            link: http://192.168.1.111:7878
+          - title: Facebook
+            link: https://facebook.com
+            icon:
+              favicon: facebook.com
+          - title: Instagram
+            link: https://instagram.com
+            icon:
+              favicon: instagram.com
+          - title: LinkedIn
+            link: https://linkedin.com
+            icon:
+              favicon: linkedin.com
+      Streaming:
+        display: list
+        items:
+          - title: Netflix
+            link: https://netflix.com
+            icon:
+              favicon: netflix.com
+          - title: Disney+
+            link: https://disneyplus.com
+            icon:
+              favicon: disneyplus.com
+          - title: YouTube
+            link: https://youtube.com
+            icon:
+              favicon: youtube.com
+          - title: Spotify
+            link: https://open.spotify.com
+            icon:
+              favicon: spotify.com
+      Shopping:
+        display: list
+        items:
+          - title: Amazon
+            link: https://amazon.com
+            icon:
+              favicon: amazon.com
+          - title: eBay
+            link: https://ebay.com
+            icon:
+              favicon: ebay.com
+          - title: AliExpress
+            link: https://aliexpress.com
+            icon:
+              favicon: aliexpress.com
+          - title: Bol.com
+            link: https://bol.com
+            icon:
+              favicon: bol.com
+      Development:
+        display: list
+        items:
+          - title: Stack Overflow
+            link: https://stackoverflow.com
+            icon:
+              favicon: stackoverflow.com
+          - title: GitLab
+            link: https://gitlab.com
+            icon:
+              favicon: gitlab.com
+          - title: CodePen
+            link: https://codepen.io
+            icon:
+              favicon: codepen.io
+          - title: npm
+            link: https://npmjs.com
+            icon:
+              favicon: npmjs.com
+      Cloud:
+        display: list
+        items:
+          - title: AWS Console
+            link: https://console.aws.amazon.com
+            icon:
+              favicon: aws.amazon.com
+          - title: Microsoft Azure
+            link: https://portal.azure.com
+            icon:
+              favicon: azure.microsoft.com
+          - title: Google Cloud
+            link: https://console.cloud.google.com
+            icon:
+              favicon: cloud.google.com
+          - title: DigitalOcean
+            link: https://cloud.digitalocean.com
+            icon:
+              favicon: digitalocean.com
+      Design:
+        display: list
+        items:
+          - title: Figma
+            link: https://figma.com
+            icon:
+              favicon: figma.com
+          - title: Dribbble
+            link: https://dribbble.com
+            icon:
+              favicon: dribbble.com
+          - title: Behance
+            link: https://behance.net
+            icon:
+              favicon: behance.net
+          - title: Canva
+            link: https://canva.com
+            icon:
+              favicon: canva.com
+      Learning:
+        display: list
+        items:
+          - title: Udemy
+            link: https://udemy.com
+            icon:
+              favicon: udemy.com
+          - title: Coursera
+            link: https://coursera.org
+            icon:
+              favicon: coursera.org
+          - title: Khan Academy
+            link: https://khanacademy.org
+            icon:
+              favicon: khanacademy.org
+          - title: edX
+            link: https://edx.org
+            icon:
+              favicon: edx.org
+      Travel:
+        display: list
+        items:
+          - title: Booking.com
+            link: https://booking.com
+            icon:
+              favicon: booking.com
+          - title: Airbnb
+            link: https://airbnb.com
+            icon:
+              favicon: airbnb.com
+          - title: Google Maps
+            link: https://maps.google.com
+            icon:
+              favicon: maps.google.com
+          - title: Skyscanner
+            link: https://skyscanner.com
+            icon:
+              favicon: skyscanner.com
+      Communication:
+        display: list
+        items:
+          - title: WhatsApp
+            link: https://web.whatsapp.com
+            icon:
+              favicon: whatsapp.com
+          - title: Telegram
+            link: https://web.telegram.org
+            icon:
+              favicon: telegram.org
+          - title: Microsoft Teams
+            link: https://teams.microsoft.com
+            icon:
+              favicon: teams.microsoft.com
+          - title: Zoom
+            link: https://zoom.us
+            icon:
+              favicon: zoom.us
+      AI Tools:
+        display: list
+        items:
+          - title: ChatGPT
+            link: https://chat.openai.com
+            icon:
+              favicon: chat.openai.com
+          - title: Claude
+            link: https://claude.ai
+            icon:
+              favicon: claude.ai
+          - title: Gemini
+            link: https://gemini.google.com
+            icon:
+              favicon: gemini.google.com
+          - title: Hugging Face
+            link: https://huggingface.co
+            icon:
+              favicon: huggingface.co
+      WIDGETS:
+        display: grid
+        items:
+          - type: ip-api
+            options:
+              flagIcon: false
+            icon:
+              name: mdi:home
+              color: "#FFFFFF"
+          - type: time
+            options:
+              timezone: Europe/Amsterdam
+              country: nl
+  - name: Explore
+    icon: mdi:compass
     services:
       FAVORITES:
         display: grid
         items:
-          - title: iperf3serverlist.net
-            description: website
-            link: https://iperf3serverlist.net
-            icon:
-              favicon: iperf3serverlist.net
-              wrap: true
-            status:
-              enabled: true
-          - title: Proton Mail
-            description: mail.proton.me
-            link: https://mail.proton.me
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/proton.svg
-              wrap: true
-          - title: Proton Calendar
-            description: calendar.proton.me
-            link: https://calendar.proton.me
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/proton-calendar.svg
-              wrap: true
-          - title: Google Drive
-            description: drive.google.com
-            link: https://drive.google.com
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/google-drive.svg
-              wrap: true
-          - title: Gmail
-            description: mail.google.com
-            link: https://mail.google.com
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/gmail.svg
-              wrap: true
-          - title: Bitwarden
-            description: bitwarden.com
-            link: https://vault.bitwarden.com
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/bitwarden.svg
-              wrap: true
-          - title: YouTube
-            description: youtube.com
-            link: https://youtube.com
-            icon:
-              favicon: youtube.com
-              wrap: true
           - title: Reddit
             description: reddit.com
             link: https://reddit.com
             icon:
               url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/reddit.svg
               wrap: true
-          - title: GitHub
-            description: github.com
-            link: https://github.com
+          - title: Wikipedia
+            description: wikipedia.org
+            link: https://wikipedia.org
             icon:
-              name: simple-icons:github
+              favicon: wikipedia.org
               wrap: true
-          - title: Spotify
-            description: open.spotify.com
-            link: https://open.spotify.com
+          - title: Medium
+            description: medium.com
+            link: https://medium.com
             icon:
-              favicon: spotify.com
+              favicon: medium.com
+              wrap: true
+          - title: Pinterest
+            description: pinterest.com
+            link: https://pinterest.com
+            icon:
+              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/pinterest.svg
+              wrap: true
+          - title: TikTok
+            description: tiktok.com
+            link: https://tiktok.com
+            icon:
+              favicon: tiktok.com
               wrap: true
       News:
         display: list
         items:
-          - title: NOS
-            link: https://nos.nl
+          - title: BBC News
+            link: https://bbc.com/news
             icon:
-              favicon: nos.nl
-          - title: New York Times
-            link: https://www.nytimes.com
+              favicon: bbc.com
+          - title: CNN
+            link: https://cnn.com
             icon:
-              favicon: nytimes.com
-          - title: Tweakers
-            link: https://tweakers.net
+              favicon: cnn.com
+          - title: The Guardian
+            link: https://theguardian.com
             icon:
-              url: https://favicon-3j1.pages.dev/favicon/tweakers.net?larger=true
-          - title: Ars Technica
-            link: https://arstechnica.com
+              favicon: theguardian.com
+          - title: Reuters
+            link: https://reuters.com
             icon:
-              favicon: arstechnica.com
-          - title: The Verge
-            link: https://theverge.com
-            icon:
-              favicon: theverge.com
-      Selfhost:
+              favicon: reuters.com
+      Finance:
         display: list
         items:
-          - title: selfh.st
-            link: https://selfh.st
+          - title: Yahoo Finance
+            link: https://finance.yahoo.com
             icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/selfh-st.svg
-          - title: OS Alternatives
-            link: https://osalt.com
+              favicon: finance.yahoo.com
+          - title: Bloomberg
+            link: https://bloomberg.com
             icon:
-              favicon: osalt.com
-          - title: Awesome Selfhosted
-            link: https://awesome-selfhosted.net
+              favicon: bloomberg.com
+          - title: CoinMarketCap
+            link: https://coinmarketcap.com
             icon:
-              favicon: awesome-selfhosted.net
-          - title: NOTED
-            link: https://noted.lol
+              favicon: coinmarketcap.com
+          - title: PayPal
+            link: https://paypal.com
             icon:
-              favicon: noted.lol
-          - title: Awesome Lists
-            link: https://github.com/sindresorhus/awesome
-            icon:
-              name: mdi:format-list-bulleted
-              color: '#ec4899'
-      Financials:
+              favicon: paypal.com
+      Productivity:
         display: list
         items:
-          - title: ABN AMRO
-            link: https://abnamro.nl
+          - title: Notion
+            link: https://notion.so
             icon:
-              favicon: abnamro.nl
-          - title: Rabo
-            link: https://rabobank.nl
+              favicon: notion.so
+          - title: Trello
+            link: https://trello.com
             icon:
-              name: mdi:bank-outline
-              color: '#f97316'
-          - title: ONZV
-            link: https://onzv.nl
+              favicon: trello.com
+          - title: Todoist
+            link: https://todoist.com
             icon:
-              url: https://www.onvz.nl/assets/favicons/apple-touch-icon.png
-          - title: Kasboek
-            link: https://kasboek.app
+              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/todoist.svg
+          - title: Evernote
+            link: https://evernote.com
             icon:
-              name: mdi:book-open-variant
-              color: '#10b981'
-          - title: Tikkie
-            link: https://tikkie.me
-            icon:
-              favicon: tikkie.me
-  - name: Work
-    icon: mdi:work
-    services:
-      FAVORITES:
-        display: grid
-        items:
-          - title: Proton Mail
-            description: mail.proton.me
-            link: https://mail.proton.me
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/proton.svg
-              wrap: true
-          - title: Google Drive
-            description: drive.google.com
-            link: https://drive.google.com
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/google-drive.svg
-              wrap: true
-          - title: Bitwarden
-            description: bitwarden.com
-            link: https://vault.bitwarden.com
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/bitwarden.svg
-              wrap: true
-      Dev:
+              favicon: evernote.com
+      Gaming:
         display: list
         items:
-          - title: Proxmox
-            link: https://proxmox.local
+          - title: Steam
+            link: https://store.steampowered.com
             icon:
-              name: simple-icons:proxmox
-              color: '#e57000'
-          - title: GitHub
-            link: https://github.com
+              favicon: store.steampowered.com
+          - title: Twitch
+            link: https://twitch.tv
             icon:
-              name: simple-icons:github
-              color: '#ffffff'
-          - title: Gitea
-            link: https://gitea.local
+              favicon: twitch.tv
+          - title: Epic Games
+            link: https://store.epicgames.com
             icon:
-              name: simple-icons:gitea
-              color: '#609926'
-          - title: Cloudflare
-            link: https://dash.cloudflare.com
+              favicon: epicgames.com
+          - title: IGN
+            link: https://ign.com
             icon:
-              name: simple-icons:cloudflare
-              color: '#f38020'
-      Monitoring:
+              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/ign.svg
+      Music:
         display: list
         items:
-          - title: Grafana
-            link: https://grafana.local
+          - title: SoundCloud
+            link: https://soundcloud.com
             icon:
-              name: simple-icons:grafana
-              color: '#f46800'
-          - title: Uptime Kuma
-            link: https://uptime.local
+              favicon: soundcloud.com
+          - title: Apple Music
+            link: https://music.apple.com
             icon:
-              name: simple-icons:uptimekuma
-              color: '#5cdd8b'
-          - title: Healthchecks
-            link: https://healthchecks.local
+              favicon: music.apple.com
+          - title: Deezer
+            link: https://deezer.com
             icon:
-              name: mdi:heart-pulse
-              color: '#ef4444'
-      Widgets:
-        display: grid
-        items:
-          - type: openweathermap
-            options:
-              lat: 52.3676
-              lon: 4.9041
-              units: metric
-            secrets:
-              apiKey: your-api-key-here
-          - type: ip-api
-          - type: timezone
-            options:
-              timezone: Europe/Amsterdam
-              country: nl
-              dateFormat: eu
-          - type: datetime-weather
-            span: 2
-            options:
-              lat: 52.3676
-              lon: 4.9041
-              timezone: Europe/Amsterdam
-              dateFormat: eu
-            secrets:
-              apiKey: your-api-key-here
-          - type: greeting
-            options:
-              text: Hello!
-              subtitle: Welcome to your dashboard
+              favicon: deezer.com
+          - title: Last.fm
+            link: https://last.fm
+footer:
+  html: <p>Modified with ❤️ by <a href="https://github.com/R0GGER/mafl" style="color:white;">MAFL+</a></p>
 `;
   try {
     const config = jsyaml.load(exampleYaml);

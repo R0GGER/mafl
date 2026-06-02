@@ -32,7 +32,7 @@ function resolveByTypeComponent(type: string) {
     return resolveComponent('ServiceOpenWeatherMap')
   }
 
-  if (type === 'timezone') {
+  if (type === 'time' || type === 'timezone') {
     return resolveComponent('ServiceTimezone')
   }
 

@@ -18,9 +18,9 @@
 </template>
 
 <script setup lang="ts">
-import type { TimezoneService, ServiceClient } from '~/types'
+import type { TimeService, ServiceClient } from '~/types'
 
-const props = defineProps<ServiceClient<TimezoneService>>()
+const props = defineProps<ServiceClient<TimeService>>()
 
 const { $settings } = useNuxtApp()
 const lang = computed(() => $settings.lang || 'en')

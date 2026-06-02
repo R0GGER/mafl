@@ -1,10 +1,15 @@
 <template>
   <img
-    v-if="$settings.logo && showLogo"
-    :src="`/api/assets/${$settings.logo}`"
+    v-if="logoImage && showLogo"
+    :src="`/api/assets/${logoImage}`"
     :alt="$settings.title || 'Logo'"
     class="fixed top-6 left-6 z-50 h-8 w-auto object-contain pointer-events-none drop-shadow-md"
   >
+  <span
+    v-else-if="logoText && showLogo"
+    class="fixed top-6 left-6 z-50 pointer-events-none drop-shadow-md select-none"
+    :style="logoTextStyle"
+  >{{ logoText.text }}</span>
   <div class="min-h-screen relative flex flex-col">
     <div
       v-if="$settings.background"
@@ -44,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Tab } from '~/types'
+import type { Tab, LogoText } from '~/types'
 
 const { $settings, $tabs, $activeTabIndex } = useNuxtApp()
 
@@ -55,6 +60,36 @@ const overlay = computed(() => ({
   color: $settings.backgroundOverlay?.color ?? '#000000',
   opacity: $settings.backgroundOverlay?.opacity ?? 0.5,
 }))
+
+const logoImage = computed(() => {
+  const logo = $settings.logo
+  if (!logo) return null
+  if (typeof logo === 'string') return logo
+  if (logo.type === 'image') return logo.image
+  return null
+})
+
+const logoText = computed((): LogoText | null => {
+  const logo = $settings.logo
+  if (!logo || typeof logo === 'string') return null
+  if (logo.type === 'text') return logo
+  return null
+})
+
+const logoTextStyle = computed(() => {
+  const lt = logoText.value
+  if (!lt) return {}
+  return {
+    fontSize: lt.fontSize || '1.5rem',
+    fontWeight: lt.fontWeight || 700,
+    fontFamily: lt.fontFamily || 'inherit',
+    color: lt.color || '#ffffff',
+    backgroundColor: lt.backgroundColor || 'transparent',
+    borderRadius: lt.borderRadius || '0',
+    padding: lt.padding || '0',
+    lineHeight: 1,
+  }
+})
 
 const windowWidth = ref(0)
 const showLogo = computed(() => windowWidth.value > 1640)

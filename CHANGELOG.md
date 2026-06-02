@@ -1,6 +1,225 @@
 # Changelog
 
 
+## Browse icons link styling
+
+### 💅 Improvements
+
+- **admin:** "Browse icons" links (`selfh.st/icons`, `dashboardicons.com`) now use a green color (`rgb(124 180 132)`) so they are clearly recognisable as clickable links
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/components/admin/ItemFields.vue` | Green link color for icon reference links |
+
+---
+
+## Timezone → Time rename
+
+### 💅 Refactors
+
+- **module:** Renamed service type from `timezone` to `time` — `type: timezone` still works for backward compatibility via alias in `useServiceData`
+- **types:** Renamed `TimezoneService` interface to `TimeService`
+- **docs:** Updated all documentation and examples to use `type: time`
+- **config-builder:** Updated module type labels and serialization to use `time`
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/types/services.d.ts` | `TimezoneService` → `TimeService` |
+| `src/components/service/Timezone.vue` | Uses `TimeService` type |
+| `src/server/api/services/timezone.ts` | Uses `TimeService` type |
+| `src/components/Item.vue` | Accepts both `time` and `timezone` type |
+| `src/composables/useServiceData.ts` | Added `time → timezone` alias so the API route stays unchanged |
+| `config-builder/index.html` | Module type updated to `time` |
+| `docs/modules.md` | All `timezone` references replaced with `time` |
+
+---
+
+## Admin Panel
+
+### 🚀 Enhancements
+
+- **admin:** Built-in admin panel at `/admin` for editing `config.yml` directly from the browser — changes are saved and applied instantly
+- **admin:** Secure login with scrypt password hashing and encrypted sessions via `NUXT_ADMIN_PASSWORD_HASH` and `NUXT_SESSION_PASSWORD` environment variables
+- **admin:** Collapsible sections for Global Settings, Layout, Styles, Tabs, Tags and per-item editing
+- **admin:** Live preview of text logo in the Global Settings section
+- **admin:** Route guard middleware redirects unauthenticated users to `/admin/login`
+- **admin:** PWA `navigateFallbackDenylist` updated to exclude `/admin` routes from service worker caching
+
+### New files
+
+| File | Purpose |
+|------|---------|
+| `src/pages/admin/index.vue` | Admin dashboard page with config editor |
+| `src/pages/admin/login.vue` | Admin login page |
+| `src/middleware/admin.ts` | Auth route guard for admin pages |
+| `src/components/admin/GlobalSettings.vue` | Global settings editor (title, theme, logo, background, etc.) |
+| `src/components/admin/ItemFields.vue` | Per-item editor (link, icon, status, tags, module options) |
+| `src/components/admin/LayoutSettings.vue` | Grid/list layout and spacing editor |
+| `src/components/admin/StylesSettings.vue` | Typography styles editor (category, title, description) |
+| `src/components/admin/TabsEditor.vue` | Tabs and service groups editor |
+| `src/components/admin/TagsEditor.vue` | Tags editor |
+| `src/composables/useConfigBuilder.ts` | Shared composable for config state, YAML import/export |
+| `src/server/api/admin/config.get.ts` | GET endpoint — reads current config |
+| `src/server/api/admin/config.post.ts` | POST endpoint — validates and saves config |
+| `src/server/api/admin/login.post.ts` | POST endpoint — authenticates and creates session |
+| `src/server/api/admin/logout.post.ts` | POST endpoint — destroys session |
+| `src/server/api/admin/session.get.ts` | GET endpoint — checks session validity |
+| `src/server/utils/auth.ts` | Scrypt password verification and session helpers |
+| `scripts/hash-password.mjs` | CLI script to generate password hashes |
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `nuxt.config.ts` | Added `runtimeConfig` for `adminPasswordHash` and `sessionPassword`; added `/admin` to PWA `navigateFallbackDenylist` |
+| `src/assets/style/tailwind.css` | Added admin builder shared styles (`.admin-section`, `.admin-label`, `.admin-input`, `.chevron`) |
+| `docker-compose.yml` | Added `NUXT_ADMIN_PASSWORD_HASH` and `NUXT_SESSION_PASSWORD` environment variables |
+| `.example/docker-compose.yml` | Added environment variables with generation instructions |
+| `README.md` | Added admin environment variables to the quick-start docker-compose example |
+| `docs/configuration.md` | Added Admin Panel reference with link to `admin.md` |
+| `docs/admin.md` | New documentation page with setup instructions |
+
+---
+
+## IP API: optional locationName & deduplicate place
+
+### ✨ Features
+
+- **ip-api:** Added optional `locationName` option — when omitted, location is auto-detected from the IP address; when set, the custom name is displayed instead
+
+### 🐛 Bug Fixes
+
+- **ip-api:** Fixed duplicate location display (e.g. "Utrecht, Utrecht") when city and region name are identical
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/types/services.d.ts` | Added `locationName?: string` to `IpApiService.options` |
+| `src/server/api/services/ip-api.ts` | Use `locationName` when provided, fallback to IP-based place; deduplicate city/region |
+| `src/components/admin/ItemFields.vue` | Added Location Name input field for IP API |
+| `src/composables/useConfigBuilder.ts` | Added `ipapiLocationName` to builder state, import/export |
+| `config-builder/index.html` | Added Location Name field + serialization logic |
+| `docs/modules.md` | Documented `locationName` option with example |
+
+---
+
+## Favicon proxy cache
+
+### 🚀 Enhancements
+
+- **favicon:** Added server-side favicon proxy with disk caching — external favicon API is now called only once per domain per 7 days
+- **favicon:** The `faviconApi` setting is read dynamically from the config (no more hardcoded URL in the frontend)
+- **favicon:** Browser receives `Cache-Control: public, max-age=604800` headers for local caching
+- **favicon:** Added Workbox `CacheFirst` runtime caching for `/api/favicon/*` so favicons also work offline via the Service Worker
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/server/api/favicon/[...domain].get.ts` | New server-side proxy endpoint with disk cache in `./data/.favicon-cache/` |
+| `src/components/service/base/Icon.vue` | Points to `/api/favicon/{domain}` instead of the external API directly |
+| `nuxt.config.ts` | Added Workbox `runtimeCaching` rule for favicon endpoint |
+
+---
+
+## UI improvements: Uptime monitoring, Tags & Wrap checkbox
+
+### 🚀 Enhancements
+
+- **admin + config-builder:** Renamed "Status enabled" to "Uptime monitoring ☐ enabled" for clarity
+- **admin + config-builder:** Moved Tags input to its own row below the Uptime monitoring checkbox
+- **admin + config-builder:** Wrap checkbox now matches the height of adjacent input fields (styled with border and padding)
+- **admin + config-builder:** All checkboxes (Wrap, Uptime monitoring) now use the brand green accent color (`#69a870`)
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/components/admin/ItemFields.vue` | Renamed status checkbox, moved Tags to separate row, styled Wrap and Uptime checkboxes |
+| `config-builder/index.html` | Same layout and styling changes in the standalone config builder |
+| `src/assets/style/tailwind.css` | Added `accent-color` to `.admin-input` |
+
+---
+
+## Admin setup documentation
+
+### 📖 Documentation
+
+- **admin.md:** Rewrote the setup section with a summary table of required environment variables, step-by-step generation instructions, and multiple methods per step (Docker one-liner, local Node.js script, OpenSSL)
+- **admin.md:** Added example output so users know what to expect from each command
+- **docker-compose.yml:** Updated inline comments with copy-pasteable Docker commands for generating the password hash and session key
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `docs/admin.md` | Rewritten setup section with detailed generation instructions |
+| `.example/docker-compose.yml` | Inline comments now include Docker one-liner commands |
+
+---
+
+## Text / letter logo support
+
+### 🚀 Enhancements
+
+- **logo:** Added text/letter logo as alternative to image logo — display any text string (e.g. "M+") with full typographic control
+- **logo:** Text logo supports `fontSize`, `fontWeight`, `fontFamily`, `color`, `backgroundColor`, `borderRadius` and `padding`
+- **logo:** Backward compatible — existing `logo: logo.png` string format continues to work as an image logo
+- **config-builder:** Logo Type selector (None / Image / Text) with conditional fields in the standalone config builder (`config-builder/index.html`)
+- **config-builder:** Live preview of text logo in both standalone and onsite (`/admin`) config builders
+- **admin:** Logo Type dropdown with conditional image or text logo settings in the onsite admin panel
+
+### 💅 Refactors
+
+- **types:** Added `LogoText`, `LogoImage` interfaces and `LogoConfig` union type (`string | LogoImage | LogoText`) to `config.d.ts`
+- **validation:** `logo` schema now accepts a string (backward compat), `{ type: 'image', image }` or `{ type: 'text', text, ... }` object
+- **default.vue:** Logo rendering split into `logoImage` and `logoText` computed refs with conditional `<img>` or `<span>` element
+- **useConfigBuilder:** `BuilderState` replaced single `logo` field with `logoType`, `logoImage`, `logoText` and font/style fields; YAML import/export handles both formats
+- **config-builder:** Standalone HTML builder updated with `toggleLogoFields()` / `updateLogoPreview()` helpers and logo-aware `generateYaml()`, `loadConfig()`, `resetAll()`
+
+### 📖 Documentation
+
+- **configuration.md:** Logo section rewritten with separate "Image logo" and "Text / letter logo" subsections, including YAML example and property table
+
+### Config format
+
+```yaml
+# Image logo (unchanged)
+logo: logo.png
+
+# Text logo (new)
+logo:
+  type: text
+  text: "M+"
+  fontSize: 1.5rem
+  fontWeight: 700
+  fontFamily: "Inter, sans-serif"
+  color: "#ffffff"
+  backgroundColor: "#3b82f6"
+  borderRadius: 0.5rem
+  padding: 0.25rem 0.5rem
+```
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/types/config.d.ts` | Added `LogoText`, `LogoImage`, `LogoConfig` types |
+| `src/server/validations/config.ts` | Logo schema accepts string or object |
+| `src/server/utils/config.ts` | Default config unchanged (empty string = no logo) |
+| `src/layouts/default.vue` | Conditional image/text logo rendering |
+| `src/composables/useConfigBuilder.ts` | Logo state split into typed fields |
+| `src/components/admin/GlobalSettings.vue` | Logo type selector + conditional fields + preview |
+| `config-builder/index.html` | Logo type selector + fields + preview + YAML generation |
+| `docs/configuration.md` | Rewritten logo documentation |
+
+---
+
 ## Logo viewport threshold
 
 ### 🚀 Enhancements
@@ -19,7 +238,7 @@
 
 ### 🚀 Enhancements
 
-- **module: timezone** — Live clock widget showing current time and date for any IANA timezone, with optional country flag icon and configurable time/date formats
+- **module: time** — Live clock widget showing current time and date for any IANA timezone, with optional country flag icon and configurable time/date formats
 - **module: datetime-weather** — Combined live clock and weather widget using OpenWeatherMap, with configurable timezone, time format and date format
 - **module: greeting** — Simple widget displaying a custom greeting message with optional subtitle
 - **module: custom-html** — Renders arbitrary HTML content inside a service card, with a `hidden` option for invisible elements (e.g. tracking pixels)
@@ -27,7 +246,7 @@
 - **layout: span** — Any service item can now span multiple grid columns via the `span` property
 - **layout: footer** — Global footer section with configurable `text` and `html` content, rendered at the bottom of the page
 - **composable: useDateFormat** — Shared date formatting composable with seven formats: `short`, `medium`, `long`, `eu`, `compact`, `short-eu`, `iso`
-- **config-builder** — Added form fields for Timezone, DateTime Weather, Greeting, Custom HTML modules
+- **config-builder** — Added form fields for Time, DateTime Weather, Greeting, Custom HTML modules
 - **config-builder** — Added span field to all grid service items
 - **config-builder** — Added Footer section for text and HTML content
 - **config-builder** — Added Wiki button linking to wiki.maflplus.eu
@@ -36,35 +255,35 @@
 ### 🩹 Fixes
 
 - **custom-html** — `<script>` tags now execute correctly; Vue's `v-html` uses `innerHTML` which browsers block from running scripts, so the component now dynamically creates script elements via `document.createElement` to ensure execution (e.g. analytics snippets)
-- **timezone/datetime-weather** — Date and time now respect the `lang` setting from config.yml instead of using the browser locale
+- **time/datetime-weather** — Date and time now respect the `lang` setting from config.yml instead of using the browser locale
 - **datetime-weather** — Date and time fit on a single line by defaulting to 24-hour format
 - **date format: eu** — Manually constructed to ensure European day-month order (`Sat 16 May 2026`) instead of US-style (`Sat, May 16, 2026`)
 
 ### 💅 Refactors
 
-- **types** — Added `TimezoneService`, `DatetimeWeatherService`, `GreetingService`, `CustomHtmlService` interfaces to `services.d.ts`
+- **types** — Added `TimeService`, `DatetimeWeatherService`, `GreetingService`, `CustomHtmlService` interfaces to `services.d.ts`
 - **types** — Added `span` to the base `Service` interface
 - **types** — Added `Footer` interface to `config.d.ts`
 - **validation** — Extended `serviceSchema` with `span` field and `configSchema` with `footer`
-- **Item.vue** — Added type-to-component mappings for `timezone`, `datetime-weather`, `greeting`, and `custom-html`
+- **Item.vue** — Added type-to-component mappings for `time`, `datetime-weather`, `greeting`, and `custom-html`
 - **Group.vue** — Grid items with `span > 1` are wrapped in a div with `grid-column: span N`
 - **default.vue** — Layout uses `flex flex-col` and renders the `Footer` component
 
 ### 📖 Documentation
 
-- **modules.md** — New documentation page covering all modules (Timezone, DateTime Weather, Greeting, Custom HTML), date formats, grid span, and footer
+- **modules.md** — New documentation page covering all modules (Time, DateTime Weather, Greeting, Custom HTML), date formats, grid span, and footer
 
 ### New files
 
 | File | Purpose |
 |------|---------|
-| `src/components/service/Timezone.vue` | Timezone widget component |
+| `src/components/service/Timezone.vue` | Time widget component |
 | `src/components/service/DatetimeWeather.vue` | DateTime Weather widget component |
 | `src/components/service/Greeting.vue` | Greeting widget component |
 | `src/components/service/CustomHtml.vue` | Custom HTML widget component |
 | `src/components/Footer.vue` | Footer component |
 | `src/composables/useDateFormat.ts` | Shared date formatting composable |
-| `src/server/api/services/timezone.ts` | Timezone API handler |
+| `src/server/api/services/timezone.ts` | Time API handler |
 | `src/server/api/services/datetime-weather.ts` | DateTime Weather API handler (OWM) |
 | `src/server/api/services/greeting.ts` | Greeting API handler |
 | `src/server/api/services/custom-html.ts` | Custom HTML API handler |

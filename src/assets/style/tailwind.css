@@ -36,4 +36,31 @@ html.bluer {
     body {
         @apply bg-background text-fg;
     }
+
+    /* Admin builder shared styles */
+    .admin-section {
+        @apply border border-fg/10 rounded-lg bg-fg/[0.02];
+    }
+    .admin-section-header {
+        @apply w-full flex items-center justify-between p-4 text-left;
+    }
+    .admin-section-body {
+        @apply px-4 pb-4;
+    }
+    .admin-label {
+        @apply block text-xs text-fg-dimmed mb-1;
+    }
+    .admin-input {
+        @apply bg-background border border-fg/10 rounded px-2.5 py-1.5 text-sm text-fg
+               focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent;
+        color-scheme: dark;
+        accent-color: theme('colors.brand.500');
+    }
+    .chevron {
+        @apply inline-block w-2 h-2 border-r-2 border-b-2 border-brand-500 transition-transform duration-200;
+        transform: rotate(-45deg);
+    }
+    .chevron.rotated {
+        transform: rotate(45deg);
+    }
 }

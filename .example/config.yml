@@ -1,571 +1,410 @@
-title: bookmarks
+title: MAFL+
 lang: en
 theme: dark
+logo:
+  type: text
+  text: MAFL+
+  fontSize: 3.5rem
+  fontWeight: 500
+  color: "#ffffff"
 background: background.jpg
-faviconApi: https://favicon.vemetric.com/
+faviconApi: https://favicon.vemetric.com
 backgroundOverlay:
-  color: '#000000'
-  opacity: 0.5
-
+  color: "#000000"
+  opacity: 0.85
 behaviour:
   target: _blank
-
-searchProvider: google
-
+searchProvider: duckduckgo
 layout:
   grid:
     small: 2
     medium: 2
     large: 3
     xlarge: 5
+  list:
+    small: 2
+    medium: 3
+    large: 4
+    xlarge: 5
   spacing:
     group: 1.5rem
     item: 0.25rem
-
 styles:
   category:
-    color: '#ffffff'
     fontSize: 1.5rem
     fontWeight: 600
+    color: "#ffffff"
   title:
-    color: '#ffffff'
     fontSize: 0.875rem
+    color: "#ffffff"
   description:
-    color: '#cccccc'
     fontStyle: italic
-
+    color: "#cccccc"
 tabs:
-  - name: Personal
+  - name: MAFL+
     icon: mdi:home
+    services:
+      MAFL+:
+        display: grid
+        items:
+          - title: MAFL+
+            description: maflplus.eu
+            link: https://maflplus.eu
+            icon:
+              name: mdi:plus
+              wrap: true
+          - title: MAFL+ | Config Builder
+            description: config.maflplus.eu
+            link: https://config.maflplus.eu
+            icon:
+              name: mdi:plus
+              wrap: true
+          - title: MAFL+ | Repo
+            description: R0GGER/mafl
+            link: https://github.com/R0GGER/mafl
+            icon:
+              name: simple-icons:github
+              wrap: true
+          - title: MAFL
+            description: Original author
+            link: https://github.com/hywax/mafl
+            icon:
+              url: https://raw.githubusercontent.com/hywax/mafl/refs/heads/main/docs/public/logotype.svg
+          - title: Favicon API
+            description: Vemetric/favicon-api
+            link: https://github.com/Vemetric/favicon-api
+            icon:
+              favicon: vemetric.com
+              wrap: true
+      Social Media:
+        display: list
+        items:
+          - title: Radarr
+            link: http://192.168.1.111:7878
+          - title: Facebook
+            link: https://facebook.com
+            icon:
+              favicon: facebook.com
+          - title: Instagram
+            link: https://instagram.com
+            icon:
+              favicon: instagram.com
+          - title: LinkedIn
+            link: https://linkedin.com
+            icon:
+              favicon: linkedin.com
+      Streaming:
+        display: list
+        items:
+          - title: Netflix
+            link: https://netflix.com
+            icon:
+              favicon: netflix.com
+          - title: Disney+
+            link: https://disneyplus.com
+            icon:
+              favicon: disneyplus.com
+          - title: YouTube
+            link: https://youtube.com
+            icon:
+              favicon: youtube.com
+          - title: Spotify
+            link: https://open.spotify.com
+            icon:
+              favicon: spotify.com
+      Shopping:
+        display: list
+        items:
+          - title: Amazon
+            link: https://amazon.com
+            icon:
+              favicon: amazon.com
+          - title: eBay
+            link: https://ebay.com
+            icon:
+              favicon: ebay.com
+          - title: AliExpress
+            link: https://aliexpress.com
+            icon:
+              favicon: aliexpress.com
+          - title: Bol.com
+            link: https://bol.com
+            icon:
+              favicon: bol.com
+      Development:
+        display: list
+        items:
+          - title: Stack Overflow
+            link: https://stackoverflow.com
+            icon:
+              favicon: stackoverflow.com
+          - title: GitLab
+            link: https://gitlab.com
+            icon:
+              favicon: gitlab.com
+          - title: CodePen
+            link: https://codepen.io
+            icon:
+              favicon: codepen.io
+          - title: npm
+            link: https://npmjs.com
+            icon:
+              favicon: npmjs.com
+      Cloud:
+        display: list
+        items:
+          - title: AWS Console
+            link: https://console.aws.amazon.com
+            icon:
+              favicon: aws.amazon.com
+          - title: Microsoft Azure
+            link: https://portal.azure.com
+            icon:
+              favicon: azure.microsoft.com
+          - title: Google Cloud
+            link: https://console.cloud.google.com
+            icon:
+              favicon: cloud.google.com
+          - title: DigitalOcean
+            link: https://cloud.digitalocean.com
+            icon:
+              favicon: digitalocean.com
+      Design:
+        display: list
+        items:
+          - title: Figma
+            link: https://figma.com
+            icon:
+              favicon: figma.com
+          - title: Dribbble
+            link: https://dribbble.com
+            icon:
+              favicon: dribbble.com
+          - title: Behance
+            link: https://behance.net
+            icon:
+              favicon: behance.net
+          - title: Canva
+            link: https://canva.com
+            icon:
+              favicon: canva.com
+      Learning:
+        display: list
+        items:
+          - title: Udemy
+            link: https://udemy.com
+            icon:
+              favicon: udemy.com
+          - title: Coursera
+            link: https://coursera.org
+            icon:
+              favicon: coursera.org
+          - title: Khan Academy
+            link: https://khanacademy.org
+            icon:
+              favicon: khanacademy.org
+          - title: edX
+            link: https://edx.org
+            icon:
+              favicon: edx.org
+      Travel:
+        display: list
+        items:
+          - title: Booking.com
+            link: https://booking.com
+            icon:
+              favicon: booking.com
+          - title: Airbnb
+            link: https://airbnb.com
+            icon:
+              favicon: airbnb.com
+          - title: Google Maps
+            link: https://maps.google.com
+            icon:
+              favicon: maps.google.com
+          - title: Skyscanner
+            link: https://skyscanner.com
+            icon:
+              favicon: skyscanner.com
+      Communication:
+        display: list
+        items:
+          - title: WhatsApp
+            link: https://web.whatsapp.com
+            icon:
+              favicon: whatsapp.com
+          - title: Telegram
+            link: https://web.telegram.org
+            icon:
+              favicon: telegram.org
+          - title: Microsoft Teams
+            link: https://teams.microsoft.com
+            icon:
+              favicon: teams.microsoft.com
+          - title: Zoom
+            link: https://zoom.us
+            icon:
+              favicon: zoom.us
+      AI Tools:
+        display: list
+        items:
+          - title: ChatGPT
+            link: https://chat.openai.com
+            icon:
+              favicon: chat.openai.com
+          - title: Claude
+            link: https://claude.ai
+            icon:
+              favicon: claude.ai
+          - title: Gemini
+            link: https://gemini.google.com
+            icon:
+              favicon: gemini.google.com
+          - title: Hugging Face
+            link: https://huggingface.co
+            icon:
+              favicon: huggingface.co
+      WIDGETS:
+        display: grid
+        items:
+          - type: ip-api
+            options:
+              flagIcon: false
+            icon:
+              name: mdi:home
+              color: "#FFFFFF"
+          - type: time
+            options:
+              timezone: Europe/Amsterdam
+              country: nl
+  - name: Explore
+    icon: mdi:compass
     services:
       FAVORITES:
         display: grid
         items:
-          - title: iperf3serverlist.net
-            description: website
-            link: https://iperf3serverlist.net
-            icon:
-              favicon: iperf3serverlist.net
-              wrap: true
-            status:
-              enabled: true
-          - title: Proton Mail
-            description: mail.proton.me
-            link: https://mail.proton.me
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/proton.svg
-              wrap: true
-          - title: Proton Calendar
-            description: calendar.proton.me
-            link: https://calendar.proton.me
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/proton-calendar.svg
-              wrap: true
-          - title: Google Drive
-            description: drive.google.com
-            link: https://drive.google.com
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/google-drive.svg
-              wrap: true
-          - title: Gmail
-            description: mail.google.com
-            link: https://mail.google.com
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/gmail.svg
-              wrap: true
-          - title: Bitwarden
-            description: bitwarden.com
-            link: https://vault.bitwarden.com
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/bitwarden.svg
-              wrap: true
-          - title: YouTube
-            description: youtube.com
-            link: https://youtube.com
-            icon:
-              favicon: youtube.com
-              wrap: true
           - title: Reddit
             description: reddit.com
             link: https://reddit.com
             icon:
               url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/reddit.svg
               wrap: true
-          - title: GitHub
-            description: github.com
-            link: https://github.com
+          - title: Wikipedia
+            description: wikipedia.org
+            link: https://wikipedia.org
             icon:
-              name: simple-icons:github
+              favicon: wikipedia.org
               wrap: true
-          - title: Spotify
-            description: open.spotify.com
-            link: https://open.spotify.com
+          - title: Medium
+            description: medium.com
+            link: https://medium.com
             icon:
-              favicon: spotify.com
+              favicon: medium.com
               wrap: true
-
+          - title: Pinterest
+            description: pinterest.com
+            link: https://pinterest.com
+            icon:
+              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/pinterest.svg
+              wrap: true
+          - title: TikTok
+            description: tiktok.com
+            link: https://tiktok.com
+            icon:
+              favicon: tiktok.com
+              wrap: true
       News:
         display: list
         items:
-          - title: NOS
-            link: https://nos.nl
+          - title: BBC News
+            link: https://bbc.com/news
             icon:
-              favicon: nos.nl              
-          - title: New York Times
-            link: https://www.nytimes.com
+              favicon: bbc.com
+          - title: CNN
+            link: https://cnn.com
             icon:
-              favicon: nytimes.com              
-          - title: Tweakers
-            link: https://tweakers.net
+              favicon: cnn.com
+          - title: The Guardian
+            link: https://theguardian.com
             icon:
-              url: https://favicon-3j1.pages.dev/favicon/tweakers.net?larger=true              
-          - title: Ars Technica
-            link: https://arstechnica.com
+              favicon: theguardian.com
+          - title: Reuters
+            link: https://reuters.com
             icon:
-              favicon: arstechnica.com
-          - title: The Verge
-            link: https://theverge.com
-            icon:
-              favicon: theverge.com
-
-      Selfhost:
+              favicon: reuters.com
+      Finance:
         display: list
         items:
-          - title: selfh.st
-            link: https://selfh.st
+          - title: Yahoo Finance
+            link: https://finance.yahoo.com
             icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/selfh-st.svg
-          - title: OS Alternatives
-            link: https://osalt.com
+              favicon: finance.yahoo.com
+          - title: Bloomberg
+            link: https://bloomberg.com
             icon:
-              favicon: osalt.com
-          - title: Awesome Selfhosted
-            link: https://awesome-selfhosted.net
+              favicon: bloomberg.com
+          - title: CoinMarketCap
+            link: https://coinmarketcap.com
             icon:
-              favicon: awesome-selfhosted.net
-          - title: NOTED
-            link: https://noted.lol
+              favicon: coinmarketcap.com
+          - title: PayPal
+            link: https://paypal.com
             icon:
-              favicon: noted.lol
-          - title: Awesome Lists
-            link: https://github.com/sindresorhus/awesome
-            icon:
-              name: mdi:format-list-bulleted
-              color: '#ec4899'
-
-      Financials:
-        display: list
-        items:
-          - title: ABN AMRO
-            link: https://abnamro.nl
-            icon:
-              favicon: abnamro.nl              
-          - title: Rabo
-            link: https://rabobank.nl
-            icon:
-              name: mdi:bank-outline
-              color: '#f97316'
-          - title: ONZV
-            link: https://onzv.nl
-            icon:
-              url: https://www.onvz.nl/assets/favicons/apple-touch-icon.png
-          - title: Kasboek
-            link: https://kasboek.app
-            icon:
-              name: mdi:book-open-variant
-              color: '#10b981'
-          - title: Tikkie
-            link: https://tikkie.me
-            icon:
-              favicon: tikkie.me
-
-      Media:
-        display: list
-        items:
-          - title: Plex
-            link: https://plex.tv
-            icon:
-              favicon: plex.tv
-          - title: Emby
-            link: https://emby.media
-            icon:
-              favicon: emby.media
-          - title: Jellyfin
-            link: https://jellyfin.org
-            icon:
-              favicon: jellyfin.org
-          - title: Calibre Web
-            link: https://calibre-web.local
-            icon:
-              name: mdi:book-open-page-variant
-              color: '#3b82f6'
-          - title: Spotify
-            link: https://open.spotify.com
-            icon:
-              favicon: spotify.com
-
-      Search:
-        display: list
-        items:
-          - title: SearXNG
-            link: https://searx.local
-            icon:
-              name: mdi:magnify
-              color: '#3b82f6'
-          - title: Whoogle
-            link: https://whoogle.local
-            icon:
-              name: mdi:google
-              color: '#4285f4'
-          - title: NZBHydra
-            link: https://nzbhydra.local
-            icon:
-              name: mdi:cloud-search
-              color: '#06b6d4'
-          - title: Prowlarr
-            link: https://prowlarr.local
-            icon:
-              name: mdi:radar
-              color: '#f97316'
-          - title: Jackett
-            link: https://jackett.local
-            icon:
-              name: mdi:vpn
-              color: '#000000'
-
-      Download:
-        display: list
-        items:
-          - title: Radarr
-            link: https://radarr.local
-            icon:
-              name: mdi:movie-open
-              color: '#ffc230'
-          - title: Sonarr
-            link: https://sonarr.local
-            icon:
-              name: mdi:television-classic
-              color: '#3fc1f0'
-          - title: Bazarr
-            link: https://bazarr.local
-            icon:
-              name: mdi:subtitles
-              color: '#a855f7'
-          - title: SABnzbd
-            link: https://sabnzbd.local
-            icon:
-              name: mdi:download-circle
-              color: '#eab308'
-          - title: qBittorrent
-            link: https://qbit.local
-            icon:
-              name: simple-icons:qbittorrent
-              color: '#2f67ba'
-
-      Automation:
-        display: list
-        items:
-          - title: Home Assistant
-            link: https://ha.local
-            icon:
-              name: simple-icons:homeassistant
-              color: '#18bcf2'
-          - title: Node-RED
-            link: https://nodered.local
-            icon:
-              name: simple-icons:nodered
-              color: '#8f0000'
-          - title: n8n
-            link: https://n8n.local
-            icon:
-              name: simple-icons:n8n
-              color: '#ea4b71'
-          - title: Ansible
-            link: https://ansible.local
-            icon:
-              name: simple-icons:ansible
-              color: '#ee0000'
-          - title: Cron Jobs
-            link: https://cron.local
-            icon:
-              name: mdi:clock-outline
-              color: '#64748b'
-
-      Network:
-        display: list
-        items:
-          - title: Proxy
-            link: https://proxy.local
-            icon:
-              name: mdi:shield-half-full
-              color: '#f97316'
-          - title: Auth
-            link: https://auth.local
-            icon:
-              name: mdi:lock
-              color: '#6366f1'
-          - title: UniFi
-            link: https://unifi.local
-            icon:
-              name: mdi:access-point-network
-              color: '#06b6d4'
-          - title: pfSense
-            link: https://pfsense.local
-            icon:
-              name: mdi:firewall
-              color: '#212b6e'
-          - title: NextDNS
-            link: https://my.nextdns.io
-            icon:
-              name: mdi:dns
-              color: '#5b7ff5'
-
-      Security:
-        display: list
-        items:
-          - title: Bitwarden
-            link: https://bitwarden.local
-            icon:
-              name: simple-icons:bitwarden
-              color: '#175ddc'
-          - title: Authelia
-            link: https://authelia.local
-            icon:
-              name: mdi:shield-key
-              color: '#0f0f33'
-          - title: CrowdSec
-            link: https://crowdsec.local
-            icon:
-              name: mdi:shield-alert
-              color: '#3b82f6'
-          - title: Fail2ban
-            link: https://fail2ban.local
-            icon:
-              name: mdi:shield-lock
-              color: '#ef4444'
-          - title: WireGuard
-            link: https://wg.local
-            icon:
-              name: simple-icons:wireguard
-              color: '#88171a'
-
+              favicon: paypal.com
       Productivity:
         display: list
         items:
-          - title: Vikunja
-            link: https://vikunja.local
+          - title: Notion
+            link: https://notion.so
             icon:
-              name: mdi:check-all
-              color: '#1db954'
-          - title: Bookstack
-            link: https://bookstack.local
+              favicon: notion.so
+          - title: Trello
+            link: https://trello.com
             icon:
-              name: mdi:bookshelf
-              color: '#0288d1'
-          - title: Wiki.js
-            link: https://wiki.local
+              favicon: trello.com
+          - title: Todoist
+            link: https://todoist.com
             icon:
-              name: mdi:book-open-variant
-              color: '#1976d2'
-          - title: Outline
-            link: https://outline.local
+              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/todoist.svg
+          - title: Evernote
+            link: https://evernote.com
             icon:
-              name: mdi:text-box-multiple
-              color: '#6366f1'
-          - title: Tandoor Recipes
-            link: https://recipes.local
-            icon:
-              name: mdi:food-apple
-              color: '#4caf50'
-
-      WEATHER:
-        display: grid
-        items:
-          - type: openweathermap
-            options:
-              lat: 52.370216
-              lon: 4.895168
-              units: metric
-            secrets:
-              apiKey:
-
-  - name: Work
-    icon: mdi:work
-    services:
-      FAVORITES:
-        display: grid
-        items:
-          - title: Proton Mail
-            description: mail.proton.me
-            link: https://mail.proton.me
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/proton.svg
-              wrap: true
-          - title: Proton Calendar
-            description: calendar.proton.me
-            link: https://calendar.proton.me
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/proton-calendar.svg
-              wrap: true
-          - title: Google Drive
-            description: drive.google.com
-            link: https://drive.google.com
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/google-drive.svg
-              wrap: true
-          - title: Gmail
-            description: mail.google.com
-            link: https://mail.google.com
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/gmail.svg
-              wrap: true
-          - title: Bitwarden
-            description: bitwarden.com
-            link: https://vault.bitwarden.com
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/bitwarden.svg
-              wrap: true    
-      Dev:
+              favicon: evernote.com
+      Gaming:
         display: list
         items:
-          - title: Proxmox
-            link: https://proxmox.local
+          - title: Steam
+            link: https://store.steampowered.com
             icon:
-              name: simple-icons:proxmox
-              color: '#e57000'
-          - title: GitHub
-            link: https://github.com
+              favicon: store.steampowered.com
+          - title: Twitch
+            link: https://twitch.tv
             icon:
-              name: simple-icons:github
-              color: '#ffffff'
-          - title: Gitea
-            link: https://gitea.local
+              favicon: twitch.tv
+          - title: Epic Games
+            link: https://store.epicgames.com
             icon:
-              name: simple-icons:gitea
-              color: '#609926'
-          - title: iperf3serverlist.net
-            link: https://iperf3serverlist.net
+              favicon: epicgames.com
+          - title: IGN
+            link: https://ign.com
             icon:
-              favicon: iperf3serverlist.net
-              color: '#13bee5'
-          - title: Cloudflare
-            link: https://dash.cloudflare.com
-            icon:
-              name: simple-icons:cloudflare
-              color: '#f38020'
-
-      Monitoring:
+              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/ign.svg
+      Music:
         display: list
         items:
-          - title: Grafana
-            link: https://grafana.local
+          - title: SoundCloud
+            link: https://soundcloud.com
             icon:
-              name: simple-icons:grafana
-              color: '#f46800'
-          - title: Prometheus
-            link: https://prometheus.local
+              favicon: soundcloud.com
+          - title: Apple Music
+            link: https://music.apple.com
             icon:
-              name: simple-icons:prometheus
-              color: '#e6522c'
-          - title: Uptime Kuma
-            link: https://uptime.local
+              favicon: music.apple.com
+          - title: Deezer
+            link: https://deezer.com
             icon:
-              name: simple-icons:uptimekuma
-              color: '#5cdd8b'
-          - title: Netdata
-            link: https://netdata.local
-            icon:
-              name: mdi:chart-areaspline
-              color: '#00c853'
-          - title: Healthchecks
-            link: https://healthchecks.local
-            icon:
-              name: mdi:heart-pulse
-              color: '#ef4444'
-
-      Storage:
-        display: list
-        items:
-          - title: Nextcloud
-            link: https://nextcloud.local
-            icon:
-              name: simple-icons:nextcloud
-              color: '#0082c9'
-          - title: MinIO
-            link: https://minio.local
-            icon:
-              name: simple-icons:minio
-              color: '#c72e49'
-          - title: Synology
-            link: https://nas.local
-            icon:
-              name: mdi:nas
-              color: '#b5b5b6'
-          - title: Paperless
-            link: https://paperless.local
-            icon:
-              name: mdi:file-document-multiple
-              color: '#17541f'
-          - title: PhotoPrism
-            link: https://photos.local
-            icon:
-              name: mdi:image-multiple
-              color: '#9c27b0'
-
-      DNS & Domains:
-        display: list
-        items:
-          - title: Pi-hole
-            link: https://pihole.local
-            icon:
-              name: simple-icons:pihole
-              color: '#96060c'
-          - title: AdGuard Home
-            link: https://adguard.local
-            icon:
-              name: simple-icons:adguard
-              color: '#68bc71'
-          - title: Technitium
-            link: https://dns.local
-            icon:
-              name: mdi:dns-outline
-              color: '#0d47a1'
-          - title: Traefik
-            link: https://traefik.local
-            icon:
-              name: simple-icons:traefikproxy
-              color: '#24a1c1'
-          - title: Caddy
-            link: https://caddy.local
-            icon:
-              name: mdi:server-security
-              color: '#22d3ee'
-
-      Communication:
-        display: list
-        items:
-          - title: Matrix
-            link: https://matrix.local
-            icon:
-              name: simple-icons:matrix
-              color: '#0dbd8b'
-          - title: Signal
-            link: https://signal.org
-            icon:
-              name: simple-icons:signal
-              color: '#3a76f0'
-          - title: Slack
-            link: https://slack.com
-            icon:
-              name: simple-icons:slack
-              color: '#4a154b'
-          - title: Discord
-            link: https://discord.com
-            icon:
-              name: simple-icons:discord
-              color: '#5865f2'
-          - title: Mattermost
-            link: https://mattermost.local
-            icon:
-              name: simple-icons:mattermost
-              color: '#0058cc'
+              favicon: deezer.com
+          - title: Last.fm
+            link: https://last.fm
+footer:
+  html: <p>Modified with ❤️ by <a href="https://github.com/R0GGER/mafl" style="color:white;">MAFL+</a></p>

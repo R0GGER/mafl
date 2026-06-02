@@ -5,6 +5,9 @@ Services, icons, language and other settings are set in a single `config.yml` fi
 ### Config Builder
 Prefer a visual editor? Open the [**Config Builder**](https://config.maflplus.eu/) in your browser to create or edit your `config.yml` without writing YAML by hand. It supports all settings documented below, imports existing config files and generates ready-to-paste YAML output.
 
+### Admin Panel
+You can also edit `config.yml` directly on your running instance via the built-in **Admin Panel** at `/admin`. Changes are saved and applied instantly. See [Admin Panel](admin.md) for setup instructions.
+
 
 ## Title
 
@@ -42,14 +45,45 @@ Default: `system`
 
 ## Logo
 
-Display a logo in the top-left corner of the homepage. The image file must be placed in the data volume
-(the same directory as `config.yml`). The logo is fixed-positioned and responsive — it scales automatically across mobile, tablet and desktop.
+Display a logo in the top-left corner of the homepage. You can choose between an **image logo** or a **text/letter logo**.
+
+### Image logo
+
+Place the image file in the data volume (the same directory as `config.yml`).
 
 ```yaml
 logo: logo.png
 ```
 
 Supported formats: `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.svg`, `.avif`
+
+### Text / letter logo
+
+Use a text string as your logo with full typographic control.
+
+```yaml
+logo:
+  type: text
+  text: "M+"
+  fontSize: 1.5rem
+  fontWeight: 700
+  fontFamily: "Inter, sans-serif"
+  color: "#ffffff"
+  backgroundColor: "#3b82f6"
+  borderRadius: 0.5rem
+  padding: 0.25rem 0.5rem
+```
+
+| Property | Description | Default |
+|---|---|---|
+| `text` | The text to display (required) | — |
+| `fontSize` | CSS font-size | `1.5rem` |
+| `fontWeight` | CSS font-weight (100–900) | `700` |
+| `fontFamily` | CSS font-family | `inherit` |
+| `color` | Text color | `#ffffff` |
+| `backgroundColor` | Background color behind the text | `transparent` |
+| `borderRadius` | CSS border-radius | `0` |
+| `padding` | CSS padding | `0` |
 
 Default: _none_
 
