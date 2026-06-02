@@ -192,7 +192,7 @@ async function logout() {
     await $fetch('/api/admin/logout', { method: 'POST' })
   }
   catch {}
-  navigateTo('/admin/login')
+  window.location.href = '/admin/login'
 }
 
 function copyYaml() {

@@ -1,6 +1,20 @@
 # Changelog
 
 
+## Fix admin logout button
+
+### 🐛 Bug Fixes
+
+- **admin:** Fixed logout button not working — replaced client-side `navigateTo` with a hard navigation (`window.location.href`) to ensure the session cookie is properly cleared and no async context issues prevent the redirect
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/pages/admin/index.vue` | Changed `navigateTo('/admin/login')` to `window.location.href = '/admin/login'` in the logout function |
+
+---
+
 ## Fix tab/content width shift
 
 ### 🐛 Bug Fixes
