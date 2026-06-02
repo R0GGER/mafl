@@ -1,6 +1,23 @@
 # Changelog
 
 
+## Fix tab/content width shift
+
+### 🐛 Bug Fixes
+
+- **layout:** Fixed container width jumping when switching between tabs with different amounts of content
+- **layout:** Added `w-full` to main container so it always takes full available width regardless of tab content
+- **style:** Added `scrollbar-gutter: stable` to prevent layout shift from scrollbar appearing/disappearing
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/layouts/default.vue` | Added `w-full` class to container div |
+| `src/assets/style/tailwind.css` | Added `scrollbar-gutter: stable` on `html` |
+
+---
+
 ## Browse icons link styling
 
 ### 💅 Improvements

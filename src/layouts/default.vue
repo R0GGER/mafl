@@ -24,7 +24,7 @@
         opacity: overlay.opacity,
       }"
     />
-    <div class="mx-auto px-4 sm:px-6 lg:px-8" :style="{ maxWidth: containerMaxWidth }">
+    <div class="w-full mx-auto px-4 sm:px-6 lg:px-8" :style="{ maxWidth: containerMaxWidth }">
       <div class="pt-6 pb-2">
         <SearchBar />
       </div>

@@ -32,6 +32,12 @@ html.bluer {
     --background: 24 29 63;
 }
 
+@layer base {
+    html {
+        scrollbar-gutter: stable;
+    }
+}
+
 @layer components {
     body {
         @apply bg-background text-fg;
