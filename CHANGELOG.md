@@ -1,6 +1,26 @@
 # Changelog
 
 
+## Tab lock & collapsible tabs
+
+### 🚀 Enhancements
+
+- **admin:** Tabs can now be locked to prevent accidental deletion — a minimalist lock icon toggles the lock state
+- **admin:** Locked tabs hide the delete button entirely; the `removeTab` function refuses to delete a locked tab
+- **admin:** Tab content is now collapsible — click the ▸/▾ arrow to expand or collapse a tab's groups and items
+- **admin:** Confirmation dialog when deleting a tab or group ("Are you sure you want to delete …?")
+- **config:** `locked: true` is persisted in the YAML config so locked state survives reloads
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/composables/useConfigBuilder.ts` | Added `locked` to `BuilderTab` interface; `removeTab` guards against locked tabs; added `toggleTabLock` function; YAML import/export handles `locked` |
+| `src/components/admin/TabsEditor.vue` | Added collapse/expand toggle (▸/▾), SVG lock icon, confirm dialogs for tab and group deletion |
+| `src/pages/admin/index.vue` | Passes `toggleTabLock` prop to `AdminTabsEditor` |
+
+---
+
 ## Auto-fill favicon domain from link
 
 ### 💅 Improvements

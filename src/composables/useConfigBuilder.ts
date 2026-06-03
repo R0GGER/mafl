@@ -60,6 +60,7 @@ export interface BuilderGroup {
 export interface BuilderTab {
   name: string
   icon: string
+  locked: boolean
   groups: BuilderGroup[]
 }
 
@@ -372,6 +373,7 @@ export function loadConfigFromYaml(state: BuilderState, yamlStr: string) {
       state.tabs.push({
         name: tab.name || '',
         icon: tab.icon || '',
+        locked: tab.locked || false,
         groups: parseServiceGroups(tab.services),
       })
     }
@@ -380,6 +382,7 @@ export function loadConfigFromYaml(state: BuilderState, yamlStr: string) {
     state.tabs.push({
       name: '',
       icon: '',
+      locked: false,
       groups: parseServiceGroups(config.services),
     })
   }
@@ -560,6 +563,7 @@ export function stateToYaml(state: BuilderState): string {
       const tabObj: any = {}
       if (tab.name) tabObj.name = tab.name
       if (tab.icon) tabObj.icon = tab.icon
+      if (tab.locked) tabObj.locked = true
       const services: any = {}
       for (const group of tab.groups) {
         if (!group.name) continue
@@ -616,11 +620,16 @@ export function useConfigBuilder() {
   }
 
   function addTab(name = '', icon = '') {
-    state.tabs.push({ name, icon, groups: [] })
+    state.tabs.push({ name, icon, locked: false, groups: [] })
   }
 
   function removeTab(index: number) {
+    if (state.tabs[index]?.locked) return
     state.tabs.splice(index, 1)
+  }
+
+  function toggleTabLock(index: number) {
+    state.tabs[index].locked = !state.tabs[index].locked
   }
 
   function addGroup(tabIndex: number, name = '', display: 'grid' | 'list' = 'list') {
@@ -666,6 +675,7 @@ export function useConfigBuilder() {
     removeTag,
     addTab,
     removeTab,
+    toggleTabLock,
     addGroup,
     removeGroup,
     addItem,

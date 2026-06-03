@@ -61,6 +61,7 @@
           :state="state"
           :add-tab="addTab"
           :remove-tab="removeTab"
+          :toggle-tab-lock="toggleTabLock"
           :add-group="addGroup"
           :remove-group="removeGroup"
           :add-item="addItem"
@@ -112,6 +113,7 @@ const {
   removeTag,
   addTab,
   removeTab,
+  toggleTabLock,
   addGroup,
   removeGroup,
   addItem,
