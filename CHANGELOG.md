@@ -1,6 +1,23 @@
 # Changelog
 
 
+## Deep linking to tabs via URL hash
+
+### 🚀 Enhancements
+
+- **frontpage:** Tabs can now be linked directly using a URL hash fragment (e.g. `/#personal`, `/#my-work`)
+- **frontpage:** Clicking a tab updates the URL hash without page reload
+- **frontpage:** Opening a URL with a tab hash automatically activates the corresponding tab
+- **frontpage:** Browser back/forward navigation between tabs is supported via `hashchange` listener
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/layouts/default.vue` | Added `slugify`, `findTabIndexByHash`, `setTabFromHash`, and `selectTab` functions; tab click now calls `selectTab` which updates the URL hash; `onMounted` reads the hash to set the initial tab; `hashchange` event listener added |
+
+---
+
 ## Hide tab bar when only one tab
 
 ### 🚀 Enhancements

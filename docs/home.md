@@ -79,7 +79,7 @@ See [Admin Panel](admin.md) for full setup instructions.
 | **Styles** | Per-element styling for category headers, titles and descriptions |
 | **Logo** | Fixed responsive logo (image or text/letter) in the top-left corner |
 | **Background** | Full-screen background image with optional color overlay |
-| **Tabs** | Organise services into switchable tabs with icons and lock protection |
+| **Tabs** | Organise services into switchable tabs with icons, lock protection and deep linking via URL hash |
 | **Search** | Filter bookmarks across tabs; web search fallback (`/`, `Ctrl+K`) |
 | **Favicon API** | Auto-fetch service icons by domain name with server-side proxy cache |
 | **Status position** | Align the status indicator to `left` or `right` |

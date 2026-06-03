@@ -47,7 +47,7 @@ This fork adds several features on top of the original [Mafl](https://github.com
 | **Logo** | Fixed responsive logo in the top-left corner — image file or text/letter with full typographic control. |
 | **Background image** | Full-screen background image served from the data volume. |
 | **Background overlay** | Color overlay with configurable opacity for better text readability. |
-| **Tabs** | Organise services into switchable tabs, each with its own icon. Tabs can be locked to prevent deletion and hidden from the frontpage. |
+| **Tabs** | Organise services into switchable tabs, each with its own icon. Tabs can be locked to prevent deletion, hidden from the frontpage, and linked directly via URL hash (e.g. `/#work`). |
 | **Search bar** | Filters bookmarks across all tabs; falls back to Google or DuckDuckGo web search. Keyboard shortcuts: `/`, `Ctrl+K`. |
 | **Favicon API** | Retrieve service icons automatically via a configurable favicon API with server-side proxy cache. |
 | **Status position** | Align the status indicator to the `left` or `right` (default) of a service. |
@@ -61,7 +61,7 @@ This fork adds several features on top of the original [Mafl](https://github.com
 * 🔐 **Privacy** — All requests to third-party services happen server-side.
 * ⚡ **Real-time** — Interactive service cards with live status information.
 * 🔍 **Search** — Filter bookmarks instantly; fall back to Google or DuckDuckGo.
-* 📑 **Tabs** — Organise services into switchable tabs with lock protection and visibility toggle.
+* 📑 **Tabs** — Organise services into switchable tabs with lock protection, visibility toggle and deep linking via URL hash.
 * 🛡️ **Admin Panel** — Built-in config editor at `/admin` with secure login.
 * 🖼️ **Backgrounds** — Full-screen background images with color overlay.
 * 🎨 **Themes** — Six built-in themes or full custom styling.
@@ -257,6 +257,17 @@ tabs:
 ```
 
 When `tabs` is defined the top-level `services` key is ignored. Add `locked: true` to protect a tab from accidental deletion. Add `hidden: true` to hide a tab from the frontpage while keeping it in the config (editable in admin).
+
+#### Deep linking
+
+Link directly to a specific tab using a URL hash fragment based on the tab name (lowercased, spaces replaced by hyphens):
+
+| Tab name | URL |
+|----------|-----|
+| Personal | `https://your-mafl/#personal` |
+| My Work  | `https://your-mafl/#my-work` |
+
+Clicking a tab automatically updates the URL hash. Browser back/forward navigation between tabs is supported.
 
 ### Search
 

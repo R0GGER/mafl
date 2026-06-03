@@ -36,7 +36,7 @@
           :class="idx === activeTabIndex
             ? 'bg-white/20 text-white shadow-sm'
             : 'text-white/50 hover:text-white/80 hover:bg-white/10'"
-          @click="activeTabIndex = idx"
+          @click="selectTab(idx)"
         >
           <Icon v-if="tab.icon" :name="tab.icon" class="w-4 h-4 flex-shrink-0" />
           {{ tab.name }}
@@ -55,6 +55,29 @@ const { $settings, $tabs, $activeTabIndex } = useNuxtApp()
 
 const visibleTabs = $tabs as Tab[]
 const activeTabIndex = $activeTabIndex as Ref<number>
+
+function slugify(name: string): string {
+  return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+}
+
+function findTabIndexByHash(hash: string): number {
+  if (!hash || hash === '#') return -1
+  const slug = hash.slice(1)
+  return visibleTabs.findIndex(tab => slugify(tab.name) === slug)
+}
+
+function setTabFromHash() {
+  const idx = findTabIndexByHash(window.location.hash)
+  if (idx >= 0) {
+    activeTabIndex.value = idx
+  }
+}
+
+function selectTab(idx: number) {
+  activeTabIndex.value = idx
+  const slug = slugify(visibleTabs[idx].name)
+  window.history.replaceState(null, '', `#${slug}`)
+}
 
 const overlay = computed(() => ({
   color: $settings.backgroundOverlay?.color ?? '#000000',
@@ -95,10 +118,17 @@ const windowWidth = ref(0)
 const showLogo = computed(() => windowWidth.value > 1640)
 
 onMounted(() => {
+  setTabFromHash()
+  window.addEventListener('hashchange', setTabFromHash)
+
   windowWidth.value = window.innerWidth
   window.addEventListener('resize', () => {
     windowWidth.value = window.innerWidth
   })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('hashchange', setTabFromHash)
 })
 
 const containerMaxWidth = computed(() => {

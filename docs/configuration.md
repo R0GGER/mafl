@@ -258,6 +258,17 @@ tabs:
 
 In the admin panel, use the eye icon toggle to show or hide a tab.
 
+### Deep linking
+
+Link directly to a specific tab using a URL hash fragment. The hash is based on the tab name — lowercased with spaces replaced by hyphens and special characters removed.
+
+| Tab name | URL |
+|----------|-----|
+| Personal | `https://your-mafl/#personal` |
+| My Work  | `https://your-mafl/#my-work` |
+
+When a user opens a URL with a tab hash, the corresponding tab is automatically activated. Clicking a tab updates the URL hash (without page reload), and browser back/forward navigation between tabs is supported.
+
 ## Tags 
 
 Tags allow you to differentiate between services.
