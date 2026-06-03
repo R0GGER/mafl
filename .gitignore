@@ -25,3 +25,6 @@ logs
 
 # Volumes
 mafl/
+
+# dev files
+docker-compose.yml

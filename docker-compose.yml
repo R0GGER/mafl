@@ -14,7 +14,7 @@ services:
     environment:
       # Admin panel: generate hash with: 
       # docker run --rm node:22-alpine node -e "c=require('crypto'),s=c.randomBytes(16),c.scrypt(process.argv[1],s,64,(_,k)=>console.log(s.toString('hex')+':'+k.toString('hex')))" your-password
-      - NUXT_ADMIN_PASSWORD_HASH=
+      - NUXT_ADMIN_PASSWORD_HASH=3bcc3fbe08603c0a9d37926070eb9819:94be2359db8900382bf54418810aeebe68bba39b3b1dd2864c91aae6b8979009f059819d2b1b522318490587393732d131b357350294ce09d19db55b867c7077
       # Session encryption key (min 32 chars, random string)
       # docker run --rm node:22-alpine node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-      - NUXT_SESSION_PASSWORD=
+      - NUXT_SESSION_PASSWORD=2952f1dad4058fa80e24fb92fb99523289d081ba7012c3929007706bbaa77f08

@@ -241,20 +241,28 @@
           <a href="https://dashboardicons.com/icons" target="_blank" class="hover:underline" style="color: rgb(124 180 132)">dashboardicons.com</a>
         </div>
       </div>
-      <div v-else class="flex gap-2 items-end">
-        <div class="flex-1">
-          <label class="admin-label">Name</label>
-          <input v-model="item.iconName" type="text" class="admin-input w-full" placeholder="mdi:home">
+      <div v-else>
+        <div class="flex gap-2 items-end">
+          <div class="flex-1">
+            <label class="admin-label">Name</label>
+            <input v-model="item.iconName" type="text" class="admin-input w-full" placeholder="mdi:home">
+          </div>
+          <div>
+            <label class="admin-label">Color</label>
+            <input v-model="item.iconColor" type="text" class="admin-input w-20" placeholder="#hex">
+          </div>
+          <div>
+            <label class="admin-label">&nbsp;</label>
+            <label class="inline-flex items-center gap-1 text-fg-dimmed admin-input cursor-pointer">
+              <input v-model="item.iconWrap" type="checkbox" style="accent-color: #69a870"> wrap
+            </label>
+          </div>
         </div>
-        <div>
-          <label class="admin-label">Color</label>
-          <input v-model="item.iconColor" type="text" class="admin-input w-20" placeholder="#hex">
-        </div>
-        <div>
-          <label class="admin-label">&nbsp;</label>
-          <label class="inline-flex items-center gap-1 text-fg-dimmed admin-input cursor-pointer">
-            <input v-model="item.iconWrap" type="checkbox" style="accent-color: #69a870"> wrap
-          </label>
+        <div class="mt-1 text-[10px] text-fg-dimmed">
+          Browse icons:
+          <a href="https://icon-sets.iconify.design/" target="_blank" class="hover:underline" style="color: rgb(124 180 132)">iconify.design</a>
+          ·
+          <a href="https://getemoji.com/" target="_blank" class="hover:underline" style="color: rgb(124 180 132)">getemoji.com</a>
         </div>
       </div>
     </div>
@@ -284,7 +292,7 @@
 <script setup lang="ts">
 import type { BuilderItem } from '~/composables/useConfigBuilder'
 
-defineProps<{
+const props = defineProps<{
   item: BuilderItem
   tabIndex: number
   groupIndex: number
@@ -292,4 +300,25 @@ defineProps<{
 }>()
 
 const dateFormats = ['short', 'medium', 'long', 'eu', 'compact', 'short-eu', 'iso']
+
+function extractDomain(url: string): string {
+  try {
+    return new URL(url).hostname
+  }
+  catch {
+    return url.replace(/^https?:\/\//, '').split('/')[0]
+  }
+}
+
+watch(() => props.item.link, (newLink) => {
+  if (props.item.iconType === 'favicon' && newLink) {
+    props.item.iconFavicon = extractDomain(newLink)
+  }
+})
+
+watch(() => props.item.iconType, (newType) => {
+  if (newType === 'favicon' && props.item.link && !props.item.iconFavicon) {
+    props.item.iconFavicon = extractDomain(props.item.link)
+  }
+})
 </script>

@@ -496,6 +496,15 @@ function moveItem(tabIndex, groupIndex, itemIndex, direction) {
   generateYaml();
 }
 
+function moveGroup(tabIndex, groupIndex, direction) {
+  const groups = state.tabs[tabIndex].groups;
+  const newIndex = groupIndex + direction;
+  if (newIndex < 0 || newIndex >= groups.length) return;
+  [groups[groupIndex], groups[newIndex]] = [groups[newIndex], groups[groupIndex]];
+  renderTabs();
+  generateYaml();
+}
+
 function renderTabs() {
   const container = document.getElementById('tabs-container');
   const openPanels = new Set();
@@ -525,6 +534,8 @@ function renderGroup(ti, gi, group) {
   return `
     <div class="border border-gray-700 rounded p-2 bg-surface">
       <div class="flex items-center gap-2 mb-2">
+        <button onclick="moveGroup(${ti},${gi},-1)" class="text-gray-400 hover:text-white px-1" title="Move up">&#9650;</button>
+        <button onclick="moveGroup(${ti},${gi},1)" class="text-gray-400 hover:text-white px-1" title="Move down">&#9660;</button>
         <input type="text" value="${escHtml(group.name)}" placeholder="Group name" class="flex-1 bg-surface-light border border-gray-600 rounded px-2 py-1 text-sm" oninput="state.tabs[${ti}].groups[${gi}].name=this.value; generateYaml()">
         <select class="bg-surface-light border border-gray-600 rounded px-2 py-1 text-xs" onchange="state.tabs[${ti}].groups[${gi}].display=this.value; generateYaml()">
           <option value="list" ${group.display === 'list' ? 'selected' : ''}>list</option>

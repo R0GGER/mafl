@@ -66,6 +66,7 @@
           :add-item="addItem"
           :remove-item="removeItem"
           :move-item="moveItem"
+          :move-group="moveGroup"
         />
       </div>
 
@@ -116,6 +117,7 @@ const {
   addItem,
   removeItem,
   moveItem,
+  moveGroup,
 } = useConfigBuilder()
 
 const saving = ref(false)

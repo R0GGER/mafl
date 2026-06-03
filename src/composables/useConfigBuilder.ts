@@ -648,6 +648,15 @@ export function useConfigBuilder() {
     items[newIndex] = temp
   }
 
+  function moveGroup(tabIndex: number, groupIndex: number, direction: -1 | 1) {
+    const groups = state.tabs[tabIndex].groups
+    const newIndex = groupIndex + direction
+    if (newIndex < 0 || newIndex >= groups.length) return
+    const temp = groups[groupIndex]
+    groups[groupIndex] = groups[newIndex]
+    groups[newIndex] = temp
+  }
+
   return {
     state,
     yamlOutput,
@@ -662,5 +671,6 @@ export function useConfigBuilder() {
     addItem,
     removeItem,
     moveItem,
+    moveGroup,
   }
 }

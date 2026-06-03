@@ -19,6 +19,8 @@
             <div v-for="(group, gi) in tab.groups" :key="gi" class="border border-fg/10 rounded p-2 bg-fg/[0.02]">
               <!-- Group header -->
               <div class="flex items-center gap-2 mb-2">
+                <button class="text-fg-dimmed hover:text-fg px-1" title="Move up" @click="moveGroup(ti, gi, -1)">&#9650;</button>
+                <button class="text-fg-dimmed hover:text-fg px-1" title="Move down" @click="moveGroup(ti, gi, 1)">&#9660;</button>
                 <input v-model="group.name" type="text" class="admin-input flex-1" placeholder="Group name">
                 <select v-model="group.display" class="admin-input text-xs">
                   <option value="list">list</option>
@@ -107,6 +109,7 @@ defineProps<{
   addItem: (tabIndex: number, groupIndex: number, serviceType?: ServiceType) => void
   removeItem: (tabIndex: number, groupIndex: number, itemIndex: number) => void
   moveItem: (tabIndex: number, groupIndex: number, itemIndex: number, direction: -1 | 1) => void
+  moveGroup: (tabIndex: number, groupIndex: number, direction: -1 | 1) => void
 }>()
 
 const open = ref(true)

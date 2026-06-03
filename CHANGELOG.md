@@ -1,12 +1,63 @@
 # Changelog
 
 
+## Auto-fill favicon domain from link
+
+### 💅 Improvements
+
+- **admin:** When the icon type is set to "favicon", the domain field is now automatically populated from the link URL — strips `http://` / `https://` and extracts the hostname (e.g. `https://netflix.com/browse` → `netflix.com`)
+- **admin:** Switching icon type to "favicon" also auto-fills the domain if a link is already present and the favicon field is empty
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/components/admin/ItemFields.vue` | Added `extractDomain()` helper and watchers on `item.link` and `item.iconType` to auto-populate `item.iconFavicon` |
+
+---
+
+## Browse icons links for name icon type
+
+### 💅 Improvements
+
+- **admin:** Added "Browse icons" links below the Name icon field — links to [iconify.design](https://icon-sets.iconify.design/) for Iconify icon names and [getemoji.com](https://getemoji.com/) for emoji, matching the existing link style used under the URL icon field
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/components/admin/ItemFields.vue` | Added browse links (iconify.design, getemoji.com) below the Name/Color/wrap row in the `name` icon type section |
+
+---
+
+## Reorder groups (categories)
+
+### 🚀 Enhancements
+
+- **admin:** Groups (categories) can now be moved up or down within a tab using ▲ / ▼ buttons, matching the existing item reorder controls
+- **config-builder:** Same move up/down functionality added to the standalone Config Builder
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/composables/useConfigBuilder.ts` | Added `moveGroup()` function that swaps adjacent groups in the array |
+| `src/pages/admin/index.vue` | Destructured `moveGroup` from composable and passed it as prop to `AdminTabsEditor` |
+| `src/components/admin/TabsEditor.vue` | Added `moveGroup` prop definition and ▲ ▼ buttons to the group header row |
+| `config-builder/index.html` | Added `moveGroup()` function and ▲ ▼ buttons in the standalone builder |
+
+---
+
 ## Example config on first run
 
 ### 🚀 Enhancements
 
 - **docker:** On first container start, if no `config.yml` exists in the data volume, the example config (`.example/config.yml`) is automatically copied as the initial config
 - **docker:** Existing `config.yml` is never overwritten — only new installations receive the example
+
+### 🐛 Bug Fixes
+
+- **docker:** Fixed `entrypoint.sh` failing with `no such file or directory` on Alpine — the script had Windows CRLF line endings which corrupted the shebang; rewritten with LF endings and added `sed -i 's/\r$//'` in the Dockerfile as a safeguard
 
 ### New files
 

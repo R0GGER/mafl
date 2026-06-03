@@ -27,7 +27,7 @@ COPY --from=build /app/extra/healthcheck.mjs /app/extra/healthcheck.mjs
 COPY --from=build /app/extra/entrypoint.sh /app/extra/entrypoint.sh
 COPY --from=build /app/.example/config.yml /app/example/config.yml
 
-RUN chmod +x /app/extra/entrypoint.sh
+RUN sed -i 's/\r$//' /app/extra/entrypoint.sh && chmod +x /app/extra/entrypoint.sh
 
 EXPOSE 3000/tcp
 
