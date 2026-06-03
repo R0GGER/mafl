@@ -49,7 +49,7 @@
                     <option value="list">list</option>
                     <option value="grid">grid</option>
                   </select>
-                  <button class="text-red-400 hover:text-red-300 px-1" @click="removeGroup(ti, gi)">&times;</button>
+                  <button v-if="!tab.locked" class="text-red-400 hover:text-red-300 px-1" @click="removeGroup(ti, gi)">&times;</button>
                 </div>
 
                 <!-- Items -->
@@ -70,7 +70,7 @@
                       <button class="text-brand-500 hover:text-brand-400 px-1 text-xs" @click="toggleEdit(ti, gi, ii)">
                         {{ isEditing(ti, gi, ii) ? 'close' : 'edit' }}
                       </button>
-                      <button class="text-red-400 hover:text-red-300 px-1" @click="removeItem(ti, gi, ii)">&times;</button>
+                      <button v-if="!tab.locked" class="text-red-400 hover:text-red-300 px-1" @click="removeItem(ti, gi, ii)">&times;</button>
                     </div>
 
                     <!-- Expanded edit fields -->

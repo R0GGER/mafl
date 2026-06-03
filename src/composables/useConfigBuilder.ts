@@ -637,6 +637,7 @@ export function useConfigBuilder() {
   }
 
   function removeGroup(tabIndex: number, groupIndex: number) {
+    if (state.tabs[tabIndex]?.locked) return
     state.tabs[tabIndex].groups.splice(groupIndex, 1)
   }
 
@@ -645,6 +646,7 @@ export function useConfigBuilder() {
   }
 
   function removeItem(tabIndex: number, groupIndex: number, itemIndex: number) {
+    if (state.tabs[tabIndex]?.locked) return
     state.tabs[tabIndex].groups[groupIndex].items.splice(itemIndex, 1)
   }
 

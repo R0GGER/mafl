@@ -6,6 +6,7 @@
 ### 🚀 Enhancements
 
 - **admin:** Tabs can now be locked to prevent accidental deletion — a locked tab hides the delete button and ignores `removeTab` calls
+- **admin:** Locking a tab also protects its categories and bookmarks — delete buttons for groups and items are hidden and `removeGroup`/`removeItem` are guarded
 - **admin:** Tabs are now collapsible in the Config Builder — click the ▸/▾ arrow to expand or collapse a tab's content
 - **config:** `locked: true` property is persisted in the YAML config and restored on load
 
