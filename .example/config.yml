@@ -47,19 +47,19 @@ tabs:
       MAFL+:
         display: grid
         items:
-          - title: MAFL+
+          - title: MAFL+ Example
             description: maflplus.eu
             link: https://maflplus.eu
             icon:
               name: mdi:plus
               wrap: true
-          - title: MAFL+ | Config Builder
+          - title: MAFL+ Config
             description: config.maflplus.eu
             link: https://config.maflplus.eu
             icon:
               name: mdi:plus
               wrap: true
-          - title: MAFL+ | Repo
+          - title: MAFL+ @Github
             description: R0GGER/mafl
             link: https://github.com/R0GGER/mafl
             icon:

@@ -1,6 +1,41 @@
 # Changelog
 
 
+## Example config on first run
+
+### 🚀 Enhancements
+
+- **docker:** On first container start, if no `config.yml` exists in the data volume, the example config (`.example/config.yml`) is automatically copied as the initial config
+- **docker:** Existing `config.yml` is never overwritten — only new installations receive the example
+
+### New files
+
+| File | Purpose |
+|------|---------|
+| `extra/entrypoint.sh` | Entrypoint script that copies the example config when `/app/data/config.yml` is missing, then starts the app |
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `Dockerfile` | Copies entrypoint script and example config into the image; uses `ENTRYPOINT` instead of `CMD` |
+
+---
+
+## Fix category title color opacity
+
+### 🐛 Bug Fixes
+
+- **styles:** Category titles in inline/list view appeared faded instead of using the exact configured color — removed hardcoded `opacity-80` Tailwind class from the `<h2>` element so the `color` from `styles.category` is rendered at full opacity
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/components/Group.vue` | Removed `opacity-80` class from the inline category `<h2>` element |
+
+---
+
 ## Fix admin logout button
 
 ### 🐛 Bug Fixes

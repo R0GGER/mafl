@@ -1,6 +1,6 @@
 <template>
   <div v-if="inline" class="flex flex-col">
-    <h2 v-if="title" class="text-sm font-semibold uppercase tracking-wide py-2 px-2 opacity-80" :style="categoryStyle">
+    <h2 v-if="title" class="text-sm font-semibold uppercase tracking-wide py-2 px-2" :style="categoryStyle">
       {{ title }}
     </h2>
     <div class="flex flex-col">

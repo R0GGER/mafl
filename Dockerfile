@@ -24,9 +24,13 @@ WORKDIR /app
 
 COPY --from=build /app/.output /app
 COPY --from=build /app/extra/healthcheck.mjs /app/extra/healthcheck.mjs
+COPY --from=build /app/extra/entrypoint.sh /app/extra/entrypoint.sh
+COPY --from=build /app/.example/config.yml /app/example/config.yml
+
+RUN chmod +x /app/extra/entrypoint.sh
 
 EXPOSE 3000/tcp
 
 HEALTHCHECK --interval=10s --timeout=5s --start-period=10s CMD ["node", "/app/extra/healthcheck.mjs"]
 
-CMD ["/app/server/index.mjs"]
+ENTRYPOINT ["/app/extra/entrypoint.sh"]
