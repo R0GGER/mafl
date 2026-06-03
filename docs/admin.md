@@ -1,6 +1,6 @@
 # Admin Panel
 
-MAFL+ includes a built-in admin panel at `/admin` that lets you edit `config.yml` through a visual config builder — directly on your running instance.
+MAFL+ includes a built-in admin panel at `/admin` that lets you edit `config.yml` through a visual config builder - directly on your running instance.
 
 ## Setup
 
@@ -13,36 +13,30 @@ The admin panel requires two environment variables in your `docker-compose.yml`:
 
 ### 1. Generate the password hash
 
-The admin password is stored as a scrypt hash in the format `salt:derivedKey` (hex-encoded). Choose any method below to generate it.
-
-**Using Docker (recommended — no local Node.js required):**
+The admin password is stored as a scrypt hash in the format `salt:derivedKey` (hex-encoded).
 
 ```bash
-docker run --rm node:22-alpine node -e \
-  "c=require('crypto'),s=c.randomBytes(16),c.scrypt(process.argv[1],s,64,(_,k)=>console.log(s.toString('hex')+':'+k.toString('hex')))" \
-  your-password
+docker run --rm -e generate=password_hash --pull=always ghcr.io/r0gger/maflpass your-password
 ```
 
-Output hash:
+Output:
 
 ```
-a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4:e7f8...long-hex-string...
+3bcc3fbe08603c0a9d37926070eb9819:94be2359db8900382bf5441881...
 ```
 
-### 2. Generate the session key
+### 2. Generate the session password
 
 `NUXT_SESSION_PASSWORD` encrypts the session cookie. It must be a random string of at least 32 characters.
 
-**Using Docker:**
-
 ```bash
-docker run --rm node:22-alpine node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+docker run --rm -e generate=session_password --pull=always ghcr.io/r0gger/maflpass
 ```
 
-**Using OpenSSL:**
+Output:
 
-```bash
-openssl rand -hex 32
+```
+2952f1dad4058fa80e24fb92fb99523289d081ba7012c3929007706bbaa77f08
 ```
 
 ### 3. Configure environment variables

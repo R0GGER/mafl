@@ -1,6 +1,25 @@
 # Changelog
 
 
+## Simplified secret generation with maflpass
+
+### 📖 Docs
+
+- **admin:** Replaced manual `node:22-alpine` one-liners for generating `NUXT_ADMIN_PASSWORD_HASH` and `NUXT_SESSION_PASSWORD` with the dedicated [`maflpass`](https://github.com/R0GGER/maflpass) Docker utility — no local Node.js or OpenSSL required
+
+### 🔧 Chore
+
+- Added `.gitattributes` with `* text=auto eol=lf` to enforce consistent LF line endings across all platforms
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `docs/admin.md` | Steps 1 & 2 now use `ghcr.io/r0gger/maflpass` commands instead of inline Node.js scripts; removed OpenSSL alternative |
+| `.gitattributes` | New file — enforces LF line endings for all text files |
+
+---
+
 ## Tab lock & collapsible tabs
 
 ### 🚀 Enhancements

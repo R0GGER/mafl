@@ -85,10 +85,10 @@ services:
       - ./mafl/:/app/data/
     environment:
       # Admin panel: generate hash with: 
-      # docker run --rm node:22-alpine node -e "c=require('crypto'),s=c.randomBytes(16),c.scrypt(process.argv[1],s,64,(_,k)=>console.log(s.toString('hex')+':'+k.toString('hex')))" your-password
+      # docker run --rm -e generate=password_hash --pull=always ghcr.io/r0gger/maflpass <your_password>
       - NUXT_ADMIN_PASSWORD_HASH=
       # Session encryption key (min 32 chars, random string)
-      # docker run --rm node:22-alpine node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+      # docker run --rm -e generate=session_password --pull=always ghcr.io/r0gger/maflpass
       - NUXT_SESSION_PASSWORD=
 ```
 
