@@ -4,27 +4,6 @@
 
 **Demo: https://maflplus.eu**
 
-![screenshot1.png](screenshot1.png)
-
-> **Note** — This is an independent fork. It is **not** affiliated with the upstream [hywax/mafl](https://github.com/hywax/mafl) project.
-> 
-## Key Features
-
-* **Privacy** — All requests to third-party services happen server-side.
-* **Real-time** — Interactive service cards with live status information.
-* **Search** — Filter bookmarks instantly; fall back to Google or DuckDuckGo.
-* **Tabs** — Organise services into switchable tabs (with optional lock protection).
-* **Admin Panel** — Built-in visual config editor at `/admin` with instant save & apply.
-* **Backgrounds** — Full-screen background images with color overlay.
-* **Themes** — Six built-in themes or full custom styling.
-* **Grid & List** — Two display modes per group with responsive columns.
-* **Modules** — Built-in widgets: Time, DateTime Weather, Greeting, Custom HTML, IP API, OpenWeatherMap.
-* **Tags** — Add tags to your services.
-* **Multi-language** — Automatic language detection with 10 locales.
-* **Docker** — Optimised container images with example config on first run.
-* **PWA** — Installable as a progressive web app.
-* **Config Builder** — [Visual editor](https://config.maflplus.eu/) for creating and editing your `config.yml`.
-
 ## Quick Start
 
 ```yaml
