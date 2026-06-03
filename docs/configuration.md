@@ -202,6 +202,45 @@ Default: `google`
 - Use `Arrow Up` / `Arrow Down` to navigate results
 - Press `Enter` to open the selected result
 
+## Tabs
+
+Split your services across multiple tabs. Each tab has a name, an optional icon and its own set of service groups.
+
+```yaml
+tabs:
+  - name: Personal
+    icon: mdi:home
+    services:
+      Favorites:
+        display: grid
+        items:
+          - title: GitHub
+            link: https://github.com
+  - name: Work
+    icon: mdi:briefcase
+    locked: true
+    services:
+      Tools:
+        display: list
+        items:
+          - title: Grafana
+            link: https://grafana.local
+```
+
+When `tabs` is defined the top-level `services` key is ignored.
+
+### Tab lock
+
+Add `locked: true` to a tab to protect it from accidental deletion. A locked tab also protects its groups and items — delete buttons are hidden in the admin panel.
+
+```yaml
+tabs:
+  - name: Personal
+    icon: mdi:home
+    locked: true
+    services: ...
+```
+
 ## Tags 
 
 Tags allow you to differentiate between services.
@@ -214,7 +253,7 @@ tags:
     color: blue
 ```
 
-More info in: Tags
+More info in: [Tags](tags.md)
 
 ## Layout
 
@@ -368,6 +407,40 @@ services:
 The column count for each mode is configured separately in the [Layout](#layout) section (`layout.grid` and `layout.list`).
 
 > **Note** — The `services` key is required. Without it the homepage will not render.
+
+## Grid Span
+
+Any service item can span multiple grid columns using the `span` property:
+
+```yaml
+services:
+  Widgets:
+    display: grid
+    items:
+      - type: time
+        span: 2
+        options:
+          timezone: Europe/Amsterdam
+      - title: Normal item
+        link: https://example.com
+```
+
+This works for all service types and modules.
+
+## Footer
+
+Display content at the bottom of every page. Both fields are optional — the footer is only shown when at least one is configured.
+
+```yaml
+footer:
+  text: "© 2026 My Dashboard"
+  html: '<p>Powered by <a href="https://github.com/R0GGER/maflplus" style="color:white;">MAFL+</a></p>'
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `text` | `string` | Plain text displayed in the footer |
+| `html` | `string` | Custom HTML content rendered in the footer |
 
 ## Demo: config.yml 
 

@@ -13,6 +13,7 @@
 * [Features](#-features)
 * [Getting started](#-getting-started)
   * [Docker](#docker)
+  * [maflpass](#maflpass)
 * [Configuration](#%EF%B8%8F-configuration)
   * [Layout](#layout)
   * [Styles](#styles)
@@ -23,6 +24,8 @@
   * [Display modes](#display-modes)
   * [Favicon API](#favicon-api)
   * [Status indicator](#status-indicator)
+  * [Footer](#footer)
+* [Admin Panel](#-admin-panel)
 * [Services](#-services)
 * [Icons](#-icons)
 * [Themes](#-themes)
@@ -41,29 +44,34 @@ This fork adds several features on top of the original [Mafl](https://github.com
 | **Layout: List** | Compact list display mode per group, with its own column configuration. |
 | **Layout: Spacing** | Configurable spacing between groups and between items. |
 | **Styles** | Per-element styling for category headers, titles and descriptions (color, fontSize, fontWeight, fontStyle, etc.). |
-| **Logo** | Fixed responsive logo in the top-left corner, served from the data volume. |
+| **Logo** | Fixed responsive logo in the top-left corner — image file or text/letter with full typographic control. |
 | **Background image** | Full-screen background image served from the data volume. |
 | **Background overlay** | Color overlay with configurable opacity for better text readability. |
-| **Tabs** | Organise services into switchable tabs, each with its own icon. |
+| **Tabs** | Organise services into switchable tabs, each with its own icon. Tabs can be locked to prevent deletion. |
 | **Search bar** | Filters bookmarks across all tabs; falls back to Google or DuckDuckGo web search. Keyboard shortcuts: `/`, `Ctrl+K`. |
-| **Favicon API** | Retrieve service icons automatically via a configurable favicon API. |
+| **Favicon API** | Retrieve service icons automatically via a configurable favicon API with server-side proxy cache. |
 | **Status position** | Align the status indicator to the `left` or `right` (default) of a service. |
-| **Check updates** | Temporarily disabled in this fork. |
+| **Admin Panel** | Built-in visual config editor at `/admin` with instant save & apply. |
+| **Modules** | Time, DateTime Weather, Greeting, Custom HTML widgets. |
+| **Grid span** | Any service item can span multiple grid columns. |
+| **Footer** | Global footer with text and/or HTML content. |
 
 ## 🎯 Features
 
 * 🔐 **Privacy** — All requests to third-party services happen server-side.
 * ⚡ **Real-time** — Interactive service cards with live status information.
 * 🔍 **Search** — Filter bookmarks instantly; fall back to Google or DuckDuckGo.
-* 📑 **Tabs** — Organise services into switchable tabs.
+* 📑 **Tabs** — Organise services into switchable tabs with lock protection.
+* 🛡️ **Admin Panel** — Built-in config editor at `/admin` with secure login.
 * 🖼️ **Backgrounds** — Full-screen background images with color overlay.
 * 🎨 **Themes** — Six built-in themes or full custom styling.
 * 🗂️ **Grouping** — Grid and list display modes per group.
+* 📦 **Modules** — Time, DateTime Weather, Greeting, Custom HTML, IP API, OpenWeatherMap.
 * 🏷️ **Tags** — Add tags to your services.
 * 🌎 **Multi-language** — Automatic language detection with 10 locales.
 * 👌 **Easy setup** — A few lines of YAML and your homepage is ready.
 * 🚀 **Fast** — Powered by Nuxt 3 — everything is snappy.
-* 🐳 **Docker** — Optimised container images.
+* 🐳 **Docker** — Optimised container images with example config on first run.
 * ✨ **Free & open source** — MIT licensed.
 * 📲 **PWA** — Installable as a progressive web app.
 * 🛠️ **[Config Builder](https://config.maflplus.eu/)** — Visual editor for creating and editing your `config.yml` — no server required.
@@ -92,7 +100,25 @@ services:
       - NUXT_SESSION_PASSWORD=
 ```
 
-Place your [config.yml](.example/config.yml) (and optional background images) inside the `./mafl/` directory. 
+Place your [config.yml](.example/config.yml) (and optional background images) inside the `./mafl/` directory. On first run, if no `config.yml` exists, an example configuration is automatically created for you.
+
+### maflpass
+
+[**maflpass**](https://github.com/R0GGER/maflpass) is a lightweight Docker utility for generating the secrets needed by the admin panel — no local Node.js or OpenSSL required.
+
+**Generate the admin password hash:**
+
+```bash
+docker run --rm -e generate=password_hash --pull=always ghcr.io/r0gger/maflpass <your_password>
+```
+
+**Generate the session password:**
+
+```bash
+docker run --rm -e generate=session_password --pull=always ghcr.io/r0gger/maflpass
+```
+
+Paste the output into the corresponding environment variables in your `docker-compose.yml`.
 
 ## ⚙️ Configuration
 
@@ -143,13 +169,29 @@ Supported properties: `fontFamily`, `fontSize`, `fontWeight`, `fontStyle`, `text
 
 ### Logo
 
-Display a logo in the top-left corner of the homepage. Place the image file in your data volume (next to `config.yml`). The logo is fixed-positioned and scales responsively across mobile, tablet and desktop.
+Display a logo in the top-left corner of the homepage. You can use an **image file** or a **text/letter logo**.
+
+**Image logo** — place the file in your data volume (next to `config.yml`):
 
 ```yaml
 logo: logo.png
 ```
 
-Supported formats: `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.svg`, `.avif`
+**Text logo** — display a text string with full typographic control:
+
+```yaml
+logo:
+  type: text
+  text: "M+"
+  fontSize: 1.5rem
+  fontWeight: 700
+  color: "#ffffff"
+  backgroundColor: "#3b82f6"
+  borderRadius: 0.5rem
+  padding: 0.25rem 0.5rem
+```
+
+Supported image formats: `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.svg`, `.avif`
 
 ### Background
 
@@ -202,6 +244,7 @@ tabs:
               favicon: news.ycombinator.com
   - name: Work
     icon: mdi:briefcase
+    locked: true
     services:
       Tools:
         display: list
@@ -213,7 +256,7 @@ tabs:
               color: '#f46800'
 ```
 
-When `tabs` is defined the top-level `services` key is ignored.
+When `tabs` is defined the top-level `services` key is ignored. Add `locked: true` to protect a tab from accidental deletion.
 
 ### Search
 
@@ -275,6 +318,8 @@ icon:
   favicon: github.com
 ```
 
+Favicons are cached server-side (7 days per domain) for performance and privacy.
+
 ### Status indicator
 
 Enable a live ping indicator per service. The position can be set to `left` or `right` (default).
@@ -288,14 +333,44 @@ Enable a live ping indicator per service. The position can be set to `left` or `
     animation: true
 ```
 
+### Footer
+
+Display content at the bottom of every page.
+
+```yaml
+footer:
+  text: "© 2026 My Dashboard"
+  html: '<p>Powered by <a href="https://github.com/R0GGER/maflplus">MAFL+</a></p>'
+```
+
+## 🛡️ Admin Panel
+
+A built-in visual config editor at `/admin` for editing your `config.yml` directly from the browser. Changes are saved and applied instantly.
+
+**Features:**
+* Global settings, layout, styles, tabs, tags and per-item editing
+* Tab lock — protect tabs from accidental deletion
+* Collapsible tabs for easier navigation
+* Reorder groups and items with ▲/▼ buttons
+* Auto-fill favicon domain from link URL
+* Browse icons links (Iconify, emoji, selfh.st, dashboardicons)
+* Module configuration (Time, DateTime Weather, Greeting, Custom HTML, IP API, OpenWeatherMap)
+* Secure login with scrypt password hashing and encrypted sessions
+
+**Setup:** generate secrets with [maflpass](#maflpass) and set the `NUXT_ADMIN_PASSWORD_HASH` and `NUXT_SESSION_PASSWORD` environment variables. See the [full documentation](docs/admin.md).
+
 ## 📊 Services
 
-Services are the building blocks of your homepage. Each service can have a title, description, link, icon, status indicator and tags.
+Services are the building blocks of your homepage. Each service can have a title, description, link, icon, status indicator, tags and an optional `span` for multi-column width.
 
 Built-in service types:
 * **Base** — Standard card with icon, title, description and optional status ping.
 * **IP API** — Displays your public IP address information.
 * **OpenWeatherMap** — Shows current weather for a given location.
+* **Time** — Live clock with date for any IANA timezone.
+* **DateTime Weather** — Combined clock and weather widget.
+* **Greeting** — Custom greeting message with optional subtitle.
+* **Custom HTML** — Render arbitrary HTML content (including scripts).
 
 ## 🖼 Icons
 
@@ -334,9 +409,11 @@ A standalone visual tool for creating and editing your `config.yml` - no server 
 **Open** the [Config Builder](https://config.maflplus.eu/) in your browser.
 
 Features:
-* Edit all global settings (title, language, theme, background, search, etc.)
+* Edit all global settings (title, language, theme, background, search, footer, etc.)
 * Add and reorder tabs, groups and bookmarks
 * Configure icons (favicon, URL or Iconify name with color)
+* Configure modules (Time, DateTime Weather, Greeting, Custom HTML, IP API, OpenWeatherMap)
+* Grid span setting per service item
 * Import an existing `config.yml` to modify it
 * Live YAML preview with one-click copy to clipboard
 * Light and dark theme

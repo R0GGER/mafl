@@ -1,6 +1,6 @@
 # Admin Panel
 
-MAFL+ includes a built-in admin panel at `/admin` that lets you edit `config.yml` through a visual config builder - directly on your running instance.
+MAFL+ includes a built-in admin panel at `/admin` that lets you edit `config.yml` through a visual config builder — directly on your running instance.
 
 ## Setup
 
@@ -10,6 +10,8 @@ The admin panel requires two environment variables in your `docker-compose.yml`:
 |---|---|
 | `NUXT_ADMIN_PASSWORD_HASH` | Scrypt hash of your admin password |
 | `NUXT_SESSION_PASSWORD` | Random key (min 32 chars) to encrypt session cookies |
+
+Both secrets are generated with [**maflpass**](https://github.com/R0GGER/maflpass), a lightweight Docker utility — no local Node.js or OpenSSL required.
 
 ### 1. Generate the password hash
 
@@ -63,6 +65,26 @@ docker compose up -d
 4. Edit settings, tabs, groups, and services using the form
 5. Click **Save & Apply** — changes are validated and written to `config.yml`
 6. The dashboard reloads automatically via WebSocket hot-reload
+
+## Features
+
+The admin panel provides a full visual config builder with the following capabilities:
+
+| Feature | Description |
+|---------|-------------|
+| **Global Settings** | Title, language, theme, logo (image or text), background, overlay, search provider |
+| **Layout & Styles** | Grid/list columns, spacing, category/title/description typography |
+| **Tabs** | Add, rename, reorder and delete tabs with custom icons |
+| **Tab lock** | Lock a tab to prevent accidental deletion — also protects its groups and items |
+| **Collapsible tabs** | Click ▸/▾ to expand or collapse a tab's content for easier navigation |
+| **Groups (categories)** | Add, rename, reorder (▲/▼) and delete groups within each tab |
+| **Service items** | Full editing of title, description, link, icon, status, tags and module options |
+| **Icon types** | Name (Iconify/emoji), URL, local file, or favicon — with browse links |
+| **Auto-fill favicon** | When icon type is "favicon", the domain is automatically extracted from the link URL |
+| **Modules** | Configure Time, DateTime Weather, Greeting, Custom HTML, IP API and OpenWeatherMap |
+| **Tags** | Add and manage global tags |
+| **Footer** | Configure footer text and/or HTML content |
+| **Live preview** | Text logo preview updates in real-time as you type |
 
 ## Security
 

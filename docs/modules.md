@@ -203,6 +203,54 @@ services:
 
 ---
 
+## OpenWeatherMap
+
+Displays the current weather for a given location using [OpenWeatherMap](https://openweathermap.org/). Shows temperature and weather condition. Requires an API key.
+
+### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `lat` | `number` | *required* | Latitude of the location |
+| `lon` | `number` | *required* | Longitude of the location |
+| `units` | `string` | `metric` | Temperature units: `metric` (°C), `imperial` (°F), or `standard` (K) |
+
+### Secrets
+
+| Secret | Type | Description |
+|--------|------|-------------|
+| `apiKey` | `string` | OpenWeatherMap API key ([get one here](https://home.openweathermap.org/api_keys)) |
+
+### Examples
+
+#### Basic usage
+
+```yaml
+services:
+  - type: openweathermap
+    options:
+      lat: 52.370216
+      lon: 4.895168
+      units: metric
+    secrets:
+      apiKey: your-api-key
+```
+
+#### Imperial units
+
+```yaml
+services:
+  - type: openweathermap
+    options:
+      lat: 40.712776
+      lon: -74.005974
+      units: imperial
+    secrets:
+      apiKey: your-api-key
+```
+
+---
+
 ## IP API
 
 Shows information about your IP address, including a country flag icon based on your location.
