@@ -62,6 +62,7 @@
           :add-tab="addTab"
           :remove-tab="removeTab"
           :toggle-tab-lock="toggleTabLock"
+          :toggle-tab-hidden="toggleTabHidden"
           :add-group="addGroup"
           :remove-group="removeGroup"
           :add-item="addItem"
@@ -114,6 +115,7 @@ const {
   addTab,
   removeTab,
   toggleTabLock,
+  toggleTabHidden,
   addGroup,
   removeGroup,
   addItem,

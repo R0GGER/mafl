@@ -75,6 +75,7 @@ The admin panel provides a full visual config builder with the following capabil
 | **Global Settings** | Title, language, theme, logo (image or text), background, overlay, search provider |
 | **Layout & Styles** | Grid/list columns, spacing, category/title/description typography |
 | **Tabs** | Add, rename, reorder and delete tabs with custom icons |
+| **Tab visibility** | Toggle the eye icon to hide/show a tab on the frontpage — hidden tabs remain editable in admin |
 | **Tab lock** | Lock a tab to prevent accidental deletion — also protects its groups and items |
 | **Collapsible tabs** | Click ▸/▾ to expand or collapse a tab's content for easier navigation |
 | **Groups (categories)** | Add, rename, reorder (▲/▼) and delete groups within each tab |

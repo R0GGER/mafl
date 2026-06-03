@@ -56,6 +56,7 @@ export interface BackgroundOverlay {
 export interface Tab {
   name: string
   icon?: string
+  hidden?: boolean
   services: ServicesGroup[]
 }
 

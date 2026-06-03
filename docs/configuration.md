@@ -241,6 +241,23 @@ tabs:
     services: ...
 ```
 
+### Tab visibility
+
+Add `hidden: true` to a tab to hide it from the frontpage. The tab remains in the config and can still be edited in the admin panel, but it will not appear in the tab navigation or display any services to users.
+
+```yaml
+tabs:
+  - name: Personal
+    icon: mdi:home
+    services: ...
+  - name: Staging
+    icon: mdi:flask
+    hidden: true
+    services: ...
+```
+
+In the admin panel, use the eye icon toggle to show or hide a tab.
+
 ## Tags 
 
 Tags allow you to differentiate between services.

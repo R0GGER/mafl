@@ -136,9 +136,10 @@ export async function loadConfig(): Promise<CompleteConfig> {
     let tabs: Tab[] = []
 
     if (Array.isArray(config.tabs) && config.tabs.length > 0) {
-      tabs = config.tabs.map((tab: { name: string; icon?: string; services: unknown }) => ({
+      tabs = config.tabs.map((tab: { name: string; icon?: string; hidden?: boolean; services: unknown }) => ({
         name: tab.name,
         icon: tab.icon,
+        hidden: tab.hidden || false,
         services: parseRawServices(tab.services, tags),
       }))
       services = tabs[0].services

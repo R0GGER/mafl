@@ -1,6 +1,44 @@
 # Changelog
 
 
+## Hide tab bar when only one tab
+
+### 🚀 Enhancements
+
+- **frontpage:** Tab navigation bar is now automatically hidden when only a single tab is configured — the tab's services are displayed directly without unnecessary UI clutter
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/layouts/default.vue` | Changed `v-if="tabs.length > 0"` to `v-if="tabs.length > 1"` so the tab bar only appears with 2+ tabs |
+
+---
+
+## Hide tabs from frontpage
+
+### 🚀 Enhancements
+
+- **admin:** Tabs can now be hidden from the frontpage — they remain in the config but are not visible to users
+- **admin:** Added an eye icon toggle in the Tabs & Services section (open eye = visible, crossed-out eye = hidden)
+- **config:** `hidden: true` property is persisted in the YAML config and restored on load
+- **frontpage:** Hidden tabs are filtered out of the tab navigation and service display
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/types/config.d.ts` | Added `hidden?: boolean` to the `Tab` interface |
+| `src/composables/useConfigBuilder.ts` | Added `hidden` to `BuilderTab`; added `toggleTabHidden` function; YAML import/export handles `hidden` |
+| `src/components/admin/TabsEditor.vue` | Added eye icon toggle button with visible/hidden states; accepts `toggleTabHidden` prop |
+| `src/pages/admin/index.vue` | Destructured and passed `toggleTabHidden` to `AdminTabsEditor` |
+| `src/plugins/settings.ts` | Filters hidden tabs before providing them to the app |
+| `src/layouts/default.vue` | Uses only visible tabs for the tab navigation |
+| `src/server/utils/config.ts` | Passes `hidden` property through when loading config from YAML |
+| `src/server/validations/config.ts` | Added `hidden: z.boolean().optional()` to the tab validation schema |
+
+---
+
 ## Simplified secret generation with maflpass
 
 ### 📖 Docs

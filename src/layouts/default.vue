@@ -28,9 +28,9 @@
       <div class="pt-6 pb-2">
         <SearchBar />
       </div>
-      <nav v-if="tabs.length > 0" class="flex items-center gap-1 pb-4 overflow-x-auto scrollbar-hide">
+      <nav v-if="visibleTabs.length > 1" class="flex items-center gap-1 pb-4 overflow-x-auto scrollbar-hide">
         <button
-          v-for="(tab, idx) in tabs"
+          v-for="(tab, idx) in visibleTabs"
           :key="tab.name"
           class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all"
           :class="idx === activeTabIndex
@@ -53,7 +53,7 @@ import type { Tab, LogoText } from '~/types'
 
 const { $settings, $tabs, $activeTabIndex } = useNuxtApp()
 
-const tabs = $tabs as Tab[]
+const visibleTabs = $tabs as Tab[]
 const activeTabIndex = $activeTabIndex as Ref<number>
 
 const overlay = computed(() => ({

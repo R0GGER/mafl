@@ -50,6 +50,7 @@ const servicesSchema = z.union([
 const tabSchema = z.object({
   name: z.string(),
   icon: z.string().optional(),
+  hidden: z.boolean().optional(),
   services: servicesSchema,
 })
 

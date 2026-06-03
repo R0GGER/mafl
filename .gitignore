@@ -27,4 +27,4 @@ logs
 mafl/
 
 # dev files
-#docker-compose.yml
+docker-compose.yml

@@ -17,9 +17,11 @@ export default defineNuxtPlugin(async () => {
 
   const activeTabIndex = useState('activeTabIndex', () => 0)
 
+  const visibleTabs = tabs ? tabs.filter(tab => !tab.hidden) : []
+
   const activeServices = computed(() => {
-    if (tabs && tabs.length > 0) {
-      return tabs[activeTabIndex.value]?.services ?? []
+    if (visibleTabs.length > 0) {
+      return visibleTabs[activeTabIndex.value]?.services ?? []
     }
     return services
   })
@@ -28,7 +30,7 @@ export default defineNuxtPlugin(async () => {
     provide: {
       services,
       settings,
-      tabs: tabs ?? [],
+      tabs: visibleTabs,
       activeTabIndex,
       activeServices,
     },
