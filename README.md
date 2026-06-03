@@ -1,11 +1,12 @@
 <h1 align="center">Mafl+</h1>
 <p align="center">
-  <i>A minimalistic and flexible homepage dashboard - forked from <a href="https://github.com/hywax/mafl">hywax/mafl</a> with extended layout options, search, tabs and more.</i><br><br>
+  <i>A minimalistic and flexible homepage dashboard with extended layout options, search, tabs and more...</i><br><br>
   <img src="docs/screenshots/screenshot1.png"></img><br>  
   <a href="docs/screenshots/screenshot2.png">screenshot 2</a> | <a href="docs/screenshots/screenshot3.png">screenshot 3</a>
 </p>
 
-> **Note** — This is an independent fork. It is **not** affiliated with the upstream [hywax/mafl](https://github.com/hywax/mafl) project.
+
+> **Note!** This is an independent fork. It is **not** affiliated with the upstream [hywax/mafl](https://github.com/hywax/mafl) project.
 
 
 ## Table of Contents
@@ -44,7 +45,7 @@ This fork adds several features on top of the original [Mafl](https://github.com
 | **Layout: List** | Compact list display mode per group, with its own column configuration. |
 | **Layout: Spacing** | Configurable spacing between groups and between items. |
 | **Styles** | Per-element styling for category headers, titles and descriptions (color, fontSize, fontWeight, fontStyle, etc.). |
-| **Logo** | Fixed responsive logo in the top-left corner — image file or text/letter with full typographic control. |
+| **Logo** | Fixed responsive logo in the top-left corner - image file or text/letter with full typographic control. |
 | **Background image** | Full-screen background image served from the data volume. |
 | **Background overlay** | Color overlay with configurable opacity for better text readability. |
 | **Tabs** | Organise services into switchable tabs, each with its own icon. Tabs can be locked to prevent deletion, hidden from the frontpage, and linked directly via URL hash (e.g. `/#work`). |
@@ -58,23 +59,23 @@ This fork adds several features on top of the original [Mafl](https://github.com
 
 ## 🎯 Features
 
-* 🔐 **Privacy** — All requests to third-party services happen server-side.
-* ⚡ **Real-time** — Interactive service cards with live status information.
-* 🔍 **Search** — Filter bookmarks instantly; fall back to Google or DuckDuckGo.
-* 📑 **Tabs** — Organise services into switchable tabs with lock protection, visibility toggle and deep linking via URL hash.
-* 🛡️ **Admin Panel** — Built-in config editor at `/admin` with secure login.
-* 🖼️ **Backgrounds** — Full-screen background images with color overlay.
-* 🎨 **Themes** — Six built-in themes or full custom styling.
-* 🗂️ **Grouping** — Grid and list display modes per group.
-* 📦 **Modules** — Time, DateTime Weather, Greeting, Custom HTML, IP API, OpenWeatherMap.
-* 🏷️ **Tags** — Add tags to your services.
-* 🌎 **Multi-language** — Automatic language detection with 10 locales.
-* 👌 **Easy setup** — A few lines of YAML and your homepage is ready.
-* 🚀 **Fast** — Powered by Nuxt 3 — everything is snappy.
-* 🐳 **Docker** — Optimised container images with example config on first run.
-* ✨ **Free & open source** — MIT licensed.
-* 📲 **PWA** — Installable as a progressive web app.
-* 🛠️ **[Config Builder](https://config.maflplus.eu/)** — Visual editor for creating and editing your `config.yml` — no server required.
+* 🔐 **Privacy** - All requests to third-party services happen server-side.
+* ⚡ **Real-time** - Interactive service cards with live status information.
+* 🔍 **Search** - Filter bookmarks instantly; fall back to Google or DuckDuckGo.
+* 📑 **Tabs** - Organise services into switchable tabs with lock protection, visibility toggle and deep linking via URL hash.
+* 🛡️ **Admin Panel** - Built-in config editor at `/admin` with secure login.
+* 🖼️ **Backgrounds** - Full-screen background images with color overlay.
+* 🎨 **Themes** - Six built-in themes or full custom styling.
+* 🗂️ **Grouping** - Grid and list display modes per group.
+* 📦 **Modules** - Time, DateTime Weather, Greeting, Custom HTML, IP API, OpenWeatherMap.
+* 🏷️ **Tags** - Add tags to your services.
+* 🌎 **Multi-language** - Automatic language detection with 10 locales.
+* 👌 **Easy setup** - A few lines of YAML and your homepage is ready.
+* 🚀 **Fast** - Powered by Nuxt 3 - everything is snappy.
+* 🐳 **Docker** - Optimised container images with example config on first run.
+* ✨ **Free & open source** - MIT licensed.
+* 📲 **PWA** - Installable as a progressive web app.
+* 🛠️ **[Config Builder](https://config.maflplus.eu/)** - Visual editor for creating and editing your `config.yml` - no server required.
 
 ## 🚀 Getting started
 
@@ -104,7 +105,7 @@ Place your [config.yml](.example/config.yml) (and optional background images) in
 
 ### maflpass
 
-[**maflpass**](https://github.com/R0GGER/maflpass) is a lightweight Docker utility for generating the secrets needed by the admin panel — no local Node.js or OpenSSL required.
+[**maflpass**](https://github.com/R0GGER/maflpass) is a lightweight Docker utility for generating the secrets needed by the admin panel - no local Node.js or OpenSSL required.
 
 **Generate the admin password hash:**
 
@@ -171,13 +172,13 @@ Supported properties: `fontFamily`, `fontSize`, `fontWeight`, `fontStyle`, `text
 
 Display a logo in the top-left corner of the homepage. You can use an **image file** or a **text/letter logo**.
 
-**Image logo** — place the file in your data volume (next to `config.yml`):
+**Image logo** - place the file in your data volume (next to `config.yml`):
 
 ```yaml
 logo: logo.png
 ```
 
-**Text logo** — display a text string with full typographic control:
+**Text logo** - display a text string with full typographic control:
 
 ```yaml
 logo:
@@ -277,7 +278,7 @@ A search bar is displayed at the top of every page. It filters bookmarks across 
 searchProvider: google
 ```
 
-Values: `google`, `duckduckgo` — Default: `google`
+Values: `google`, `duckduckgo` - Default: `google`
 
 **Keyboard shortcuts:**
 | Key | Action |
@@ -360,7 +361,7 @@ A built-in visual config editor at `/admin` for editing your `config.yml` direct
 
 **Features:**
 * Global settings, layout, styles, tabs, tags and per-item editing
-* Tab lock — protect tabs from accidental deletion
+* Tab lock - protect tabs from accidental deletion
 * Collapsible tabs for easier navigation
 * Reorder groups and items with ▲/▼ buttons
 * Auto-fill favicon domain from link URL
@@ -375,13 +376,13 @@ A built-in visual config editor at `/admin` for editing your `config.yml` direct
 Services are the building blocks of your homepage. Each service can have a title, description, link, icon, status indicator, tags and an optional `span` for multi-column width.
 
 Built-in service types:
-* **Base** — Standard card with icon, title, description and optional status ping.
-* **IP API** — Displays your public IP address information.
-* **OpenWeatherMap** — Shows current weather for a given location.
-* **Time** — Live clock with date for any IANA timezone.
-* **DateTime Weather** — Combined clock and weather widget.
-* **Greeting** — Custom greeting message with optional subtitle.
-* **Custom HTML** — Render arbitrary HTML content (including scripts).
+* **Base** - Standard card with icon, title, description and optional status ping.
+* **IP API** - Displays your public IP address information.
+* **OpenWeatherMap** - Shows current weather for a given location.
+* **Time** - Live clock with date for any IANA timezone.
+* **DateTime Weather** - Combined clock and weather widget.
+* **Greeting** - Custom greeting message with optional subtitle.
+* **Custom HTML** - Render arbitrary HTML content (including scripts).
 
 ## 🖼 Icons
 
@@ -436,4 +437,4 @@ A step-by-step guide covering installation, configuration (layout, styles, backg
 
 This project is open-source software licensed under the [MIT license](LICENSE).
 
-Based on [hywax/mafl](https://github.com/hywax/mafl) — thank you to the original author and all contributors.
+Based on [hywax/mafl](https://github.com/hywax/mafl) - thank you to the original author and all contributors.
