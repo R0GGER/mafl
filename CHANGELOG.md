@@ -1,6 +1,25 @@
 # Changelog
 
 
+## Config Builder feature parity with /admin editor
+
+### 🚀 Enhancements
+
+- **config-builder:** Added global Card Style section to Styles — matches the admin's `styles.card` editor with background color, opacity, blur (glassmorphism), border (width, style, color, radius) and padding
+- **config-builder:** Added per-group Card Style Override — each group now has a "card" toggle button that opens a collapsible panel with all card style fields and a reset button, matching the admin's per-group override
+- **config-builder:** Added Tab locked/hidden toggles — each tab now shows "visible/hidden" and "lock/unlock" buttons matching the admin's eye and lock icons
+- **config-builder:** Locked tabs protect their groups and items from deletion (remove buttons hidden)
+- **config-builder:** Added "Browse icons" links for the name icon type — links to [iconify.design](https://icon-sets.iconify.design/) and [getemoji.com](https://getemoji.com/), matching the admin's icon browse links
+- **config-builder:** Full YAML round-trip for all new fields — `locked`, `hidden`, `styles.card`, and per-group `card` are generated, imported, and reset correctly
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `config-builder/index.html` | Added `emptyCardStyle()`, `serializeCardStyle()`, `parseCardStyle()` helpers; added `renderCardStyleFields()` for global card UI; added `renderGroupCardPanel()` for per-group card override; added `toggleTabLock()`, `toggleTabHidden()`, `toggleGroupCard()`, `resetGroupCard()` functions; updated `addTab` with `locked`/`hidden`, `addGroup` with `card`; updated `renderTabs` with lock/hidden buttons, `renderGroup` with card toggle and panel, `renderItem` with locked-aware delete and icon browse links; updated `generateYaml` for `styles.card`, `tab.locked/hidden`, `group.card`; updated `loadConfig` with `parseCardStyle` and `loadCardStyleToUI`; updated `resetAll` for card state |
+
+---
+
 ## Group card styling
 
 ### 🚀 Enhancements

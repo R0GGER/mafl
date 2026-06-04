@@ -319,6 +319,10 @@
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="style-description"></div>
             </div>
           </div>
+          <div class="mt-3 border-t border-gray-700 pt-3">
+            <label class="block text-xs text-gray-300 font-medium mb-2">Card (global default)</label>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="style-card"></div>
+          </div>
         </div>
       </section>
 
@@ -371,11 +375,16 @@
 <script>
 const TAG_COLORS = ['red','orange','amber','yellow','lime','green','emerald','teal','cyan','sky','blue','indigo','violet','purple','fuchsia','pink','rose'];
 
-let state = { tags: [], tabs: [] };
+function emptyCardStyle() {
+  return { backgroundColor: '', opacity: '', blur: '', borderWidth: '', borderStyle: '', borderColor: '', borderRadius: '', padding: '' };
+}
+
+let state = { tags: [], tabs: [], cardStyle: emptyCardStyle() };
 
 // --- Initialization ---
 function init() {
   renderStyleFields();
+  renderCardStyleFields();
   generateYaml();
   setupDragDrop();
   document.getElementById('file-import').addEventListener('change', handleFileImport);
@@ -407,6 +416,47 @@ function syncColorFromText(textInput, el) {
   }
 }
 
+function renderCardStyleFields() {
+  const c = document.getElementById('style-card');
+  c.innerHTML = `
+    <div><label class="text-xs text-gray-500">Background Color</label><div class="flex gap-1"><input type="color" id="card-bgColor" value="#000000" class="w-8 h-7 rounded" oninput="state.cardStyle.backgroundColor=this.value; document.getElementById('card-bgColorText').value=this.value; generateYaml()"><input type="text" id="card-bgColorText" placeholder="#1a1a2e" class="flex-1 bg-surface border border-gray-600 rounded px-2 py-1 text-xs" oninput="state.cardStyle.backgroundColor=this.value; if(/^#[0-9a-fA-F]{6}$/.test(this.value)) document.getElementById('card-bgColor').value=this.value; generateYaml()"></div></div>
+    <div><label class="text-xs text-gray-500">Opacity</label><div class="flex gap-1 items-center"><input type="range" id="card-opacity" min="0" max="1" step="0.05" value="0" class="flex-1" oninput="state.cardStyle.opacity=this.value; document.getElementById('card-opacity-val').textContent=this.value; generateYaml()"><span id="card-opacity-val" class="text-[10px] text-gray-400 w-6 text-right">--</span></div></div>
+    <div><label class="text-xs text-gray-500">Blur (glass)</label><div class="flex gap-1 items-center"><input type="range" id="card-blur" min="0" max="30" step="1" value="0" class="flex-1" oninput="state.cardStyle.blur=this.value+'px'; document.getElementById('card-blur-val').textContent=this.value+'px'; generateYaml()"><span id="card-blur-val" class="text-[10px] text-gray-400 w-8 text-right">--</span></div></div>
+    <div><label class="text-xs text-gray-500">Border Width</label><input type="text" id="card-borderWidth" placeholder="1px" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-xs" oninput="state.cardStyle.borderWidth=this.value; generateYaml()"></div>
+    <div><label class="text-xs text-gray-500">Border Style</label><select id="card-borderStyle" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-xs" onchange="state.cardStyle.borderStyle=this.value; generateYaml()"><option value="">--</option><option value="none">none</option><option value="solid">solid</option><option value="dashed">dashed</option><option value="dotted">dotted</option><option value="double">double</option></select></div>
+    <div><label class="text-xs text-gray-500">Border Color</label><div class="flex gap-1"><input type="color" id="card-borderColor" value="#ffffff" class="w-8 h-7 rounded" oninput="state.cardStyle.borderColor=this.value; document.getElementById('card-borderColorText').value=this.value; generateYaml()"><input type="text" id="card-borderColorText" placeholder="rgba(255,255,255,0.2)" class="flex-1 bg-surface border border-gray-600 rounded px-2 py-1 text-xs" oninput="state.cardStyle.borderColor=this.value; if(/^#[0-9a-fA-F]{6}$/.test(this.value)) document.getElementById('card-borderColor').value=this.value; generateYaml()"></div></div>
+    <div><label class="text-xs text-gray-500">Border Radius</label><input type="text" id="card-borderRadius" placeholder="0.5rem" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-xs" oninput="state.cardStyle.borderRadius=this.value; generateYaml()"></div>
+    <div><label class="text-xs text-gray-500">Padding</label><input type="text" id="card-padding" placeholder="1rem" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-xs" oninput="state.cardStyle.padding=this.value; generateYaml()"></div>
+  `;
+}
+
+function serializeCardStyle(card) {
+  const c = {};
+  if (card.backgroundColor) c.backgroundColor = card.backgroundColor;
+  if (card.opacity) c.opacity = parseFloat(card.opacity);
+  if (card.blur) c.blur = card.blur;
+  if (card.borderWidth) c.borderWidth = card.borderWidth;
+  if (card.borderStyle) c.borderStyle = card.borderStyle;
+  if (card.borderColor) c.borderColor = card.borderColor;
+  if (card.borderRadius) c.borderRadius = card.borderRadius;
+  if (card.padding) c.padding = card.padding;
+  return Object.keys(c).length ? c : null;
+}
+
+function parseCardStyle(raw) {
+  const card = emptyCardStyle();
+  if (!raw || typeof raw !== 'object') return card;
+  if (raw.backgroundColor) card.backgroundColor = raw.backgroundColor;
+  if (raw.opacity != null) card.opacity = String(raw.opacity);
+  if (raw.blur) card.blur = raw.blur;
+  if (raw.borderWidth) card.borderWidth = raw.borderWidth;
+  if (raw.borderStyle) card.borderStyle = raw.borderStyle;
+  if (raw.borderColor) card.borderColor = raw.borderColor;
+  if (raw.borderRadius) card.borderRadius = raw.borderRadius;
+  if (raw.padding) card.padding = raw.padding;
+  return card;
+}
+
 // --- Tags ---
 function addTag(name = '', color = 'blue') {
   state.tags.push({ name, color });
@@ -434,25 +484,39 @@ function renderTags() {
 }
 
 // --- Tabs ---
-function addTab(name = '', icon = '') {
-  state.tabs.push({ name, icon, groups: [] });
+function addTab(name = '', icon = '', locked = false, hidden = false) {
+  state.tabs.push({ name, icon, locked, hidden, groups: [] });
+  renderTabs();
+  generateYaml();
+}
+
+function toggleTabLock(index) {
+  state.tabs[index].locked = !state.tabs[index].locked;
+  renderTabs();
+  generateYaml();
+}
+
+function toggleTabHidden(index) {
+  state.tabs[index].hidden = !state.tabs[index].hidden;
   renderTabs();
   generateYaml();
 }
 
 function removeTab(index) {
+  if (state.tabs[index]?.locked) return;
   state.tabs.splice(index, 1);
   renderTabs();
   generateYaml();
 }
 
 function addGroup(tabIndex, name = '', display = 'list') {
-  state.tabs[tabIndex].groups.push({ name, display, items: [] });
+  state.tabs[tabIndex].groups.push({ name, display, card: emptyCardStyle(), items: [] });
   renderTabs();
   generateYaml();
 }
 
 function removeGroup(tabIndex, groupIndex) {
+  if (state.tabs[tabIndex]?.locked) return;
   state.tabs[tabIndex].groups.splice(groupIndex, 1);
   renderTabs();
   generateYaml();
@@ -482,6 +546,7 @@ function addItem(tabIndex, groupIndex, serviceType = 'bookmark') {
 }
 
 function removeItem(tabIndex, groupIndex, itemIndex) {
+  if (state.tabs[tabIndex]?.locked) return;
   state.tabs[tabIndex].groups[groupIndex].items.splice(itemIndex, 1);
   renderTabs();
   generateYaml();
@@ -508,7 +573,7 @@ function moveGroup(tabIndex, groupIndex, direction) {
 function renderTabs() {
   const container = document.getElementById('tabs-container');
   const openPanels = new Set();
-  container.querySelectorAll('[id^="item-edit-"]').forEach(el => {
+  container.querySelectorAll('[id^="item-edit-"], [id^="group-card-"]').forEach(el => {
     if (!el.classList.contains('hidden')) openPanels.add(el.id);
   });
   container.innerHTML = state.tabs.map((tab, ti) => `
@@ -516,7 +581,9 @@ function renderTabs() {
       <div class="flex items-center gap-2 mb-3">
         <input type="text" value="${escHtml(tab.name)}" placeholder="Tab name" class="flex-1 bg-surface border border-gray-600 rounded px-2 py-1.5 text-sm font-medium" oninput="state.tabs[${ti}].name=this.value; generateYaml()">
         <input type="text" value="${escHtml(tab.icon)}" placeholder="Icon (mdi:home)" class="w-36 bg-surface border border-gray-600 rounded px-2 py-1.5 text-sm" oninput="state.tabs[${ti}].icon=this.value; generateYaml()">
-        <button onclick="removeTab(${ti})" class="text-red-400 hover:text-red-300 text-lg px-2">&times;</button>
+        <button onclick="toggleTabHidden(${ti})" class="text-xs px-1.5 py-0.5 rounded transition ${tab.hidden ? 'bg-gray-600/20 text-gray-500' : 'bg-sky-400/20 text-sky-400'}" title="${tab.hidden ? 'Show on frontpage' : 'Hide from frontpage'}">${tab.hidden ? 'hidden' : 'visible'}</button>
+        <button onclick="toggleTabLock(${ti})" class="text-xs px-1.5 py-0.5 rounded transition ${tab.locked ? 'bg-amber-400/20 text-amber-400' : 'bg-gray-600/20 text-gray-500'}" title="${tab.locked ? 'Unlock tab' : 'Lock tab'}">${tab.locked ? 'locked' : 'lock'}</button>
+        ${tab.locked ? '' : `<button onclick="removeTab(${ti})" class="text-red-400 hover:text-red-300 text-lg px-2">&times;</button>`}
       </div>
       <div class="space-y-3 ml-2">
         ${tab.groups.map((group, gi) => renderGroup(ti, gi, group)).join('')}
@@ -530,19 +597,53 @@ function renderTabs() {
   });
 }
 
+function toggleGroupCard(id) {
+  document.getElementById(id).classList.toggle('hidden');
+}
+
+function resetGroupCard(ti, gi) {
+  state.tabs[ti].groups[gi].card = emptyCardStyle();
+  renderTabs();
+  generateYaml();
+}
+
+function renderGroupCardPanel(ti, gi, card) {
+  const uid = `group-card-${ti}-${gi}`;
+  return `
+    <div id="${uid}" class="hidden mb-2 border border-gray-700 rounded p-2 bg-surface-lighter">
+      <div class="flex items-center justify-between mb-1">
+        <h5 class="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Card Style Override</h5>
+        <button onclick="resetGroupCard(${ti},${gi})" class="text-[10px] text-red-400 hover:text-red-300">reset</button>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+        <div><label class="text-gray-500">Background Color</label><div class="flex gap-1"><input type="color" value="${card.backgroundColor || '#000000'}" class="w-6 h-6 rounded" oninput="state.tabs[${ti}].groups[${gi}].card.backgroundColor=this.value; this.nextElementSibling.value=this.value; generateYaml()"><input type="text" value="${escHtml(card.backgroundColor)}" placeholder="#1a1a2e" class="flex-1 bg-surface border border-gray-600 rounded px-2 py-1 text-xs" oninput="state.tabs[${ti}].groups[${gi}].card.backgroundColor=this.value; if(/^#[0-9a-fA-F]{6}$/.test(this.value)) this.previousElementSibling.value=this.value; generateYaml()"></div></div>
+        <div><label class="text-gray-500">Opacity</label><div class="flex gap-1 items-center"><input type="range" min="0" max="1" step="0.05" value="${card.opacity || 0}" class="flex-1" oninput="state.tabs[${ti}].groups[${gi}].card.opacity=this.value; this.nextElementSibling.textContent=this.value; generateYaml()"><span class="text-[10px] text-gray-400 w-6 text-right">${card.opacity || '--'}</span></div></div>
+        <div><label class="text-gray-500">Blur (glass)</label><div class="flex gap-1 items-center"><input type="range" min="0" max="30" step="1" value="${parseFloat(card.blur) || 0}" class="flex-1" oninput="state.tabs[${ti}].groups[${gi}].card.blur=this.value+'px'; this.nextElementSibling.textContent=this.value+'px'; generateYaml()"><span class="text-[10px] text-gray-400 w-8 text-right">${card.blur || '--'}</span></div></div>
+        <div><label class="text-gray-500">Border Width</label><input type="text" value="${escHtml(card.borderWidth)}" placeholder="1px" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-xs" oninput="state.tabs[${ti}].groups[${gi}].card.borderWidth=this.value; generateYaml()"></div>
+        <div><label class="text-gray-500">Border Style</label><select class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-xs" onchange="state.tabs[${ti}].groups[${gi}].card.borderStyle=this.value; generateYaml()"><option value="" ${!card.borderStyle ? 'selected' : ''}>--</option><option value="none" ${card.borderStyle==='none'?'selected':''}>none</option><option value="solid" ${card.borderStyle==='solid'?'selected':''}>solid</option><option value="dashed" ${card.borderStyle==='dashed'?'selected':''}>dashed</option><option value="dotted" ${card.borderStyle==='dotted'?'selected':''}>dotted</option><option value="double" ${card.borderStyle==='double'?'selected':''}>double</option></select></div>
+        <div><label class="text-gray-500">Border Color</label><div class="flex gap-1"><input type="color" value="${card.borderColor || '#ffffff'}" class="w-6 h-6 rounded" oninput="state.tabs[${ti}].groups[${gi}].card.borderColor=this.value; this.nextElementSibling.value=this.value; generateYaml()"><input type="text" value="${escHtml(card.borderColor)}" placeholder="rgba(255,255,255,0.2)" class="flex-1 bg-surface border border-gray-600 rounded px-2 py-1 text-xs" oninput="state.tabs[${ti}].groups[${gi}].card.borderColor=this.value; if(/^#[0-9a-fA-F]{6}$/.test(this.value)) this.previousElementSibling.value=this.value; generateYaml()"></div></div>
+        <div><label class="text-gray-500">Border Radius</label><input type="text" value="${escHtml(card.borderRadius)}" placeholder="0.5rem" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-xs" oninput="state.tabs[${ti}].groups[${gi}].card.borderRadius=this.value; generateYaml()"></div>
+        <div><label class="text-gray-500">Padding</label><input type="text" value="${escHtml(card.padding)}" placeholder="1rem" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-xs" oninput="state.tabs[${ti}].groups[${gi}].card.padding=this.value; generateYaml()"></div>
+      </div>
+    </div>`;
+}
+
 function renderGroup(ti, gi, group) {
+  const tab = state.tabs[ti];
   return `
     <div class="border border-gray-700 rounded p-2 bg-surface">
       <div class="flex items-center gap-2 mb-2">
         <button onclick="moveGroup(${ti},${gi},-1)" class="text-gray-400 hover:text-white px-1" title="Move up">&#9650;</button>
         <button onclick="moveGroup(${ti},${gi},1)" class="text-gray-400 hover:text-white px-1" title="Move down">&#9660;</button>
         <input type="text" value="${escHtml(group.name)}" placeholder="Group name" class="flex-1 bg-surface-light border border-gray-600 rounded px-2 py-1 text-sm" oninput="state.tabs[${ti}].groups[${gi}].name=this.value; generateYaml()">
-        <select class="bg-surface-light border border-gray-600 rounded px-2 py-1 text-xs" onchange="state.tabs[${ti}].groups[${gi}].display=this.value; generateYaml()">
+        <select class="bg-surface-light border border-gray-600 rounded px-2 py-1 text-xs" onchange="state.tabs[${ti}].groups[${gi}].display=this.value; renderTabs(); generateYaml()">
           <option value="list" ${group.display === 'list' ? 'selected' : ''}>list</option>
           <option value="grid" ${group.display === 'grid' ? 'selected' : ''}>grid</option>
         </select>
-        <button onclick="removeGroup(${ti},${gi})" class="text-red-400 hover:text-red-300 px-1">&times;</button>
+        <button onclick="toggleGroupCard('group-card-${ti}-${gi}')" class="text-xs text-accent hover:text-accent-hover px-1" title="Card style override">card</button>
+        ${tab.locked ? '' : `<button onclick="removeGroup(${ti},${gi})" class="text-red-400 hover:text-red-300 px-1">&times;</button>`}
       </div>
+      ${renderGroupCardPanel(ti, gi, group.card || emptyCardStyle())}
       <div class="space-y-1">
         ${group.items.map((item, ii) => renderItem(ti, gi, ii, item)).join('')}
       </div>
@@ -713,6 +814,7 @@ function renderItem(ti, gi, ii, item) {
               <div><label class="text-gray-500">Color</label><input type="text" value="${escHtml(item.iconColor)}" placeholder="#hex" class="w-20 bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].iconColor=this.value; generateYaml()"></div>
               <div><label class="text-gray-500">&nbsp;</label><label class="flex items-center gap-1 bg-surface border border-gray-600 rounded px-2 py-1 cursor-pointer"><input type="checkbox" ${item.iconWrap ? 'checked' : ''} onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].iconWrap=this.checked; generateYaml()"> wrap</label></div>
             </div>
+            <div class="mt-1 text-[10px] text-gray-500">Browse icons: <a href="https://icon-sets.iconify.design/" target="_blank" class="text-accent hover:underline">iconify.design</a> · <a href="https://getemoji.com/" target="_blank" class="text-accent hover:underline">getemoji.com</a></div>
           `}
         </div>`;
 
@@ -730,7 +832,7 @@ function renderItem(ti, gi, ii, item) {
         ${typeBadge}
         <span class="flex-1 font-medium text-gray-200 truncate">${displayTitle}</span>
         <button onclick="toggleItemEdit('item-edit-${uid}')" class="text-blue-400 hover:text-blue-300 px-1 text-xs">edit</button>
-        <button onclick="removeItem(${ti},${gi},${ii})" class="text-red-400 hover:text-red-300 px-1">&times;</button>
+        ${state.tabs[ti]?.locked ? '' : `<button onclick="removeItem(${ti},${gi},${ii})" class="text-red-400 hover:text-red-300 px-1">&times;</button>`}
       </div>
       <div id="item-edit-${uid}" class="hidden mt-2 space-y-2">
         ${typeFields}
@@ -838,6 +940,8 @@ function generateYaml() {
     if (ct) s.color = ct;
     if (Object.keys(s).length) styles[el] = s;
   });
+  const globalCard = serializeCardStyle(state.cardStyle);
+  if (globalCard) styles.card = globalCard;
   if (Object.keys(styles).length) config.styles = styles;
 
   // Tags
@@ -852,10 +956,14 @@ function generateYaml() {
       const tabObj = {};
       if (tab.name) tabObj.name = tab.name;
       if (tab.icon) tabObj.icon = tab.icon;
+      if (tab.locked) tabObj.locked = true;
+      if (tab.hidden) tabObj.hidden = true;
       const services = {};
       tab.groups.forEach(group => {
         if (!group.name) return;
         const groupObj = { display: group.display, items: [] };
+        const groupCard = serializeCardStyle(group.card || emptyCardStyle());
+        if (groupCard) groupObj.card = groupCard;
         group.items.forEach(item => {
           const sType = item.serviceType || 'bookmark';
           if (sType === 'bookmark' && !item.title && !item.link) return;
@@ -1059,7 +1167,8 @@ function resetAll() {
   document.getElementById('cfg-footer-text').value = '';
   document.getElementById('cfg-footer-html').value = '';
   document.querySelectorAll('[data-style]').forEach(el => { el.value = ''; });
-  state = { tags: [], tabs: [] };
+  state = { tags: [], tabs: [], cardStyle: emptyCardStyle() };
+  loadCardStyleToUI(state.cardStyle);
   renderTags();
   renderTabs();
   generateYaml();
@@ -1245,6 +1354,10 @@ function loadConfig(config) {
         if (colorInput && /^#[0-9a-fA-F]{6}$/.test(s.color)) colorInput.value = s.color;
       }
     });
+    if (config.styles.card) {
+      state.cardStyle = parseCardStyle(config.styles.card);
+      loadCardStyleToUI(state.cardStyle);
+    }
   }
 
   // Footer
@@ -1264,13 +1377,14 @@ function loadConfig(config) {
   state.tabs = [];
   if (config.tabs && Array.isArray(config.tabs)) {
     config.tabs.forEach(tab => {
-      const tabObj = { name: tab.name || '', icon: tab.icon || '', groups: [] };
+      const tabObj = { name: tab.name || '', icon: tab.icon || '', locked: tab.locked || false, hidden: tab.hidden || false, groups: [] };
       if (tab.services && typeof tab.services === 'object') {
         Object.entries(tab.services).forEach(([groupName, groupData]) => {
-          const group = { name: groupName, display: 'list', items: [] };
+          const group = { name: groupName, display: 'list', card: emptyCardStyle(), items: [] };
           let items = [];
           if (groupData && typeof groupData === 'object' && !Array.isArray(groupData)) {
             group.display = groupData.display || 'list';
+            if (groupData.card) group.card = parseCardStyle(groupData.card);
             items = groupData.items || [];
           } else if (Array.isArray(groupData)) {
             items = groupData;
@@ -1282,13 +1396,14 @@ function loadConfig(config) {
       state.tabs.push(tabObj);
     });
   } else if (config.services) {
-    const tabObj = { name: '', icon: '', groups: [] };
+    const tabObj = { name: '', icon: '', locked: false, hidden: false, groups: [] };
     if (typeof config.services === 'object' && !Array.isArray(config.services)) {
       Object.entries(config.services).forEach(([groupName, groupData]) => {
-        const group = { name: groupName, display: 'list', items: [] };
+        const group = { name: groupName, display: 'list', card: emptyCardStyle(), items: [] };
         let items = [];
         if (groupData && typeof groupData === 'object' && !Array.isArray(groupData)) {
           group.display = groupData.display || 'list';
+          if (groupData.card) group.card = parseCardStyle(groupData.card);
           items = groupData.items || [];
         } else if (Array.isArray(groupData)) {
           items = groupData;
@@ -1297,7 +1412,7 @@ function loadConfig(config) {
         tabObj.groups.push(group);
       });
     } else if (Array.isArray(config.services)) {
-      const group = { name: 'Services', display: 'list', items: [] };
+      const group = { name: 'Services', display: 'list', card: emptyCardStyle(), items: [] };
       config.services.forEach(raw => group.items.push(parseRawItem(raw)));
       tabObj.groups.push(group);
     }
@@ -1310,6 +1425,24 @@ function loadConfig(config) {
 function setStyleVal(key, value) {
   const el = document.querySelector(`[data-style="${key}"]`);
   if (el) el.value = value;
+}
+
+function loadCardStyleToUI(card) {
+  const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+  setVal('card-bgColorText', card.backgroundColor || '');
+  if (card.backgroundColor && /^#[0-9a-fA-F]{6}$/.test(card.backgroundColor)) setVal('card-bgColor', card.backgroundColor);
+  if (card.opacity) { setVal('card-opacity', card.opacity); const lbl = document.getElementById('card-opacity-val'); if (lbl) lbl.textContent = card.opacity; }
+  if (card.blur) {
+    const numVal = parseFloat(card.blur) || 0;
+    setVal('card-blur', numVal);
+    const lbl = document.getElementById('card-blur-val'); if (lbl) lbl.textContent = card.blur;
+  }
+  setVal('card-borderWidth', card.borderWidth || '');
+  setVal('card-borderStyle', card.borderStyle || '');
+  setVal('card-borderColorText', card.borderColor || '');
+  if (card.borderColor && /^#[0-9a-fA-F]{6}$/.test(card.borderColor)) setVal('card-borderColor', card.borderColor);
+  setVal('card-borderRadius', card.borderRadius || '');
+  setVal('card-padding', card.padding || '');
 }
 
 // --- Load Example ---
