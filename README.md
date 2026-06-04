@@ -2,7 +2,7 @@
 <p align="center">
   <i>A minimalistic and flexible homepage dashboard with extended layout options, search, tabs and more...</i><br><br>
   <img src="docs/screenshots/screenshot1.png"></img><br>  
-  <a href="docs/screenshots/screenshot2.png">screenshot 2</a> | <a href="docs/screenshots/screenshot3.png">screenshot 3</a>
+  <a href="docs/screenshots/screenshot2.png">screenshot 2</a> | <a href="docs/screenshots/screenshot3.png">screenshot 3</a> | <a href="docs/screenshots/screenshot4.png">screenshot 4</a>
 </p>
 
 
