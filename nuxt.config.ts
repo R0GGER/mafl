@@ -18,6 +18,10 @@ export default defineNuxtConfig({
           rel: 'mask-icon',
           href: '/favicons/logo.svg',
         },
+        {
+          rel: 'manifest',
+          href: '/manifest.webmanifest',
+        },
       ],
     },
   },
@@ -25,26 +29,7 @@ export default defineNuxtConfig({
     registerType: 'autoUpdate',
     scope: '/',
     base: '/',
-    manifest: {
-      id: '/',
-      scope: '/',
-      name: 'Mafl. Minimalistic flexible homepage.',
-      short_name: 'Mafl',
-      description: 'Mafl is an intuitive service for organizing your homepage. Customize Mafl to your individual needs and work even more efficiently!',
-      theme_color: '#609966',
-      icons: [
-        {
-          sizes: '192x192',
-          src: 'favicons/pwa-192x192.png',
-          type: 'image/png',
-        },
-        {
-          sizes: '512x512',
-          src: 'favicons/pwa-512x512.png',
-          type: 'image/png',
-        },
-      ],
-    },
+    manifest: false,
     workbox: {
       globPatterns: ['**/*.{js,css,html,txt,png,ico,svg}'],
       navigateFallbackDenylist: [/^\/api\//, /^\/admin/],
@@ -64,7 +49,6 @@ export default defineNuxtConfig({
         },
       ],
     },
-    registerWebManifestInRouteRules: true,
     writePlugin: true,
     devOptions: {
       enabled: process.env.VITE_PLUGIN_PWA === 'true',

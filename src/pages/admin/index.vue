@@ -19,10 +19,17 @@
             {{ saving ? 'Saving...' : 'Save & Apply' }}
           </button>
           <button
-            class="text-sm px-3 py-1.5 rounded border border-fg/10 hover:bg-fg/5 transition-colors text-fg"
+            class="relative text-sm px-3 py-1.5 rounded border overflow-hidden transition-colors"
+            :class="resetConfirming
+              ? 'border-red-400/50 text-red-400 hover:bg-red-400/10'
+              : 'border-fg/10 text-fg hover:bg-fg/5'"
             @click="resetAll"
           >
-            Reset
+            <span class="relative z-10">{{ resetConfirming ? 'Click again to reset' : 'Reset' }}</span>
+            <span
+              v-if="resetConfirming"
+              class="absolute inset-y-0 left-0 bg-red-400/20 reset-timer-bar"
+            />
           </button>
           <NuxtLink to="/" class="text-sm px-3 py-1.5 rounded border border-fg/10 hover:bg-fg/5 transition-colors text-fg">
             Dashboard
@@ -186,8 +193,23 @@ async function saveConfig() {
   }
 }
 
+const resetConfirming = ref(false)
+let resetTimer: ReturnType<typeof setTimeout> | null = null
+const RESET_TIMEOUT_MS = 5000
+const resetTimeoutCss = `${RESET_TIMEOUT_MS}ms`
+
+function cancelResetConfirm() {
+  resetConfirming.value = false
+  if (resetTimer) { clearTimeout(resetTimer); resetTimer = null }
+}
+
 function resetAll() {
-  if (!confirm('Reset all fields to defaults?')) return
+  if (!resetConfirming.value) {
+    resetConfirming.value = true
+    resetTimer = setTimeout(cancelResetConfirm, RESET_TIMEOUT_MS)
+    return
+  }
+  cancelResetConfirm()
   resetState()
   validationError.value = ''
   showToast('Reset to defaults')
@@ -217,4 +239,12 @@ onMounted(() => {
 .toast-leave-active { animation: fadeOut 0.3s ease forwards; }
 @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+.reset-timer-bar {
+  animation: shrink-bar v-bind(resetTimeoutCss) linear forwards;
+}
+@keyframes shrink-bar {
+  from { width: 100%; }
+  to { width: 0%; }
+}
 </style>

@@ -1,6 +1,39 @@
 # Changelog
 
 
+## Reset button confirmation with timer bar
+
+### 💅 Improvements
+
+- **admin:** Reset button now requires a two-step confirmation — first click shows "Click again to reset" with a 5-second countdown timer bar, second click within the timer confirms the reset
+- **admin:** Visual timer bar shrinks from left to right over 5 seconds, providing clear feedback on the remaining confirmation window
+- **admin:** If no second click occurs within 5 seconds, the button returns to its normal "Reset" state without any action
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/pages/admin/index.vue` | Replaced `confirm()` dialog with inline two-step confirmation; added `resetConfirming` state, `cancelResetConfirm()` timer logic, animated `.reset-timer-bar` CSS with `v-bind(resetTimeoutCss)` duration |
+
+---
+
+## Dynamic PWA manifest from app title
+
+### 🚀 Enhancements
+
+- **pwa:** PWA name now uses the app title configured in `/admin` (Global Settings → Title) instead of a hardcoded string — the manifest is served dynamically so changes take effect without a rebuild
+- **pwa:** Created a Nitro server route at `/manifest.webmanifest` that reads the current config title and returns a complete PWA manifest with `name`, `short_name`, `start_url`, `display`, icons and theme color
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/server/routes/manifest.webmanifest.get.ts` | New server route that dynamically generates the PWA manifest using the configured app title from `config.yml` |
+| `nuxt.config.ts` | Set `manifest: false` to disable static manifest generation; added `<link rel="manifest">` to app head pointing to the dynamic route; removed `registerWebManifestInRouteRules` |
+| `src/app.vue` | Removed `<NuxtPwaManifest />` component (no longer needed since manifest link is in the head config) |
+
+---
+
 ## Config Builder feature parity with /admin editor
 
 ### 🚀 Enhancements
