@@ -47,6 +47,43 @@ icon:
   favicon: github.com
 ```
 
+### Self-hosted Favicon API
+
+Instead of using the default public API, you can run your own instance of the [Favicon API](https://github.com/vemetric/favicon-api) using Docker:
+
+```yaml
+services:
+  favicon-api:
+    image: vemetric/favicon-api
+    restart: unless-stopped
+    ports:
+      - '3003:3000'
+```
+
+Once running, update `faviconApi` in your `config.yml` (or via the config-builder) to point to your own instance:
+
+```yaml
+faviconApi: http://favicon-api:3003
+```
+
+> If both containers share the same Docker network you can use the service name (`favicon-api`) as hostname. Otherwise use the host IP/domain and the mapped port (e.g. `http://192.168.1.100:3003/`).
+
+You can also expose the API via a reverse proxy such as [Caddy](https://caddyserver.com/):
+
+```text
+favicon-api.your-domain.tld {
+    reverse_proxy favicon-api:3003
+}
+```
+
+Then set `faviconApi` to the public URL:
+
+```yaml
+faviconApi: https://favicon-api.your-domain.tld/
+```
+
+See the [Favicon API Quick Start](https://github.com/vemetric/favicon-api#quick-start) for all configuration options and deployment methods.
+
 ### Server-side proxy cache
 
 Favicon requests are proxied through the MAFL+ server with disk caching. The external favicon API is called only once per domain per 7 days. Benefits:
