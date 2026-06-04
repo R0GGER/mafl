@@ -51,6 +51,89 @@
           </div>
         </div>
       </div>
+
+      <!-- Global Card Style -->
+      <div class="border border-fg/10 rounded-lg p-3">
+        <h4 class="text-sm font-medium text-fg mb-2">Card (global default)</h4>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <div>
+            <label class="admin-label">Background Color</label>
+            <div class="flex gap-1 items-center">
+              <input
+                :value="state.styles.card.backgroundColor || '#000000'"
+                type="color"
+                class="w-8 h-7 rounded cursor-pointer border-0"
+                @input="state.styles.card.backgroundColor = ($event.target as HTMLInputElement).value"
+              >
+              <input v-model="state.styles.card.backgroundColor" type="text" class="admin-input flex-1" placeholder="#1a1a2e">
+            </div>
+          </div>
+          <div>
+            <label class="admin-label">Opacity</label>
+            <div class="flex gap-1 items-center">
+              <input
+                v-model="state.styles.card.opacity"
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                class="flex-1"
+              >
+              <span class="text-xs text-fg-dimmed w-8 text-right">{{ state.styles.card.opacity || '--' }}</span>
+            </div>
+          </div>
+          <div>
+            <label class="admin-label">Blur (glass)</label>
+            <div class="flex gap-1 items-center">
+              <input
+                :value="parseFloat(state.styles.card.blur) || 0"
+                type="range"
+                min="0"
+                max="30"
+                step="1"
+                class="flex-1"
+                @input="state.styles.card.blur = ($event.target as HTMLInputElement).value + 'px'"
+              >
+              <span class="text-xs text-fg-dimmed w-10 text-right">{{ state.styles.card.blur || '--' }}</span>
+            </div>
+          </div>
+          <div>
+            <label class="admin-label">Border Width</label>
+            <input v-model="state.styles.card.borderWidth" type="text" class="admin-input w-full" placeholder="1px">
+          </div>
+          <div>
+            <label class="admin-label">Border Style</label>
+            <select v-model="state.styles.card.borderStyle" class="admin-input w-full">
+              <option value="">--</option>
+              <option value="none">none</option>
+              <option value="solid">solid</option>
+              <option value="dashed">dashed</option>
+              <option value="dotted">dotted</option>
+              <option value="double">double</option>
+            </select>
+          </div>
+          <div>
+            <label class="admin-label">Border Color</label>
+            <div class="flex gap-1 items-center">
+              <input
+                :value="state.styles.card.borderColor || '#ffffff'"
+                type="color"
+                class="w-8 h-7 rounded cursor-pointer border-0"
+                @input="state.styles.card.borderColor = ($event.target as HTMLInputElement).value"
+              >
+              <input v-model="state.styles.card.borderColor" type="text" class="admin-input flex-1" placeholder="rgba(255,255,255,0.2)">
+            </div>
+          </div>
+          <div>
+            <label class="admin-label">Border Radius</label>
+            <input v-model="state.styles.card.borderRadius" type="text" class="admin-input w-full" placeholder="0.5rem">
+          </div>
+          <div>
+            <label class="admin-label">Padding</label>
+            <input v-model="state.styles.card.padding" type="text" class="admin-input w-full" placeholder="1rem">
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 </template>

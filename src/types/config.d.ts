@@ -1,8 +1,20 @@
 import type { Service } from '~/types/services'
 
+export interface CardStyle {
+  backgroundColor?: string
+  opacity?: number
+  blur?: string
+  borderWidth?: string
+  borderStyle?: 'none' | 'solid' | 'dashed' | 'dotted' | 'double'
+  borderColor?: string
+  borderRadius?: string
+  padding?: string
+}
+
 export interface ServicesGroup {
   title?: string
   display?: 'grid' | 'list'
+  card?: CardStyle
   items: Service[]
 }
 
@@ -46,6 +58,7 @@ export interface Styles {
   category?: TextStyle
   title?: TextStyle
   description?: TextStyle
+  card?: CardStyle
 }
 
 export interface BackgroundOverlay {

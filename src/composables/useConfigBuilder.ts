@@ -51,9 +51,21 @@ export interface BuilderItem {
   customHidden: boolean
 }
 
+export interface BuilderCardStyle {
+  backgroundColor: string
+  opacity: string
+  blur: string
+  borderWidth: string
+  borderStyle: string
+  borderColor: string
+  borderRadius: string
+  padding: string
+}
+
 export interface BuilderGroup {
   name: string
   display: 'grid' | 'list'
+  card: BuilderCardStyle
   items: BuilderItem[]
 }
 
@@ -115,6 +127,7 @@ export interface BuilderState {
     category: TextStyle
     title: TextStyle
     description: TextStyle
+    card: BuilderCardStyle
   }
   tags: BuilderTag[]
   tabs: BuilderTab[]
@@ -129,6 +142,10 @@ export const TAG_COLORS = [
 
 function emptyTextStyle(): TextStyle {
   return { fontFamily: '', fontSize: '', fontWeight: '', fontStyle: '', textDecoration: '', color: '' }
+}
+
+function emptyCardStyle(): BuilderCardStyle {
+  return { backgroundColor: '', opacity: '', blur: '', borderWidth: '', borderStyle: '', borderColor: '', borderRadius: '', padding: '' }
 }
 
 function defaultState(): BuilderState {
@@ -166,6 +183,7 @@ function defaultState(): BuilderState {
       category: emptyTextStyle(),
       title: emptyTextStyle(),
       description: emptyTextStyle(),
+      card: emptyCardStyle(),
     },
     tags: [],
     tabs: [],
@@ -264,14 +282,29 @@ function parseRawItem(raw: any): BuilderItem {
   return item
 }
 
+function parseCardStyle(raw: any): BuilderCardStyle {
+  const card = emptyCardStyle()
+  if (!raw || typeof raw !== 'object') return card
+  if (raw.backgroundColor) card.backgroundColor = raw.backgroundColor
+  if (raw.opacity != null) card.opacity = String(raw.opacity)
+  if (raw.blur) card.blur = raw.blur
+  if (raw.borderWidth) card.borderWidth = raw.borderWidth
+  if (raw.borderStyle) card.borderStyle = raw.borderStyle
+  if (raw.borderColor) card.borderColor = raw.borderColor
+  if (raw.borderRadius) card.borderRadius = raw.borderRadius
+  if (raw.padding) card.padding = raw.padding
+  return card
+}
+
 function parseServiceGroups(services: any): BuilderGroup[] {
   const groups: BuilderGroup[] = []
   if (typeof services === 'object' && !Array.isArray(services)) {
     for (const [groupName, groupData] of Object.entries(services)) {
-      const group: BuilderGroup = { name: groupName, display: 'list', items: [] }
+      const group: BuilderGroup = { name: groupName, display: 'list', card: emptyCardStyle(), items: [] }
       let items: any[] = []
       if (groupData && typeof groupData === 'object' && !Array.isArray(groupData)) {
         group.display = (groupData as any).display || 'list'
+        if ((groupData as any).card) group.card = parseCardStyle((groupData as any).card)
         items = (groupData as any).items || []
       }
       else if (Array.isArray(groupData)) {
@@ -282,7 +315,7 @@ function parseServiceGroups(services: any): BuilderGroup[] {
     }
   }
   else if (Array.isArray(services)) {
-    const group: BuilderGroup = { name: 'Services', display: 'list', items: [] }
+    const group: BuilderGroup = { name: 'Services', display: 'list', card: emptyCardStyle(), items: [] }
     group.items = services.map(parseRawItem)
     groups.push(group)
   }
@@ -353,6 +386,9 @@ export function loadConfigFromYaml(state: BuilderState, yamlStr: string) {
       if (s.fontStyle) target.fontStyle = s.fontStyle
       if (s.textDecoration) target.textDecoration = s.textDecoration
       if (s.color) target.color = s.color
+    }
+    if (config.styles.card) {
+      state.styles.card = parseCardStyle(config.styles.card)
     }
   }
 
@@ -490,6 +526,19 @@ function serializeItem(item: BuilderItem): Record<string, any> | null {
   return it
 }
 
+function serializeCardStyle(card: BuilderCardStyle): Record<string, any> | null {
+  const c: Record<string, any> = {}
+  if (card.backgroundColor) c.backgroundColor = card.backgroundColor
+  if (card.opacity) c.opacity = parseFloat(card.opacity)
+  if (card.blur) c.blur = card.blur
+  if (card.borderWidth) c.borderWidth = card.borderWidth
+  if (card.borderStyle) c.borderStyle = card.borderStyle
+  if (card.borderColor) c.borderColor = card.borderColor
+  if (card.borderRadius) c.borderRadius = card.borderRadius
+  if (card.padding) c.padding = card.padding
+  return Object.keys(c).length ? c : null
+}
+
 export function stateToYaml(state: BuilderState): string {
   const config: Record<string, any> = {}
 
@@ -554,6 +603,8 @@ export function stateToYaml(state: BuilderState): string {
     if (src.color) s.color = src.color
     if (Object.keys(s).length) styles[el] = s
   }
+  const globalCard = serializeCardStyle(state.styles.card)
+  if (globalCard) styles.card = globalCard
   if (Object.keys(styles).length) config.styles = styles
 
   // Tags
@@ -572,6 +623,8 @@ export function stateToYaml(state: BuilderState): string {
       for (const group of tab.groups) {
         if (!group.name) continue
         const groupObj: any = { display: group.display, items: [] }
+        const groupCard = serializeCardStyle(group.card)
+        if (groupCard) groupObj.card = groupCard
         for (const item of group.items) {
           const serialized = serializeItem(item)
           if (serialized) groupObj.items.push(serialized)
@@ -641,7 +694,7 @@ export function useConfigBuilder() {
   }
 
   function addGroup(tabIndex: number, name = '', display: 'grid' | 'list' = 'list') {
-    state.tabs[tabIndex].groups.push({ name, display, items: [] })
+    state.tabs[tabIndex].groups.push({ name, display, card: emptyCardStyle(), items: [] })
   }
 
   function removeGroup(tabIndex: number, groupIndex: number) {

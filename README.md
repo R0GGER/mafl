@@ -45,6 +45,7 @@ This fork adds several features on top of the original [Mafl](https://github.com
 | **Layout: List** | Compact list display mode per group, with its own column configuration. |
 | **Layout: Spacing** | Configurable spacing between groups and between items. |
 | **Styles** | Per-element styling for category headers, titles and descriptions (color, fontSize, fontWeight, fontStyle, etc.). |
+| **Card style** | Wrap groups in styled cards with configurable background color, opacity, border (width, style, color), border radius and padding — globally and per group. |
 | **Logo** | Fixed responsive logo in the top-left corner - image file or text/letter with full typographic control. |
 | **Background image** | Full-screen background image served from the data volume. |
 | **Background overlay** | Color overlay with configurable opacity for better text readability. |
@@ -167,6 +168,53 @@ styles:
 ```
 
 Supported properties: `fontFamily`, `fontSize`, `fontWeight`, `fontStyle`, `textDecoration`, `color`.
+
+#### Card style
+
+Wrap each service group in a styled card with a background, border and padding. Set a global default under `styles.card`:
+
+```yaml
+styles:
+  card:
+    backgroundColor: '#1a1a2e'
+    opacity: 0.8
+    blur: 10px
+    borderWidth: '1px'
+    borderStyle: solid
+    borderColor: 'rgba(255,255,255,0.2)'
+    borderRadius: 0.5rem
+    padding: 1rem
+```
+
+Override the global default per group by adding a `card` key inside the group:
+
+```yaml
+services:
+  NEWS:
+    display: list
+    card:
+      backgroundColor: '#2a2a3e'
+      opacity: 0.6
+      borderWidth: '2px'
+      borderStyle: dashed
+      borderColor: '#ff0000'
+    items:
+      - title: NOS
+        link: https://nos.nl
+```
+
+Per-group values override individual global defaults; omitted properties fall back to the global card style.
+
+| Property          | Description                         | Default |
+|-------------------|-------------------------------------|---------|
+| `backgroundColor` | Any valid CSS color                 | –       |
+| `opacity`         | `0` (transparent) – `1` (opaque)   | `1`     |
+| `blur`            | Backdrop blur for glass effect (e.g. `10px`) | –  |
+| `borderWidth`     | CSS border width (e.g. `1px`)       | –       |
+| `borderStyle`     | `none`, `solid`, `dashed`, `dotted`, `double` | `solid` |
+| `borderColor`     | Any valid CSS color                 | –       |
+| `borderRadius`    | CSS border radius (e.g. `0.5rem`)   | –       |
+| `padding`         | CSS padding (e.g. `1rem`)           | –       |
 
 ### Logo
 

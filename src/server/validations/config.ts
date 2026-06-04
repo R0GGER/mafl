@@ -15,10 +15,22 @@ const textStyleSchema = z.object({
   color: z.string().optional(),
 }).optional()
 
+const cardStyleSchema = z.object({
+  backgroundColor: z.string().optional(),
+  opacity: z.number().min(0).max(1).optional(),
+  blur: z.string().optional(),
+  borderWidth: z.string().optional(),
+  borderStyle: z.enum(['none', 'solid', 'dashed', 'dotted', 'double']).optional(),
+  borderColor: z.string().optional(),
+  borderRadius: z.string().optional(),
+  padding: z.string().optional(),
+}).optional()
+
 const stylesSchema = z.object({
   category: textStyleSchema,
   title: textStyleSchema,
   description: textStyleSchema,
+  card: cardStyleSchema,
 }).optional()
 
 const layoutGridSchema = z.object({
@@ -39,6 +51,7 @@ const layoutSchema = z.object({
 
 const servicesGroupSchema = z.object({
   display: z.enum(['grid', 'list']).optional(),
+  card: cardStyleSchema,
   items: z.array(serviceSchema),
 })
 

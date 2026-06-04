@@ -46,6 +46,7 @@ export function getDefaultConfig(): CompleteConfig {
       category: {},
       title: {},
       description: {},
+      card: {},
     },
     checkUpdates: true,
     layout: {
@@ -93,10 +94,11 @@ function parseRawServices(raw: unknown, tags: TagMap): ServicesGroup[] {
           items: determineService(value as DraftService[], tags),
         })
       } else {
-        const group = value as { display?: 'grid' | 'list'; items: DraftService[] }
+        const group = value as { display?: 'grid' | 'list'; card?: any; items: DraftService[] }
         services.push({
           title,
           display: group.display,
+          ...(group.card ? { card: group.card } : {}),
           items: determineService(group.items, tags),
         })
       }

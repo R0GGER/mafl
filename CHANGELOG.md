@@ -1,6 +1,59 @@
 # Changelog
 
 
+## Group card styling
+
+### 🚀 Enhancements
+
+- **styles:** Service groups (categories) can now be wrapped in styled cards with configurable background color, opacity, glassmorphism blur, border (width, style, color), border radius and padding
+- **styles:** Global default card style via `styles.card` — applies to all groups automatically
+- **styles:** Per-group card override via `card` key inside each service group — fully replaces the global default when set
+- **styles:** Glassmorphism blur effect (`blur` property) using `backdrop-filter` for a frosted glass appearance over the background image
+- **admin:** Global card style editor in the Styles section with color pickers, opacity slider, blur slider (0–30px), border controls, radius and padding
+- **admin:** Per-group "card" toggle button in the Tabs & Services editor with collapsible card style override panel and reset button
+
+### Config format
+
+```yaml
+# Global default (applies to all groups)
+styles:
+  card:
+    backgroundColor: "#1a1a2e"
+    opacity: 0.8
+    blur: 10px
+    borderWidth: "1px"
+    borderStyle: solid
+    borderColor: "rgba(255,255,255,0.2)"
+    borderRadius: 0.5rem
+    padding: 1rem
+
+# Per-group override (replaces global for this group)
+services:
+  NEWS:
+    display: list
+    card:
+      backgroundColor: "#2a2a3e"
+      opacity: 0.6
+    items:
+      - title: NOS
+        link: https://nos.nl
+```
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/types/config.d.ts` | Added `CardStyle` interface with `backgroundColor`, `opacity`, `blur`, `borderWidth`, `borderStyle`, `borderColor`, `borderRadius`, `padding`; added `card?: CardStyle` to `ServicesGroup` and `Styles` |
+| `src/server/validations/config.ts` | Added `cardStyleSchema` with Zod validators; added to `stylesSchema` and `servicesGroupSchema` |
+| `src/server/utils/config.ts` | `parseRawServices()` passes `card` field through; `getDefaultConfig()` includes empty `card` in styles |
+| `src/components/Group.vue` | Added card rendering with absolute-positioned background div for opacity/blur separation; `hexToRgba` conversion to avoid CSS opacity reducing blur; merge logic uses per-group override when present, otherwise global default |
+| `src/composables/useConfigBuilder.ts` | Added `BuilderCardStyle` interface, `emptyCardStyle()`, `parseCardStyle()`, `serializeCardStyle()`; card fields on `BuilderGroup` and `BuilderState.styles`; YAML import/export |
+| `src/components/admin/StylesSettings.vue` | Global card style editor with color pickers, opacity and blur sliders, border and padding fields |
+| `src/components/admin/TabsEditor.vue` | Per-group card toggle button, collapsible override panel with all card fields, reset button to clear overrides |
+| `README.md` | Documented card styling feature with YAML examples and property table |
+
+---
+
 ## Deep linking to tabs via URL hash
 
 ### 🚀 Enhancements

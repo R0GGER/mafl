@@ -68,7 +68,95 @@
                     <option value="list">list</option>
                     <option value="grid">grid</option>
                   </select>
+                  <button
+                    class="text-fg-dimmed hover:text-fg px-1 text-xs"
+                    :class="{ 'text-brand-500': isCardOpen(ti, gi) }"
+                    title="Card style override"
+                    @click="toggleCard(ti, gi)"
+                  >card</button>
                   <button v-if="!tab.locked" class="text-red-400 hover:text-red-300 px-1" @click="removeGroup(ti, gi)">&times;</button>
+                </div>
+
+                <!-- Per-group card style override -->
+                <div v-if="isCardOpen(ti, gi)" class="mb-2 border border-fg/10 rounded p-2 bg-fg/[0.03]">
+                  <div class="flex items-center justify-between mb-1">
+                    <h5 class="text-[10px] font-medium text-fg-dimmed uppercase tracking-wider">Card Style Override</h5>
+                    <button
+                      class="text-[10px] text-red-400 hover:text-red-300"
+                      @click="resetGroupCard(group)"
+                    >reset</button>
+                  </div>
+                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                    <div>
+                      <label class="admin-label">Background Color</label>
+                      <div class="flex gap-1 items-center">
+                        <input
+                          :value="group.card.backgroundColor || '#000000'"
+                          type="color"
+                          class="w-6 h-6 rounded cursor-pointer border-0"
+                          @input="group.card.backgroundColor = ($event.target as HTMLInputElement).value"
+                        >
+                        <input v-model="group.card.backgroundColor" type="text" class="admin-input flex-1" placeholder="#1a1a2e">
+                      </div>
+                    </div>
+                    <div>
+                      <label class="admin-label">Opacity</label>
+                      <div class="flex gap-1 items-center">
+                        <input v-model="group.card.opacity" type="range" min="0" max="1" step="0.05" class="flex-1">
+                        <span class="text-[10px] text-fg-dimmed w-6 text-right">{{ group.card.opacity || '--' }}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <label class="admin-label">Blur (glass)</label>
+                      <div class="flex gap-1 items-center">
+                        <input
+                          :value="parseFloat(group.card.blur) || 0"
+                          type="range"
+                          min="0"
+                          max="30"
+                          step="1"
+                          class="flex-1"
+                          @input="group.card.blur = ($event.target as HTMLInputElement).value + 'px'"
+                        >
+                        <span class="text-[10px] text-fg-dimmed w-8 text-right">{{ group.card.blur || '--' }}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <label class="admin-label">Border Width</label>
+                      <input v-model="group.card.borderWidth" type="text" class="admin-input w-full" placeholder="1px">
+                    </div>
+                    <div>
+                      <label class="admin-label">Border Style</label>
+                      <select v-model="group.card.borderStyle" class="admin-input w-full">
+                        <option value="">--</option>
+                        <option value="none">none</option>
+                        <option value="solid">solid</option>
+                        <option value="dashed">dashed</option>
+                        <option value="dotted">dotted</option>
+                        <option value="double">double</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="admin-label">Border Color</label>
+                      <div class="flex gap-1 items-center">
+                        <input
+                          :value="group.card.borderColor || '#ffffff'"
+                          type="color"
+                          class="w-6 h-6 rounded cursor-pointer border-0"
+                          @input="group.card.borderColor = ($event.target as HTMLInputElement).value"
+                        >
+                        <input v-model="group.card.borderColor" type="text" class="admin-input flex-1" placeholder="rgba(255,255,255,0.2)">
+                      </div>
+                    </div>
+                    <div>
+                      <label class="admin-label">Border Radius</label>
+                      <input v-model="group.card.borderRadius" type="text" class="admin-input w-full" placeholder="0.5rem">
+                    </div>
+                    <div>
+                      <label class="admin-label">Padding</label>
+                      <input v-model="group.card.padding" type="text" class="admin-input w-full" placeholder="1rem">
+                    </div>
+                  </div>
                 </div>
 
                 <!-- Items -->
@@ -141,7 +229,7 @@
 </template>
 
 <script setup lang="ts">
-import type { BuilderItem, BuilderState, ServiceType } from '~/composables/useConfigBuilder'
+import type { BuilderCardStyle, BuilderGroup, BuilderItem, BuilderState, ServiceType } from '~/composables/useConfigBuilder'
 
 defineProps<{
   state: BuilderState
@@ -160,6 +248,7 @@ defineProps<{
 const open = ref(true)
 const openTabs = ref(new Set<number>())
 const openEdits = ref(new Set<string>())
+const openCards = ref(new Set<string>())
 
 function isTabOpen(ti: number) {
   return openTabs.value.has(ti)
@@ -171,6 +260,24 @@ function toggleTab(ti: number) {
   }
   else {
     openTabs.value.add(ti)
+  }
+}
+
+function cardKey(ti: number, gi: number) {
+  return `card-${ti}-${gi}`
+}
+
+function isCardOpen(ti: number, gi: number) {
+  return openCards.value.has(cardKey(ti, gi))
+}
+
+function toggleCard(ti: number, gi: number) {
+  const key = cardKey(ti, gi)
+  if (openCards.value.has(key)) {
+    openCards.value.delete(key)
+  }
+  else {
+    openCards.value.add(key)
   }
 }
 
@@ -190,6 +297,17 @@ function toggleEdit(ti: number, gi: number, ii: number) {
   else {
     openEdits.value.add(key)
   }
+}
+
+function resetGroupCard(group: BuilderGroup) {
+  group.card.backgroundColor = ''
+  group.card.opacity = ''
+  group.card.blur = ''
+  group.card.borderWidth = ''
+  group.card.borderStyle = ''
+  group.card.borderColor = ''
+  group.card.borderRadius = ''
+  group.card.padding = ''
 }
 
 const TYPE_LABELS: Record<string, string> = {
