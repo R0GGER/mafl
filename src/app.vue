@@ -16,6 +16,10 @@ const i18nHead = useLocaleHead({
   identifierAttribute: 'id',
 })
 
+onMounted(() => {
+  colorMode.preference = $settings.theme || 'system'
+})
+
 useHead({
   title: $settings.title,
   htmlAttrs: {
@@ -25,9 +29,5 @@ useHead({
   bodyAttrs: {
     class: 'relative',
   },
-})
-
-onMounted(() => {
-  colorMode.preference = $settings.theme || 'system'
 })
 </script>

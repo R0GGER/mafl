@@ -59,8 +59,27 @@ html.bluer {
     .admin-input {
         @apply bg-background border border-fg/10 rounded px-2.5 py-1.5 text-sm text-fg
                focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent;
-        color-scheme: dark;
+        color-scheme: light;
         accent-color: theme('colors.brand.500');
+    }
+    .admin-section input[type="checkbox"],
+    .admin-section input[type="radio"],
+    .admin-section input[type="number"] {
+        color-scheme: light;
+    }
+    html.dark .admin-input,
+    html.dark .admin-section input[type="checkbox"],
+    html.dark .admin-section input[type="radio"],
+    html.dark .admin-section input[type="number"],
+    html.deep .admin-input,
+    html.deep .admin-section input[type="checkbox"],
+    html.deep .admin-section input[type="radio"],
+    html.deep .admin-section input[type="number"],
+    html.bluer .admin-input,
+    html.bluer .admin-section input[type="checkbox"],
+    html.bluer .admin-section input[type="radio"],
+    html.bluer .admin-section input[type="number"] {
+        color-scheme: dark;
     }
     .chevron {
         @apply inline-block w-2 h-2 border-r-2 border-b-2 border-brand-500 transition-transform duration-200;
@@ -69,4 +88,24 @@ html.bluer {
     .chevron.rotated {
         transform: rotate(45deg);
     }
+
+    /* YAML syntax highlighting – light mode */
+    .yaml-hl { color: #24292e; }
+    .yaml-hl .yl-key { color: #005cc5; }
+    .yaml-hl .yl-str { color: #22863a; }
+    .yaml-hl .yl-num { color: #e36209; }
+    .yaml-hl .yl-bool { color: #d73a49; }
+    .yaml-hl .yl-null { color: #d73a49; font-style: italic; }
+    .yaml-hl .yl-comment { color: #6a737d; font-style: italic; }
+    .yaml-hl .yl-punct { color: #6a737d; }
+
+    /* YAML syntax highlighting – dark mode */
+    html.dark .yaml-hl { color: #e1e4e8; }
+    html.dark .yaml-hl .yl-key { color: #79b8ff; }
+    html.dark .yaml-hl .yl-str { color: #85e89d; }
+    html.dark .yaml-hl .yl-num { color: #ffab70; }
+    html.dark .yaml-hl .yl-bool { color: #f97583; }
+    html.dark .yaml-hl .yl-null { color: #f97583; font-style: italic; }
+    html.dark .yaml-hl .yl-comment { color: #6a737d; font-style: italic; }
+    html.dark .yaml-hl .yl-punct { color: #6a737d; }
 }

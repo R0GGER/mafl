@@ -57,6 +57,19 @@
 <script setup lang="ts">
 definePageMeta({ layout: false })
 
+const colorMode = useColorMode()
+colorMode.preference = 'dark'
+
+onMounted(() => {
+  const saved = localStorage.getItem('mafl-admin-theme')
+  if (saved === 'light') colorMode.preference = 'light'
+})
+
+onUnmounted(() => {
+  const { $settings } = useNuxtApp()
+  colorMode.preference = $settings.theme || 'system'
+})
+
 const password = ref('')
 const loading = ref(false)
 const error = ref('')

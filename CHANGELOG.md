@@ -1,6 +1,69 @@
 # Changelog
 
 
+## YAML syntax highlighting in admin editor
+
+### 💅 Improvements
+
+- **admin:** YAML output panel now has syntax highlighting with distinct colors for keys, string values, numbers, booleans, null, comments and punctuation
+- **admin:** Highlighting colors are optimized for both dark and light mode — uses a GitHub-inspired color palette with good contrast in each theme
+
+### 🐛 Bug Fixes
+
+- **admin:** Fixed admin pages (login + editor) rendering in light mode on first visit in Firefox or incognito — `colorMode.preference` is now set to `dark` during the setup phase (SSR) instead of waiting for `onMounted`, preventing a flash of light theme when no cookie or localStorage is present
+
+### New files
+
+| File | Purpose |
+|------|---------|
+| `src/utils/yamlHighlight.ts` | Lightweight YAML tokenizer that converts plain YAML text to HTML with `yl-key`, `yl-str`, `yl-num`, `yl-bool`, `yl-null`, `yl-comment` and `yl-punct` spans |
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/pages/admin/index.vue` | Replaced `{{ yamlOutput }}` with `v-html="highlightedYaml"` using the new highlight utility; moved `colorMode.preference = 'dark'` from `onMounted` to setup phase |
+| `src/pages/admin/login.vue` | Moved `colorMode.preference = 'dark'` from `onMounted` to setup phase; `onMounted` now only overrides to light if explicitly saved in localStorage |
+| `src/assets/style/tailwind.css` | Added `.yaml-hl` token styles for light mode (`:root`) and dark mode (`html.dark`) |
+
+---
+
+## Admin dark mode with user toggle
+
+### 💅 Improvements
+
+- **admin:** Config Builder and login page now default to dark mode — independent of the dashboard theme setting
+- **admin:** Added a light/dark toggle button (sun/moon icon) in the Config Builder header so users can switch to light mode if preferred
+- **admin:** Theme preference is stored in `localStorage` (`mafl-admin-theme`) and shared between the login and config builder pages
+- **admin:** When navigating back to the dashboard, the dashboard theme (`$settings.theme`) is restored automatically
+- **admin:** Native form controls (checkboxes, radio buttons, number input spinners) now correctly follow the active theme via `color-scheme` — previously they were always dark even in light mode
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/pages/admin/index.vue` | Added `colorMode` management with `applyAdminTheme()`, `toggleAdminTheme()`, localStorage persistence, and `onUnmounted` restore; added sun/moon toggle button in header |
+| `src/pages/admin/login.vue` | Added `colorMode` management to default to dark and respect stored preference; restores dashboard theme on unmount |
+| `src/assets/style/tailwind.css` | Changed `color-scheme: dark` from hardcoded to theme-responsive; added rules for `html.dark`, `html.deep`, `html.bluer` to set `color-scheme: dark` on `.admin-input`, checkboxes, radios and number inputs |
+
+---
+
+## Fix admin login on non-localhost (HTTP)
+
+### 🐛 Bug Fixes
+
+- **admin:** Fixed login failing on remote/Linux hosts accessed over HTTP — the session cookie had `secure: true` based on `NODE_ENV === 'production'`, which caused browsers to reject the cookie on non-HTTPS connections. On `localhost` this worked because browsers treat it as a secure context, but accessing the app via a remote IP or hostname over HTTP silently dropped the cookie after successful password verification
+- **admin:** Session cookie `secure` flag is now based on the actual request protocol (`getRequestProtocol` with `xForwardedProto` support) instead of `NODE_ENV` — works correctly for direct HTTP, direct HTTPS, and behind a reverse proxy
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/server/utils/auth.ts` | `getSessionConfig()` now accepts the `H3Event` and uses `getRequestProtocol(event, { xForwardedProto: true })` to set `secure: proto === 'https'` instead of `secure: process.env.NODE_ENV === 'production'` |
+| `docker-compose.yml` | Quoted environment variable values to prevent YAML parser issues with `:` in hash values |
+
+---
+
 ## Reset button confirmation with timer bar
 
 ### 💅 Improvements
