@@ -47,13 +47,14 @@ export async function hashPassword(plain: string): Promise<string> {
 
 const SESSION_MAX_AGE = 60 * 60 * 24 // 24 hours
 
-function getSessionConfig() {
+function getSessionConfig(event: H3Event) {
   const config = useRuntimeConfig()
+  const proto = getRequestProtocol(event, { xForwardedProto: true })
   return {
     password: config.sessionPassword,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: proto === 'https',
       sameSite: 'lax' as const,
     },
     maxAge: SESSION_MAX_AGE,
@@ -66,7 +67,7 @@ interface AdminSessionData {
 }
 
 export async function getAdminSession(event: H3Event) {
-  return useSession<AdminSessionData>(event, getSessionConfig())
+  return useSession<AdminSessionData>(event, getSessionConfig(event))
 }
 
 export async function requireAdminSession(event: H3Event) {
