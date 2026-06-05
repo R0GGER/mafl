@@ -90,7 +90,20 @@ export interface LogoImage {
   image: string
 }
 
-export type LogoConfig = string | LogoImage | LogoText
+export interface LogoBoth {
+  type: 'both'
+  image: string
+  text: string
+  fontSize?: string
+  fontWeight?: string | number
+  fontFamily?: string
+  color?: string
+  backgroundColor?: string
+  borderRadius?: string
+  padding?: string
+}
+
+export type LogoConfig = string | LogoImage | LogoText | LogoBoth
 
 export interface Footer {
   text?: string

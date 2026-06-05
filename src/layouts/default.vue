@@ -1,6 +1,20 @@
 <template>
+  <div
+    v-if="logoBoth && showLogo"
+    class="fixed top-6 left-6 z-50 flex items-center gap-2 pointer-events-none drop-shadow-md"
+  >
+    <img
+      :src="`/api/assets/${logoBoth.image}`"
+      :alt="$settings.title || 'Logo'"
+      class="h-8 w-auto object-contain"
+    >
+    <span
+      class="select-none"
+      :style="logoTextStyle"
+    >{{ logoBoth.text }}</span>
+  </div>
   <img
-    v-if="logoImage && showLogo"
+    v-else-if="logoImage && showLogo"
     :src="`/api/assets/${logoImage}`"
     :alt="$settings.title || 'Logo'"
     class="fixed top-6 left-6 z-50 h-8 w-auto object-contain pointer-events-none drop-shadow-md"
@@ -49,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Tab, LogoText } from '~/types'
+import type { Tab, LogoText, LogoBoth } from '~/types'
 
 const { $settings, $tabs, $activeTabIndex } = useNuxtApp()
 
@@ -84,6 +98,13 @@ const overlay = computed(() => ({
   opacity: $settings.backgroundOverlay?.opacity ?? 0.5,
 }))
 
+const logoBoth = computed((): LogoBoth | null => {
+  const logo = $settings.logo
+  if (!logo || typeof logo === 'string') return null
+  if (logo.type === 'both') return logo
+  return null
+})
+
 const logoImage = computed(() => {
   const logo = $settings.logo
   if (!logo) return null
@@ -99,8 +120,10 @@ const logoText = computed((): LogoText | null => {
   return null
 })
 
+const logoTextSource = computed(() => logoBoth.value || logoText.value)
+
 const logoTextStyle = computed(() => {
-  const lt = logoText.value
+  const lt = logoTextSource.value
   if (!lt) return {}
   return {
     fontSize: lt.fontSize || '1.5rem',

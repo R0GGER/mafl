@@ -50,6 +50,7 @@
             <option value="none">None</option>
             <option value="image">Image</option>
             <option value="text">Text / Letter</option>
+            <option value="both">Image + Text</option>
           </select>
         </div>
         <div>
@@ -72,7 +73,7 @@
       </div>
 
       <!-- Image logo fields -->
-      <div v-if="state.logoType === 'image'" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div v-if="state.logoType === 'image' || state.logoType === 'both'" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label class="admin-label">Logo Image (filename in data/)</label>
           <input v-model="state.logoImage" type="text" class="admin-input w-full" placeholder="logo.png">
@@ -80,7 +81,7 @@
       </div>
 
       <!-- Text logo fields -->
-      <div v-if="state.logoType === 'text'" class="mt-4 space-y-3">
+      <div v-if="state.logoType === 'text' || state.logoType === 'both'" class="mt-4 space-y-3">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="admin-label">Logo Text</label>

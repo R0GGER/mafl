@@ -1,6 +1,102 @@
 # Changelog
 
 
+## Admin performance: debounced YAML preview
+
+### ⚡ Performance
+
+- **admin:** Eliminated `watch(state, { deep: true })` which caused Vue to traverse the entire reactive state tree on every keystroke — replaced with native DOM event bubbling (`@input.capture`, `@change.capture`, `@click.capture`) for zero-overhead change detection
+- **admin:** YAML generation (`stateToYaml`) and syntax highlighting (`highlightYaml`) are now fully debounced at 400ms — neither function runs during active typing or slider movement
+- **admin:** Removed `yamlOutput` computed dependency from the preview pipeline — Save, Copy and Export call `stateToYaml()` on demand instead of maintaining a reactive computed
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/pages/admin/index.vue` | Replaced `watch(state, { deep: true })` with `@input.capture` / `@change.capture` / `@click.capture` event handlers on the form container; replaced `yamlOutput` computed with direct `stateToYaml(state)` calls; added `schedulePreview()` and `schedulePreviewAfterClick()` debounce functions; explicit `updatePreview()` calls after reset, import and config load |
+
+---
+
+## Config import & export in admin
+
+### 🚀 Enhancements
+
+- **admin:** Added Import button — upload a local `.yml` / `.yaml` file to load it into the config builder via file picker
+- **admin:** Added Export button — downloads the current YAML output as `config-backup-<timestamp>.yml` for backup purposes
+- **admin:** Removed "Load Current Config" button — the server config is already loaded automatically on page open, making the button redundant with the new Import functionality
+
+### 💅 Improvements
+
+- **admin:** Header buttons are now visually grouped with vertical dividers: `[theme] | [Import] [Export] | [Save & Apply] [Reset] | [Dashboard] [Logout]`
+- **admin:** Button bar uses `flex-wrap` for better layout on narrower screens
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/pages/admin/index.vue` | Added Import button with hidden file input and `FileReader` handler; added Export button with `Blob` download; removed "Load Current Config" button and `configLoading` ref; grouped buttons with `<span>` dividers |
+
+---
+
+## Combined image + text logo
+
+### 🚀 Enhancements
+
+- **logo:** Image and text/letter logo can now be displayed simultaneously — select "Image + Text" as Logo Type in Global Settings
+- **logo:** The image logo is automatically vertically centered relative to the text logo using flexbox `items-center`
+- **admin:** New "Image + Text" option in the Logo Type dropdown shows both the image filename field and all text styling fields at once
+
+### Config format
+
+```yaml
+logo:
+  type: both
+  image: logo.png
+  text: "MAFL+"
+  fontSize: 1.5rem
+  fontWeight: 700
+  fontFamily: "Inter, sans-serif"
+  color: "#ffffff"
+  backgroundColor: transparent
+  borderRadius: 0
+  padding: 0
+```
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/types/config.d.ts` | Added `LogoBoth` interface with `type: 'both'`, `image`, `text` and all text style properties; extended `LogoConfig` union type |
+| `src/server/validations/config.ts` | Added `type: 'both'` variant to the logo Zod schema with `image` and `text` required fields |
+| `src/composables/useConfigBuilder.ts` | Extended `LogoType` with `'both'`; YAML import/export handles the combined logo format |
+| `src/components/admin/GlobalSettings.vue` | Added "Image + Text" option to Logo Type dropdown; image and text fields are shown simultaneously when selected |
+| `src/layouts/default.vue` | Added combined logo rendering with `flex items-center` container; image logo is vertically centered next to the text logo |
+
+---
+
+## Remove unused dependencies and VitePress
+
+### 🧹 Chore
+
+- **deps:** Removed `vitepress` and `@hywax/vitepress-yandex-metrika` — VitePress documentation engine is not used by the application; docs are plain markdown files
+- **deps:** Removed `h3-zod` — not imported anywhere in the codebase; Zod validation is used directly
+- **deps:** Removed `@commitlint/cli` and `@commitlint/config-conventional` — no commitlint configuration exists in the project
+- **deps:** Removed `husky` and `lint-staged` — no `.husky/` hooks were configured; the git hook workflow was not wired up
+- **scripts:** Removed `docs:dev`, `docs:build`, `docs:preview` scripts (VitePress)
+- **scripts:** Removed `"prepare": "husky"` script and `lint-staged` configuration from `package.json`
+- **docker:** Added `docs` to `.dockerignore` to exclude documentation files from the build context
+- **deps:** Regenerated `yarn.lock` to remove orphaned packages
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `package.json` | Removed 7 unused dependencies, 3 docs scripts, husky prepare script and lint-staged config |
+| `.dockerignore` | Added `docs` to exclude documentation from Docker build context |
+| `yarn.lock` | Regenerated to reflect removed packages |
+
+---
+
 ## YAML syntax highlighting in admin editor
 
 ### 💅 Improvements

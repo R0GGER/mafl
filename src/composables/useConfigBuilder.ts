@@ -91,7 +91,7 @@ export interface TextStyle {
   color: string
 }
 
-export type LogoType = 'none' | 'image' | 'text'
+export type LogoType = 'none' | 'image' | 'text' | 'both'
 
 export interface BuilderState {
   title: string
@@ -346,6 +346,17 @@ export function loadConfigFromYaml(state: BuilderState, yamlStr: string) {
       if (config.logo.backgroundColor) state.logoBackgroundColor = config.logo.backgroundColor
       if (config.logo.borderRadius) state.logoBorderRadius = config.logo.borderRadius
       if (config.logo.padding) state.logoPadding = config.logo.padding
+    } else if (config.logo.type === 'both') {
+      state.logoType = 'both'
+      state.logoImage = config.logo.image || ''
+      state.logoText = config.logo.text || ''
+      if (config.logo.fontSize) state.logoFontSize = config.logo.fontSize
+      if (config.logo.fontWeight != null) state.logoFontWeight = String(config.logo.fontWeight)
+      if (config.logo.fontFamily) state.logoFontFamily = config.logo.fontFamily
+      if (config.logo.color) state.logoColor = config.logo.color
+      if (config.logo.backgroundColor) state.logoBackgroundColor = config.logo.backgroundColor
+      if (config.logo.borderRadius) state.logoBorderRadius = config.logo.borderRadius
+      if (config.logo.padding) state.logoPadding = config.logo.padding
     }
   }
   if (config.background) state.background = config.background
@@ -549,6 +560,16 @@ export function stateToYaml(state: BuilderState): string {
     config.logo = state.logoImage
   } else if (state.logoType === 'text' && state.logoText) {
     const logoObj: Record<string, any> = { type: 'text', text: state.logoText }
+    if (state.logoFontSize) logoObj.fontSize = state.logoFontSize
+    if (state.logoFontWeight) logoObj.fontWeight = isNaN(Number(state.logoFontWeight)) ? state.logoFontWeight : parseInt(state.logoFontWeight)
+    if (state.logoFontFamily) logoObj.fontFamily = state.logoFontFamily
+    if (state.logoColor) logoObj.color = state.logoColor
+    if (state.logoBackgroundColor) logoObj.backgroundColor = state.logoBackgroundColor
+    if (state.logoBorderRadius) logoObj.borderRadius = state.logoBorderRadius
+    if (state.logoPadding) logoObj.padding = state.logoPadding
+    config.logo = logoObj
+  } else if (state.logoType === 'both' && state.logoImage && state.logoText) {
+    const logoObj: Record<string, any> = { type: 'both', image: state.logoImage, text: state.logoText }
     if (state.logoFontSize) logoObj.fontSize = state.logoFontSize
     if (state.logoFontWeight) logoObj.fontWeight = isNaN(Number(state.logoFontWeight)) ? state.logoFontWeight : parseInt(state.logoFontWeight)
     if (state.logoFontFamily) logoObj.fontFamily = state.logoFontFamily
