@@ -2,9 +2,40 @@
 
 MAFL+ includes several built-in service modules that can be added to your dashboard via `config.yml`. Each module is configured using `type` and optional `options`.
 
+## Table of Contents
+
+* [Overview](#overview)
+* [Time](#time)
+* [Datetime Weather](#datetime-weather)
+* [OpenWeatherMap](#openweathermap)
+* [IP API](#ip-api)
+* [Greeting](#greeting)
+* [Custom HTML](#custom-html)
+* [Grid Span](#grid-span)
+* [Date Formats](#date-formats)
+
+---
+
+## Overview
+
+| Module | Type | Description |
+|--------|------|-------------|
+| [Time](#time) | `time` | Live clock with date for any IANA timezone |
+| [Datetime Weather](#datetime-weather) | `datetime-weather` | Combined clock and weather widget (OpenWeatherMap) |
+| [OpenWeatherMap](#openweathermap) | `openweathermap` | Current weather for a given location |
+| [IP API](#ip-api) | `ip-api` | Public IP address information with country flag |
+| [Greeting](#greeting) | `greeting` | Custom greeting message with optional subtitle |
+| [Custom HTML](#custom-html) | `custom-html` | Render arbitrary HTML content (including scripts) |
+
+All modules support common service properties like `span`, `icon` and `tags`. See [Configuration](configuration.md#service-item-properties) for the full list.
+
+---
+
 ## Time
 
 Displays a live clock with the current time and date for a specific timezone.
+
+> **Backward compatibility:** `type: timezone` is accepted as an alias for `type: time`.
 
 ### Options
 
@@ -14,7 +45,7 @@ Displays a live clock with the current time and date for a specific timezone.
 | `locationName` | `string` | value of `timezone` | Display name shown in the widget |
 | `country` | `string` | — | Two-letter country code for a flag icon (e.g. `nl`, `us`). If omitted, a clock icon is shown. |
 | `timeFormat` | `string` | `24h` | Time format: `24h` or `12h` |
-| `dateFormat` | `string` | `medium` | Date format (see [Date formats](#date-formats)) |
+| `dateFormat` | `string` | `medium` | Date format (see [Date Formats](#date-formats)) |
 
 ### Examples
 
@@ -74,23 +105,7 @@ Combines a live clock with weather data from [OpenWeatherMap](https://openweathe
 | `timezone` | `string` | *required* | IANA timezone identifier |
 | `units` | `string` | `metric` | Temperature units: `metric`, `imperial`, or `standard` |
 | `timeFormat` | `string` | `24h` | Time format: `24h` or `12h` |
-| `dateFormat` | `string` | `medium` | Date format (see [Date formats](#date-formats)) |
-
-### Date Formats
-
-The `time` and `datetime-weather` modules support a `dateFormat` option. Available formats:
-
-| Format     | Example (EN)           | Example (NL)         |
-| ---------- | ---------------------- | -------------------- |
-| `short`    | 5/16/2026              | 16-5-2026            |
-| `medium`   | May 16, 2026           | 16 mei 2026          |
-| `long`     | Saturday, May 16, 2026 | zaterdag 16 mei 2026 |
-| `eu`       | Sat 16 May 2026        | za 16 mei 2026       |
-| `compact`  | Sat 16 May             | za 16 mei            |
-| `short-eu` | 16-05-2026             | 16-05-2026           |
-| `iso`      | 2026-05-16             | 2026-05-16           |
-
-The date language is determined by the `lang` setting in your `config.yml`.
+| `dateFormat` | `string` | `medium` | Date format (see [Date Formats](#date-formats)) |
 
 ### Secrets
 
@@ -113,7 +128,7 @@ services:
       apiKey: your-api-key
 ```
 
-#### With Medium date format and Metric units
+#### With EU date format and metric units
 
 ```yaml
 services:
@@ -123,82 +138,10 @@ services:
       lon: 4.895168
       timezone: Europe/Amsterdam
       units: metric
-      dateFormat: medium
+      dateFormat: eu
       timeFormat: 24h
     secrets:
       apiKey: your-api-key
-```
-
----
-
-## Greeting
-
-Displays a custom greeting message on your dashboard.
-
-### Options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `text` | `string` | *required* | Main greeting text |
-| `subtitle` | `string` | — | Secondary text shown below the greeting |
-
-### Examples
-
-#### Basic usage
-
-```yaml
-services:
-  - type: greeting
-    options:
-      text: Hello R0GGER!
-      subtitle: Welcome to your dashboard!
-```
-
-#### With custom icon
-
-```yaml
-services:
-  - type: greeting
-    icon:
-      name: mdi:home
-    options:
-      text: Welcome Home
-      subtitle: Have a great day
-```
-
----
-
-## Custom HTML
-
-Renders custom HTML content inside a service card. Useful for embedding widgets, links, or tracking pixels.
-
-### Options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `html` | `string` | *required* | HTML content to render |
-| `hidden` | `boolean` | `false` | When `true`, the card is invisible (HTML is still rendered) |
-
-### Examples
-
-#### Visible card with custom content
-
-```yaml
-services:
-  - type: custom-html
-    title: Links
-    options:
-      html: '<a href="https://example.com" style="color:white;">Visit Example</a>'
-```
-
-#### Hidden (e.g. for tracking pixels)
-
-```yaml
-services:
-  - type: custom-html
-    options:
-      hidden: true
-      html: '<img src="https://analytics.example.com/pixel.gif" />'
 ```
 
 ---
@@ -253,13 +196,13 @@ services:
 
 ## IP API
 
-Shows information about your IP address, including a country flag icon based on your location.
+Shows information about your public IP address, including a country flag icon based on your location.
 
 ### Options
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `locationName` | `string` | – | Custom location name to display. When omitted, the location is auto-detected from the IP address. |
+| `locationName` | `string` | — | Custom location name to display. When omitted, the location is auto-detected from the IP address. |
 | `flagIcon` | `boolean` | `true` | Show the country flag icon. When `false`, the configured icon is used instead. |
 
 ### Examples
@@ -280,7 +223,7 @@ services:
       locationName: Home Office
 ```
 
-#### With custom icon
+#### With custom icon instead of flag
 
 ```yaml
 services:
@@ -293,35 +236,136 @@ services:
 
 ---
 
-## Grid Span
+## Greeting
 
-Any service item can span multiple grid columns using the `span` property:
+Displays a custom greeting message on your dashboard.
+
+### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `text` | `string` | *required* | Main greeting text |
+| `subtitle` | `string` | — | Secondary text shown below the greeting |
+
+### Examples
+
+#### Basic usage
 
 ```yaml
 services:
-  - type: time
-    span: 2
+  - type: greeting
     options:
-      timezone: Europe/Amsterdam
+      text: Hello R0GGER!
+      subtitle: Welcome to your dashboard!
 ```
 
-This works for all service types, not just modules.
+#### With custom icon
+
+```yaml
+services:
+  - type: greeting
+    icon:
+      name: mdi:home
+    options:
+      text: Welcome Home
+      subtitle: Have a great day
+```
 
 ---
 
-## Footer
+## Custom HTML
 
-The footer is a global configuration option (not a service module). It displays content at the bottom of the page.
+Renders custom HTML content inside a service card. Useful for embedding widgets, links, analytics snippets or tracking pixels.
+
+`<script>` tags are fully supported and will execute correctly.
+
+### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `html` | `string` | *required* | HTML content to render (including `<script>` tags) |
+| `hidden` | `boolean` | `false` | When `true`, the card is invisible (HTML is still rendered) |
+
+### Examples
+
+#### Visible card with custom content
 
 ```yaml
-footer:
-  text: "© 2026 MAFL+"
-  html: '<p>Powered by <a href="https://github.com/R0GGER/mafl" style="color:white;">MAFL+</a></p>'
+services:
+  - type: custom-html
+    title: Links
+    options:
+      html: '<a href="https://example.com" style="color:white;">Visit Example</a>'
 ```
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `text` | `string` | Plain text displayed in the footer |
-| `html` | `string` | Custom HTML content rendered in the footer |
+#### Hidden (e.g. for tracking pixels or analytics)
 
-Both fields are optional. The footer is only shown when at least one is configured.
+```yaml
+services:
+  - type: custom-html
+    options:
+      hidden: true
+      html: '<img src="https://analytics.example.com/pixel.gif" />'
+```
+
+#### Embedded script
+
+```yaml
+services:
+  - type: custom-html
+    options:
+      hidden: true
+      html: '<script src="https://example.com/widget.js"></script>'
+```
+
+---
+
+## Grid Span
+
+By default every module occupies a single column in the grid. With the `span` property you can make a module stretch across multiple columns, giving wider widgets like clocks or weather more room to breathe.
+
+```yaml
+services:
+  Widgets:
+    display: grid
+    items:
+      - type: datetime-weather
+        span: 2
+        options:
+          lat: 52.370216
+          lon: 4.895168
+          timezone: Europe/Amsterdam
+        secrets:
+          apiKey: your-api-key
+      - type: time
+        span: 1
+        options:
+          timezone: America/New_York
+          country: us
+```
+
+| Value | Behaviour |
+|-------|-----------|
+| `1` | Default — occupies one grid column |
+| `2` | Spans two columns — useful for datetime-weather, greeting or custom-html widgets that benefit from extra width |
+| `3` | Spans three columns — useful for wide custom-html embeds or a prominent greeting |
+
+The maximum useful value depends on how many columns your [layout](configuration.md#layout) defines at the current breakpoint. A span larger than the column count will simply fill the entire row.
+
+`span` is not limited to modules — it works on any service item (bookmarks, links, etc.).
+
+---
+
+## Date Formats
+
+The `time` and `datetime-weather` modules support a `dateFormat` option. The date language is determined by the `lang` setting in your `config.yml`.
+
+| Format | Example (EN) | Example (NL) |
+|--------|--------------|--------------|
+| `short` | 5/16/2026 | 16-5-2026 |
+| `medium` | May 16, 2026 | 16 mei 2026 |
+| `long` | Saturday, May 16, 2026 | zaterdag 16 mei 2026 |
+| `eu` | Sat 16 May 2026 | za 16 mei 2026 |
+| `compact` | Sat 16 May | za 16 mei |
+| `short-eu` | 16-05-2026 | 16-05-2026 |
+| `iso` | 2026-05-16 | 2026-05-16 |

@@ -41,22 +41,25 @@ This fork adds several features on top of the original [Mafl](https://github.com
 
 | Area | What changed |
 |------|-------------|
-| **Layout: Grid** | Responsive grid with up to 6 columns (`small` / `medium` / `large` / `xlarge`). |
-| **Layout: List** | Compact list display mode per group, with its own column configuration. |
-| **Layout: Spacing** | Configurable spacing between groups and between items. |
-| **Styles** | Per-element styling for category headers, titles and descriptions (color, fontSize, fontWeight, fontStyle, etc.). |
-| **Card style** | Wrap groups in styled cards with configurable background color, opacity, border (width, style, color), border radius and padding — globally and per group. |
-| **Logo** | Fixed responsive logo in the top-left corner - image file or text/letter with full typographic control. |
-| **Background image** | Full-screen background image served from the data volume. |
-| **Background overlay** | Color overlay with configurable opacity for better text readability. |
-| **Tabs** | Organise services into switchable tabs, each with its own icon. Tabs can be locked to prevent deletion, hidden from the frontpage, and linked directly via URL hash (e.g. `/#work`). |
-| **Search bar** | Filters bookmarks across all tabs; falls back to Google or DuckDuckGo web search. Keyboard shortcuts: `/`, `Ctrl+K`. |
-| **Favicon API** | Retrieve service icons automatically via a configurable favicon API with server-side proxy cache. |
-| **Status position** | Align the status indicator to the `left` or `right` (default) of a service. |
-| **Admin Panel** | Built-in visual config editor at `/admin` with instant save & apply. |
-| **Modules** | Time, DateTime Weather, Greeting, Custom HTML widgets. |
-| **Grid span** | Any service item can span multiple grid columns. |
-| **Footer** | Global footer with text and/or HTML content. |
+| **Grid layout** | Responsive grid with up to 6 columns (`small` / `medium` / `large` / `xlarge`) |
+| **List layout** | Compact list display mode per group with its own column config |
+| **Spacing** | Configurable spacing between groups and items |
+| **Styles** | Per-element styling for category headers, titles and descriptions |
+| **Card style** | Wrap groups in styled cards with background, opacity, glassmorphism blur, border and padding — globally and per group |
+| **Logo** | Fixed responsive logo in the top-left corner — image, text/letter or both combined |
+| **Background** | Full-screen background image with optional color overlay |
+| **Tabs** | Organise services into switchable tabs with icons, lock protection, visibility toggle and deep linking via URL hash. Tab bar auto-hides with a single tab. |
+| **Search** | Filter bookmarks across tabs; web search fallback (`/`, `Ctrl+K`) |
+| **Favicon API** | Auto-fetch service icons by domain name with server-side proxy cache |
+| **Caching** | Server-side favicon proxy with disk cache (7 days per domain) and Service Worker offline support |
+| **Status position** | Align the status indicator to `left` or `right` |
+| **Admin Panel** | Built-in visual config editor at `/admin` with config import/export, YAML syntax highlighting, reorder groups/items and WebSocket hot-reload |
+| **Modules** | Time, DateTime Weather, Greeting, Custom HTML, IP API, OpenWeatherMap widgets |
+| **Grid span** | Any service item can span multiple grid columns |
+| **Footer** | Global footer with text and/or HTML content |
+| **PWA** | Dynamic manifest uses the app title from config — no rebuild needed |
+| **Config Builder** | Standalone visual editor at [config.maflplus.eu](https://config.maflplus.eu/) — no server required |
+| **Example config** | On first Docker run, an example `config.yml` is automatically created |
 
 ## 🎯 Features
 

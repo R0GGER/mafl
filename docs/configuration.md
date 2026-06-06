@@ -1,17 +1,44 @@
 # Configuration (config.yml)
 
-Services, icons, language and other settings are set in a single `config.yml` file.
+All settings live in a single `config.yml` file inside the data volume (`./mafl/`). This page documents every available option.
 
-### Config Builder
-Prefer a visual editor? Open the [**Config Builder**](https://config.maflplus.eu/) in your browser to create or edit your `config.yml` without writing YAML by hand. It supports all settings documented below, imports existing config files and generates ready-to-paste YAML output.
+**Editing tools:**
 
-### Admin Panel
-You can also edit `config.yml` directly on your running instance via the built-in **Admin Panel** at `/admin`. Changes are saved and applied instantly. See [Admin Panel](admin.md) for setup instructions.
+- [Config Builder](https://config.maflplus.eu/) — standalone visual editor in your browser (no server required)
+- [Admin Panel](admin.md) — built-in editor at `/admin` on your running instance (changes are saved and applied instantly)
 
+---
+
+## Table of Contents
+
+- [Title](#title)
+- [Language](#language)
+- [Theme](#theme)
+- [Logo](#logo)
+- [Background](#background)
+- [Layout](#layout)
+- [Styles](#styles)
+- [Card Style](#card-style)
+- [Search](#search)
+- [Tabs](#tabs)
+- [Services](#services)
+- [Display Modes](#display-modes)
+- [Grid Span](#grid-span)
+- [Service Item Properties](#service-item-properties)
+- [Icon](#icon)
+- [Status Indicator](#status-indicator)
+- [Favicon API](#favicon-api)
+- [Tags](#tags)
+- [Behaviour](#behaviour)
+- [Footer](#footer)
+- [Check Updates](#check-updates-watchtower)
+- [Demo config.yml](#demo-configyml)
+
+---
 
 ## Title
 
-You can customize the page header if you wish.
+The page title shown in the browser tab and used as the PWA app name.
 
 ```yaml
 title: MAFL+
@@ -19,9 +46,11 @@ title: MAFL+
 
 Default: `MAFL+`
 
+---
+
 ## Language
 
-Set the desired language with:
+The app detects your browser language automatically. Override it with:
 
 ```yaml
 lang: en
@@ -31,9 +60,11 @@ Values: `en`, `ru`, `zh`, `hi`, `es`, `ar`, `pl`, `fr`, `de`, `gr`, `nl`
 
 Default: `en`
 
+---
+
 ## Theme
 
-You can customize fixed themes by passing the `theme` option as shown below:
+Set a fixed color theme for the dashboard.
 
 ```yaml
 theme: dark
@@ -43,9 +74,13 @@ Values: `system`, `light`, `dark`, `deep`, `sepia`, `bluer`
 
 Default: `system`
 
+---
+
 ## Logo
 
-Display a logo in the top-left corner of the homepage. You can choose between an **image logo** or a **text/letter logo**.
+Display a logo in the top-left corner of the homepage. Three modes are available: **image**, **text** or **both**.
+
+> The logo is only visible on screens wider than 1640px.
 
 ### Image logo
 
@@ -74,9 +109,31 @@ logo:
   padding: 0.25rem 0.5rem
 ```
 
+### Combined image + text logo
+
+Display both an image and a text logo side by side. The image is automatically centered vertically relative to the text.
+
+```yaml
+logo:
+  type: both
+  image: logo.png
+  text: "MAFL+"
+  fontSize: 1.5rem
+  fontWeight: 700
+  fontFamily: "Inter, sans-serif"
+  color: "#ffffff"
+  backgroundColor: transparent
+  borderRadius: 0
+  padding: 0
+```
+
+### Logo properties
+
 | Property | Description | Default |
 |---|---|---|
-| `text` | The text to display (required) | — |
+| `type` | Logo mode: `text`, `image` or `both` | — |
+| `image` | Image filename (required for `image` and `both`) | — |
+| `text` | Text to display (required for `text` and `both`) | — |
 | `fontSize` | CSS font-size | `1.5rem` |
 | `fontWeight` | CSS font-weight (100–900) | `700` |
 | `fontFamily` | CSS font-family | `inherit` |
@@ -85,12 +142,13 @@ logo:
 | `borderRadius` | CSS border-radius | `0` |
 | `padding` | CSS padding | `0` |
 
-Default: _none_
+Default: _none_ (no logo)
+
+---
 
 ## Background
 
-Display a background image on the homepage. The image file must be placed in the data volume
-(the same directory as `config.yml`).
+Display a full-screen background image. Place the image file in the data volume (the same directory as `config.yml`).
 
 ```yaml
 background: background.jpg
@@ -102,8 +160,7 @@ Default: _none_
 
 ### Background overlay
 
-Add a color overlay on top of the background image to improve text readability.
-Only takes effect when `background` is set.
+Add a color overlay on top of the background image to improve text readability. Only takes effect when `background` is set.
 
 ```yaml
 background: background.jpg
@@ -112,15 +169,93 @@ backgroundOverlay:
   opacity: 0.5
 ```
 
-| Property  | Description                                | Default     |
-|-----------|--------------------------------------------|-------------|
-| `color`   | Any valid CSS color (hex, rgb, named, etc) | `#000000`   |
+| Property | Description | Default |
+|---|---|---|
+| `color` | Any valid CSS color (hex, rgb, named, etc) | `#000000` |
 | `opacity` | Value between `0` (transparent) and `1` (opaque) | `0.5` |
+
+---
+
+## Layout
+
+Controls the responsive column layout and spacing of the dashboard.
+
+### Grid columns
+
+Sets the number of columns for groups using `display: grid` at different screen widths.
+
+```yaml
+layout:
+  grid:
+    small: 2      # ≥640px
+    medium: 2     # ≥768px
+    large: 3      # ≥1024px
+    xlarge: 5     # ≥1280px
+```
+
+Values: `1` – `6`
+
+You can specify only the breakpoints you want to override; the rest will be set automatically.
+
+### List columns
+
+Sets the number of columns for groups using `display: list` at different screen widths.
+
+```yaml
+layout:
+  list:
+    small: 2      # ≥640px
+    medium: 3     # ≥768px
+    large: 4      # ≥1024px
+    xlarge: 5     # ≥1280px
+```
+
+Values: `1` – `6`
+
+Works exactly like grid above, but applies only to groups with `display: list`.
+
+### Spacing
+
+Controls the vertical spacing between groups and the gap between items.
+
+```yaml
+layout:
+  spacing:
+    group: 1.5rem
+    item: 0.25rem
+```
+
+| Property | Description | Default |
+|---|---|---|
+| `group` | Vertical padding around each category group | `2.5rem` |
+| `item` | Gap between items within a group | `0.5rem` |
+
+Any valid CSS unit works (`rem`, `px`, `em`, etc).
+
+### Full layout example
+
+```yaml
+layout:
+  grid:
+    small: 2
+    medium: 2
+    large: 3
+    xlarge: 5
+  list:
+    small: 2
+    medium: 3
+    large: 4
+    xlarge: 5
+  spacing:
+    group: 1.5rem
+    item: 0.25rem
+```
+
+---
 
 ## Styles
 
-Customize the font family, size, weight, style, decoration and color for category headers,
-service titles and service descriptions.
+Customize the font family, size, weight, style, decoration and color for category headers, service titles and service descriptions.
 
 ```yaml
 styles:
@@ -143,49 +278,79 @@ styles:
 
 All three elements (`category`, `title`, `description`) support the same properties:
 
-| Property         | Description          | Examples                                   |
-|------------------|----------------------|--------------------------------------------|
-| `fontFamily`     | Font family          | `'Arial, sans-serif'`, `'Georgia, serif'`  |
-| `fontSize`       | Font size            | `1.5rem`, `18px`, `1.2em`                  |
-| `fontWeight`     | Font weight          | `bold`, `normal`, `600`, `lighter`          |
-| `fontStyle`      | Font style           | `italic`, `normal`                         |
-| `textDecoration` | Text decoration      | `underline`, `line-through`, `none`         |
-| `color`          | Text color           | `'#ffffff'`, `'rgb(255,255,255)'`           |
+| Property | Description | Examples |
+|---|---|---|
+| `fontFamily` | Font family | `'Arial, sans-serif'`, `'Georgia, serif'` |
+| `fontSize` | Font size | `1.5rem`, `18px`, `1.2em` |
+| `fontWeight` | Font weight | `bold`, `normal`, `600`, `lighter` |
+| `fontStyle` | Font style | `italic`, `normal` |
+| `textDecoration` | Text decoration | `underline`, `line-through`, `none` |
+| `color` | Text color | `'#ffffff'`, `'rgb(255,255,255)'` |
 
 All properties are optional — only specify what you want to customize.
 
 Default: _inherits from theme_
 
-## Check updates (watchtower)
+---
 
-Run once: check, update, and when finished remove the Watchtower container.
-```bash
-docker run --rm -v /var/run/docker.sock:/var/run/docker.sock --pull=always nickfedor/watchtower --run-once --cleanup
+## Card Style
+
+Wrap each service group in a styled card with a background, opacity, glassmorphism blur, border and padding. The card style can be set globally and overridden per group.
+
+### Global card style
+
+Set a default card style for all groups under `styles.card`:
+
+```yaml
+styles:
+  card:
+    backgroundColor: '#1a1a2e'
+    opacity: 0.8
+    blur: 10px
+    borderWidth: '1px'
+    borderStyle: solid
+    borderColor: 'rgba(255,255,255,0.2)'
+    borderRadius: 0.5rem
+    padding: 1rem
 ```
 
-## Behaviour
+### Per-group card override
 
-A group of parameters responsible for the behavior of the application.
+Override the global card style for individual groups by adding a `card` key inside the group. Per-group values override individual global defaults; omitted properties fall back to the global card style.
 
-### Target
+```yaml
+services:
+  NEWS:
+    display: list
+    card:
+      backgroundColor: '#2a2a3e'
+      opacity: 0.6
+      borderWidth: '2px'
+      borderStyle: dashed
+      borderColor: '#ff0000'
+    items:
+      - title: NOS
+        link: https://nos.nl
+```
 
-Browser behavior when the service is clicked.
-With this property, you can make the service open in the current or a new window.
+### Card style properties
 
-Values:
+| Property | Description | Default |
+|---|---|---|
+| `backgroundColor` | Any valid CSS color | — |
+| `opacity` | `0` (transparent) – `1` (opaque) | `1` |
+| `blur` | Backdrop blur for glass effect (e.g. `10px`) | — |
+| `borderWidth` | CSS border width (e.g. `1px`) | — |
+| `borderStyle` | `none`, `solid`, `dashed`, `dotted`, `double` | `solid` |
+| `borderColor` | Any valid CSS color | — |
+| `borderRadius` | CSS border radius (e.g. `0.5rem`) | — |
+| `padding` | CSS padding (e.g. `1rem`) | — |
 
-| Value     | Description                                                                                                                     |
-|-----------|---------------------------------------------------------------------------------------------------------------------------------|
-| `_blank`  | Usually a new tab, but users can configure browsers to open a new window instead                                                |
-| `_self`   | The current browsing context                                                                                                    |
-| `_parent` | The parent browsing context of the current one. If no parent, behaves as `_self`                                                |
-| `_top`    | The topmost browsing context (the "highest" context that's an ancestor of the current one). If no ancestors, behaves as `_self` |
-
-Default: `_blank`
+---
 
 ## Search
 
-A search bar is displayed at the top of the page. It filters your bookmarks as you type and offers web search as a fallback. You can choose the preferred search engine:
+A search bar is displayed at the top of the page. It filters your bookmarks across all tabs as you type and offers web search as a fallback.
 
 ```yaml
 searchProvider: google
@@ -195,12 +360,17 @@ Values: `google`, `duckduckgo`
 
 Default: `google`
 
-**Keyboard shortcuts:**
-- Press `/` to focus the search bar
-- Press `Ctrl+K` (or `Cmd+K` on macOS) to focus the search bar
-- Press `Escape` to clear or close
-- Use `Arrow Up` / `Arrow Down` to navigate results
-- Press `Enter` to open the selected result
+### Keyboard shortcuts
+
+| Key | Action |
+|-----|--------|
+| `/` | Focus the search bar |
+| `Ctrl+K` / `Cmd+K` | Focus the search bar |
+| `↑` / `↓` | Navigate results |
+| `Enter` | Open selected result |
+| `Escape` | Clear / close |
+
+---
 
 ## Tabs
 
@@ -229,6 +399,18 @@ tabs:
 
 When `tabs` is defined the top-level `services` key is ignored.
 
+> When only a single tab is configured, the tab navigation bar is automatically hidden.
+
+### Tab properties
+
+| Property | Type | Description | Default |
+|---|---|---|---|
+| `name` | `string` | Tab name (required) | — |
+| `icon` | `string` | Iconify icon name (e.g. `mdi:home`) | — |
+| `locked` | `boolean` | Protect the tab from accidental deletion | `false` |
+| `hidden` | `boolean` | Hide the tab from the frontpage | `false` |
+| `services` | `object` | Service groups within this tab (required) | — |
+
 ### Tab lock
 
 Add `locked: true` to a tab to protect it from accidental deletion. A locked tab also protects its groups and items — delete buttons are hidden in the admin panel.
@@ -247,9 +429,6 @@ Add `hidden: true` to a tab to hide it from the frontpage. The tab remains in th
 
 ```yaml
 tabs:
-  - name: Personal
-    icon: mdi:home
-    services: ...
   - name: Staging
     icon: mdi:flask
     hidden: true
@@ -265,102 +444,15 @@ Link directly to a specific tab using a URL hash fragment. The hash is based on 
 | Tab name | URL |
 |----------|-----|
 | Personal | `https://your-mafl/#personal` |
-| My Work  | `https://your-mafl/#my-work` |
+| My Work | `https://your-mafl/#my-work` |
 
 When a user opens a URL with a tab hash, the corresponding tab is automatically activated. Clicking a tab updates the URL hash (without page reload), and browser back/forward navigation between tabs is supported.
 
-## Tags 
-
-Tags allow you to differentiate between services.
-
-```yaml
-tags:
-  - name: Home
-    color: green
-  - name: Work
-    color: blue
-```
-
-More info in: [Tags](tags.md)
-
-## Layout
-
-Controls the responsive column layout and spacing of the dashboard.
-
-### Grid
-
-Sets the number of columns for groups using `display: grid` at different screen widths.
-
-```yaml
-layout:
-  grid:
-    small: 2      # ≥640px
-    medium: 2     # ≥768px
-    large: 3      # ≥1024px
-    xlarge: 5     # ≥1280px
-```
-
-Values: `1` – `6`
-
-You can specify only the breakpoints you want to override; the rest will be set automatically.
-
-### List
-
-Sets the number of columns for groups using `display: list` at different screen widths.
-
-```yaml
-layout:
-  list:
-    small: 2      # ≥640px
-    medium: 3     # ≥768px
-    large: 4      # ≥1024px
-    xlarge: 5     # ≥1280px
-```
-
-Values: `1` – `6`
-
-Works exactly like `grid` above, but applies only to groups with `display: list`.
-
-### Full example
-
-```yaml
-layout:
-  grid:
-    small: 2
-    medium: 2
-    large: 3
-    xlarge: 5
-  list:
-    small: 2
-    medium: 3
-    large: 4
-    xlarge: 5
-  spacing:
-    group: 1.5rem
-    item: 0.25rem
-```
-
-### Spacing
-
-Controls the vertical spacing between groups and the gap between items.
-
-```yaml
-layout:
-  spacing:
-    group: 1.5rem
-    item: 0.25rem
-```
-
-| Property | Description                                      | Default   |
-|----------|--------------------------------------------------|-----------|
-| `group`  | Vertical padding around each category group      | `2.5rem`  |
-| `item`   | Gap between items within a group                 | `0.5rem`  |
-
-Any valid CSS unit works (`rem`, `px`, `em`, etc).
+---
 
 ## Services
 
-The `services` key is the main building block of your dashboard. It defines **groups** of **items** (bookmarks, links, modules) that are displayed on the homepage. Think of it as:
+The `services` key is the main building block of your dashboard. It defines **groups** of **items** (bookmarks, links, modules) that are displayed on the homepage.
 
 ```
 services
@@ -400,7 +492,7 @@ services:
 
 ### Groups with display mode
 
-Each group can choose its own display mode: **grid** (larger cards) or **list** (compact rows). When using a `display` key, items must be nested under `items`:
+Each group can choose its own display mode and optional [card style](#card-style). When using a `display` key, items must be nested under `items`:
 
 ```yaml
 services:
@@ -427,14 +519,44 @@ services:
           name: simple-icons:grafana
 ```
 
-| Value  | Description                                              |
-|--------|----------------------------------------------------------|
-| `grid` | Cards with icon, title and description (default)         |
-| `list` | Compact rows with small icon and title only              |
+> **Note** — Either `services` or `tabs` must be provided. Without at least one of them the homepage will not render.
+
+---
+
+## Display Modes
+
+Each service group can be rendered as a **grid** or a **list**. Set `display` per group.
+
+| Value | Description |
+|---|---|
+| `grid` | Cards with icon, title and description (default) |
+| `list` | Compact rows with small icon and title only |
 
 The column count for each mode is configured separately in the [Layout](#layout) section (`layout.grid` and `layout.list`).
 
-> **Note** — The `services` key is required. Without it the homepage will not render.
+```yaml
+services:
+  Favorites:
+    display: grid
+    items:
+      - title: Home Assistant
+        description: Home automation
+        link: https://ha.local
+        icon:
+          name: simple-icons:homeassistant
+          wrap: true
+          color: '#3dbcf3'
+  Monitoring:
+    display: list
+    items:
+      - title: Grafana
+        link: https://grafana.local
+        icon:
+          name: simple-icons:grafana
+          color: '#f46800'
+```
+
+---
 
 ## Grid Span
 
@@ -455,6 +577,204 @@ services:
 
 This works for all service types and modules.
 
+---
+
+## Service Item Properties
+
+Each service item supports the following properties:
+
+| Property | Type | Description | Default |
+|---|---|---|---|
+| `title` | `string` | Service name | — |
+| `description` | `string` | Short description shown below the title (grid mode only) | — |
+| `link` | `string` | URL to open when clicked | — |
+| `target` | `string` | Link target: `_blank`, `_self`, `_parent`, `_top` | inherits from [behaviour](#behaviour) |
+| `icon` | `object` | Icon configuration (see [Icon](#icon)) | — |
+| `status` | `object` | Uptime monitoring (see [Status Indicator](#status-indicator)) | — |
+| `tags` | `array` | Tag names or inline tag objects (see [Tags](#tags)) | `[]` |
+| `span` | `number` | Number of grid columns to span (see [Grid Span](#grid-span)) | `1` |
+| `type` | `string` | Module type (see [Modules](modules.md)) | — |
+| `options` | `object` | Module-specific options | — |
+| `secrets` | `object` | Module-specific secrets (e.g. API keys) | — |
+
+### Example with all properties
+
+```yaml
+- title: Home Assistant
+  description: Home automation
+  link: https://ha.local
+  target: _blank
+  icon:
+    name: simple-icons:homeassistant
+    wrap: true
+    color: '#3dbcf3'
+  status:
+    enabled: true
+    position: left
+    animation: true
+  tags:
+    - Home
+  span: 2
+```
+
+---
+
+## Icon
+
+Services support multiple icon sources. The `icon` object is configured per service item.
+
+### Icon types
+
+| Type | Field | Description | Example |
+|---|---|---|---|
+| Iconify | `name` | 200,000+ open-source vector icons | `name: simple-icons:github` |
+| Emoji | `name` | Any valid emoji character | `name: 🏠` |
+| URL | `url` | Direct URL to an image | `url: https://cdn.example.com/icon.svg` |
+| Local | `url` | Image file from the data volume | `url: /api/assets/icon.png` |
+| Favicon | `favicon` | Auto-fetched by domain via the [Favicon API](#favicon-api) | `favicon: github.com` |
+
+### Icon properties
+
+| Property | Type | Description | Default |
+|---|---|---|---|
+| `name` | `string` | Iconify icon name or emoji character | — |
+| `url` | `string` | Direct URL or local path to an image | — |
+| `favicon` | `string` | Domain name for auto-fetched favicon | — |
+| `wrap` | `boolean` | Show a circular background behind the icon | `false` |
+| `color` | `string` | Icon color (Iconify icons only) | _inherits from theme_ |
+| `background` | `string` | Custom background color for the icon circle | _inherits from theme_ |
+
+### Icon examples
+
+```yaml
+# Iconify icon with color and wrap
+icon:
+  name: simple-icons:github
+  color: '#ffffff'
+  wrap: true
+
+# URL icon
+icon:
+  url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/proton.svg
+  wrap: true
+
+# Favicon (requires faviconApi to be configured)
+icon:
+  favicon: github.com
+
+# Emoji
+icon:
+  name: 🏠
+```
+
+See [Favicons](favicons.md) for icon types, self-hosted favicon API setup and custom PWA favicons.
+
+---
+
+## Status Indicator
+
+Enable a live uptime ping indicator per service. The indicator shows whether the service URL is reachable.
+
+```yaml
+- title: Home Assistant
+  link: https://ha.local
+  status:
+    enabled: true
+    position: left
+    animation: true
+    interval: 60
+```
+
+### Status properties
+
+| Property | Type | Description | Default |
+|---|---|---|---|
+| `enabled` | `boolean` | Enable the status indicator | `false` |
+| `position` | `string` | Indicator position: `left` or `right` | `right` |
+| `animation` | `boolean` | Show a pulsing animation on the indicator | `true` |
+| `interval` | `number` | Ping interval in seconds | `60` |
+
+---
+
+## Favicon API
+
+Automatically fetch service icons by domain name using a favicon API. Set the base URL globally in your config:
+
+```yaml
+faviconApi: https://favicon.vemetric.com/
+```
+
+Then reference a domain in any service icon:
+
+```yaml
+icon:
+  favicon: github.com
+```
+
+Favicons are proxied through the MAFL+ server with disk caching. The external favicon API is called only once per domain per 7 days. Benefits:
+
+- **Privacy** — the client never contacts the favicon API directly
+- **Performance** — cached favicons are served instantly from disk
+- **Offline support** — favicons are cached by the Service Worker
+- **Reduced API calls** — each domain is fetched only once per week
+
+See [Favicons](favicons.md) for self-hosted favicon API setup and custom PWA favicons.
+
+---
+
+## Tags
+
+Tags allow you to categorise and differentiate between services with colored labels.
+
+```yaml
+tags:
+  - name: Home
+    color: green
+  - name: Work
+    color: blue
+```
+
+Tag names must be unique. Reference tags by name in any service item:
+
+```yaml
+- title: Home Assistant
+  link: https://ha.local
+  tags:
+    - Home
+```
+
+Available colors: `red`, `orange`, `amber`, `yellow`, `lime`, `green`, `emerald`, `teal`, `cyan`, `sky`, `blue`, `indigo`, `violet`, `purple`, `fuchsia`, `pink`, `rose`
+
+Default color: `blue`
+
+See [Tags](tags.md) for global vs local tag usage and more examples.
+
+---
+
+## Behaviour
+
+A group of parameters responsible for the global behavior of the application.
+
+### Target
+
+Browser behavior when a service is clicked. This sets the default for all services; individual services can override it with their own `target` property.
+
+```yaml
+behaviour:
+  target: _blank
+```
+
+| Value | Description |
+|---|---|
+| `_blank` | Open in a new tab (default) |
+| `_self` | Open in the current tab |
+| `_parent` | Open in the parent browsing context |
+| `_top` | Open in the topmost browsing context |
+
+Default: `_blank`
+
+---
+
 ## Footer
 
 Display content at the bottom of every page. Both fields are optional — the footer is only shown when at least one is configured.
@@ -466,20 +786,34 @@ footer:
 ```
 
 | Property | Type | Description |
-|----------|------|-------------|
+|---|---|---|
 | `text` | `string` | Plain text displayed in the footer |
 | `html` | `string` | Custom HTML content rendered in the footer |
 
-## Demo: config.yml 
+---
+
+## Check Updates (Watchtower)
+
+Run once to check for container image updates, apply them and clean up:
+
+```bash
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock --pull=always nickfedor/watchtower --run-once --cleanup
+```
+
+---
+
+## Demo: config.yml
+
+A complete example configuration with two tabs, multiple groups and various display modes.
 
 **Tab: Personal**
-* 10 Favorites
-* 10 Groups with each 5 listed items
-* Weather
+- 10 Favorites (grid)
+- 10 Groups with 5 listed items each
+- Weather widget
 
 **Tab: Work**
-* 5 Favorites
-* 5 Groups with each 5 listed items
+- 5 Favorites (grid)
+- 5 Groups with 5 listed items each
 
 ```yaml
 title: bookmarks
@@ -540,53 +874,11 @@ tabs:
             icon:
               url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/proton.svg
               wrap: true
-          - title: Proton Calendar
-            description: calendar.proton.me
-            link: https://calendar.proton.me
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/proton-calendar.svg
-              wrap: true
-          - title: Google Drive
-            description: drive.google.com
-            link: https://drive.google.com
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/google-drive.svg
-              wrap: true
-          - title: Gmail
-            description: mail.google.com
-            link: https://mail.google.com
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/gmail.svg
-              wrap: true
-          - title: Bitwarden
-            description: bitwarden.com
-            link: https://vault.bitwarden.com
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/bitwarden.svg
-              wrap: true
-          - title: YouTube
-            description: youtube.com
-            link: https://youtube.com
-            icon:
-              favicon: youtube.com
-              wrap: true
-          - title: Reddit
-            description: reddit.com
-            link: https://reddit.com
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/reddit.svg
-              wrap: true
           - title: GitHub
             description: github.com
             link: https://github.com
             icon:
               name: simple-icons:github
-              wrap: true
-          - title: Spotify
-            description: open.spotify.com
-            link: https://open.spotify.com
-            icon:
-              favicon: spotify.com
               wrap: true
 
       News:
@@ -595,157 +887,15 @@ tabs:
           - title: NOS
             link: https://nos.nl
             icon:
-              favicon: nos.nl              
-          - title: New York Times
-            link: https://www.nytimes.com
-            icon:
-              favicon: nytimes.com              
+              favicon: nos.nl
           - title: Tweakers
             link: https://tweakers.net
             icon:
-              url: https://favicon-3j1.pages.dev/favicon/tweakers.net?larger=true              
+              url: https://favicon-3j1.pages.dev/favicon/tweakers.net?larger=true
           - title: Ars Technica
             link: https://arstechnica.com
             icon:
               favicon: arstechnica.com
-          - title: The Verge
-            link: https://theverge.com
-            icon:
-              favicon: theverge.com
-
-      Selfhost:
-        display: list
-        items:
-          - title: selfh.st
-            link: https://selfh.st
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/selfh-st.svg
-          - title: OS Alternatives
-            link: https://osalt.com
-            icon:
-              favicon: osalt.com
-          - title: Awesome Selfhosted
-            link: https://awesome-selfhosted.net
-            icon:
-              favicon: awesome-selfhosted.net
-          - title: NOTED
-            link: https://noted.lol
-            icon:
-              favicon: noted.lol
-          - title: Awesome Lists
-            link: https://github.com/sindresorhus/awesome
-            icon:
-              name: mdi:format-list-bulleted
-              color: '#ec4899'
-
-      Financials:
-        display: list
-        items:
-          - title: ABN AMRO
-            link: https://abnamro.nl
-            icon:
-              favicon: abnamro.nl              
-          - title: Rabo
-            link: https://rabobank.nl
-            icon:
-              name: mdi:bank-outline
-              color: '#f97316'
-          - title: ONZV
-            link: https://onzv.nl
-            icon:
-              url: https://www.onvz.nl/assets/favicons/apple-touch-icon.png
-          - title: Kasboek
-            link: https://kasboek.app
-            icon:
-              name: mdi:book-open-variant
-              color: '#10b981'
-          - title: Tikkie
-            link: https://tikkie.me
-            icon:
-              favicon: tikkie.me
-
-      Media:
-        display: list
-        items:
-          - title: Plex
-            link: https://plex.tv
-            icon:
-              favicon: plex.tv
-          - title: Emby
-            link: https://emby.media
-            icon:
-              favicon: emby.media
-          - title: Jellyfin
-            link: https://jellyfin.org
-            icon:
-              favicon: jellyfin.org
-          - title: Calibre Web
-            link: https://calibre-web.local
-            icon:
-              name: mdi:book-open-page-variant
-              color: '#3b82f6'
-          - title: Spotify
-            link: https://open.spotify.com
-            icon:
-              favicon: spotify.com
-
-      Search:
-        display: list
-        items:
-          - title: SearXNG
-            link: https://searx.local
-            icon:
-              name: mdi:magnify
-              color: '#3b82f6'
-          - title: Whoogle
-            link: https://whoogle.local
-            icon:
-              name: mdi:google
-              color: '#4285f4'
-          - title: NZBHydra
-            link: https://nzbhydra.local
-            icon:
-              name: mdi:cloud-search
-              color: '#06b6d4'
-          - title: Prowlarr
-            link: https://prowlarr.local
-            icon:
-              name: mdi:radar
-              color: '#f97316'
-          - title: Jackett
-            link: https://jackett.local
-            icon:
-              name: mdi:vpn
-              color: '#000000'
-
-      Download:
-        display: list
-        items:
-          - title: Radarr
-            link: https://radarr.local
-            icon:
-              name: mdi:movie-open
-              color: '#ffc230'
-          - title: Sonarr
-            link: https://sonarr.local
-            icon:
-              name: mdi:television-classic
-              color: '#3fc1f0'
-          - title: Bazarr
-            link: https://bazarr.local
-            icon:
-              name: mdi:subtitles
-              color: '#a855f7'
-          - title: SABnzbd
-            link: https://sabnzbd.local
-            icon:
-              name: mdi:download-circle
-              color: '#eab308'
-          - title: qBittorrent
-            link: https://qbit.local
-            icon:
-              name: simple-icons:qbittorrent
-              color: '#2f67ba'
 
       Automation:
         display: list
@@ -760,108 +910,6 @@ tabs:
             icon:
               name: simple-icons:nodered
               color: '#8f0000'
-          - title: n8n
-            link: https://n8n.local
-            icon:
-              name: simple-icons:n8n
-              color: '#ea4b71'
-          - title: Ansible
-            link: https://ansible.local
-            icon:
-              name: simple-icons:ansible
-              color: '#ee0000'
-          - title: Cron Jobs
-            link: https://cron.local
-            icon:
-              name: mdi:clock-outline
-              color: '#64748b'
-
-      Network:
-        display: list
-        items:
-          - title: Proxy
-            link: https://proxy.local
-            icon:
-              name: mdi:shield-half-full
-              color: '#f97316'
-          - title: Auth
-            link: https://auth.local
-            icon:
-              name: mdi:lock
-              color: '#6366f1'
-          - title: UniFi
-            link: https://unifi.local
-            icon:
-              name: mdi:access-point-network
-              color: '#06b6d4'
-          - title: pfSense
-            link: https://pfsense.local
-            icon:
-              name: mdi:firewall
-              color: '#212b6e'
-          - title: NextDNS
-            link: https://my.nextdns.io
-            icon:
-              name: mdi:dns
-              color: '#5b7ff5'
-
-      Security:
-        display: list
-        items:
-          - title: Bitwarden
-            link: https://bitwarden.local
-            icon:
-              name: simple-icons:bitwarden
-              color: '#175ddc'
-          - title: Authelia
-            link: https://authelia.local
-            icon:
-              name: mdi:shield-key
-              color: '#0f0f33'
-          - title: CrowdSec
-            link: https://crowdsec.local
-            icon:
-              name: mdi:shield-alert
-              color: '#3b82f6'
-          - title: Fail2ban
-            link: https://fail2ban.local
-            icon:
-              name: mdi:shield-lock
-              color: '#ef4444'
-          - title: WireGuard
-            link: https://wg.local
-            icon:
-              name: simple-icons:wireguard
-              color: '#88171a'
-
-      Productivity:
-        display: list
-        items:
-          - title: Vikunja
-            link: https://vikunja.local
-            icon:
-              name: mdi:check-all
-              color: '#1db954'
-          - title: Bookstack
-            link: https://bookstack.local
-            icon:
-              name: mdi:bookshelf
-              color: '#0288d1'
-          - title: Wiki.js
-            link: https://wiki.local
-            icon:
-              name: mdi:book-open-variant
-              color: '#1976d2'
-          - title: Outline
-            link: https://outline.local
-            icon:
-              name: mdi:text-box-multiple
-              color: '#6366f1'
-          - title: Tandoor Recipes
-            link: https://recipes.local
-            icon:
-              name: mdi:food-apple
-              color: '#4caf50'
 
       WEATHER:
         display: grid
@@ -872,10 +920,11 @@ tabs:
               lon: 4.895168
               units: metric
             secrets:
-              apiKey: ****
+              apiKey: your-api-key
 
   - name: Work
     icon: mdi:work
+    locked: true
     services:
       FAVORITES:
         display: grid
@@ -886,58 +935,6 @@ tabs:
             icon:
               url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/proton.svg
               wrap: true
-          - title: Proton Calendar
-            description: calendar.proton.me
-            link: https://calendar.proton.me
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/proton-calendar.svg
-              wrap: true
-          - title: Google Drive
-            description: drive.google.com
-            link: https://drive.google.com
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/google-drive.svg
-              wrap: true
-          - title: Gmail
-            description: mail.google.com
-            link: https://mail.google.com
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/gmail.svg
-              wrap: true
-          - title: Bitwarden
-            description: bitwarden.com
-            link: https://vault.bitwarden.com
-            icon:
-              url: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/bitwarden.svg
-              wrap: true    
-      Dev:
-        display: list
-        items:
-          - title: Proxmox
-            link: https://proxmox.local
-            icon:
-              name: simple-icons:proxmox
-              color: '#e57000'
-          - title: GitHub
-            link: https://github.com
-            icon:
-              name: simple-icons:github
-              color: '#ffffff'
-          - title: Gitea
-            link: https://gitea.local
-            icon:
-              name: simple-icons:gitea
-              color: '#609926'
-          - title: iperf3serverlist.net
-            link: https://iperf3serverlist.net
-            icon:
-              favicon: iperf3serverlist.net
-              color: '#13bee5'
-          - title: Cloudflare
-            link: https://dash.cloudflare.com
-            icon:
-              name: simple-icons:cloudflare
-              color: '#f38020'
 
       Monitoring:
         display: list
@@ -947,116 +944,9 @@ tabs:
             icon:
               name: simple-icons:grafana
               color: '#f46800'
-          - title: Prometheus
-            link: https://prometheus.local
-            icon:
-              name: simple-icons:prometheus
-              color: '#e6522c'
           - title: Uptime Kuma
             link: https://uptime.local
             icon:
               name: simple-icons:uptimekuma
               color: '#5cdd8b'
-          - title: Netdata
-            link: https://netdata.local
-            icon:
-              name: mdi:chart-areaspline
-              color: '#00c853'
-          - title: Healthchecks
-            link: https://healthchecks.local
-            icon:
-              name: mdi:heart-pulse
-              color: '#ef4444'
-
-      Storage:
-        display: list
-        items:
-          - title: Nextcloud
-            link: https://nextcloud.local
-            icon:
-              name: simple-icons:nextcloud
-              color: '#0082c9'
-          - title: MinIO
-            link: https://minio.local
-            icon:
-              name: simple-icons:minio
-              color: '#c72e49'
-          - title: Synology
-            link: https://nas.local
-            icon:
-              name: mdi:nas
-              color: '#b5b5b6'
-          - title: Paperless
-            link: https://paperless.local
-            icon:
-              name: mdi:file-document-multiple
-              color: '#17541f'
-          - title: PhotoPrism
-            link: https://photos.local
-            icon:
-              name: mdi:image-multiple
-              color: '#9c27b0'
-
-      DNS & Domains:
-        display: list
-        items:
-          - title: Pi-hole
-            link: https://pihole.local
-            icon:
-              name: simple-icons:pihole
-              color: '#96060c'
-          - title: AdGuard Home
-            link: https://adguard.local
-            icon:
-              name: simple-icons:adguard
-              color: '#68bc71'
-          - title: Technitium
-            link: https://dns.local
-            icon:
-              name: mdi:dns-outline
-              color: '#0d47a1'
-          - title: Traefik
-            link: https://traefik.local
-            icon:
-              name: simple-icons:traefikproxy
-              color: '#24a1c1'
-          - title: Caddy
-            link: https://caddy.local
-            icon:
-              name: mdi:server-security
-              color: '#22d3ee'
-
-      Communication:
-        display: list
-        items:
-          - title: Matrix
-            link: https://matrix.local
-            icon:
-              name: simple-icons:matrix
-              color: '#0dbd8b'
-          - title: Signal
-            link: https://signal.org
-            icon:
-              name: simple-icons:signal
-              color: '#3a76f0'
-          - title: Slack
-            link: https://slack.com
-            icon:
-              name: simple-icons:slack
-              color: '#4a154b'
-          - title: Discord
-            link: https://discord.com
-            icon:
-              name: simple-icons:discord
-              color: '#5865f2'
-          - title: Mattermost
-            link: https://mattermost.local
-            icon:
-              name: simple-icons:mattermost
-              color: '#0058cc'
-
-
 ```
-
-
-

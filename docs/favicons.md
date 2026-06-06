@@ -1,5 +1,17 @@
 # Favicons
 
+## Table of Contents
+
+- [Service Icons](#service-icons)
+  - [Icon configuration](#icon-configuration)
+- [Favicon API](#favicon-api)
+  - [Self-hosted Favicon API](#self-hosted-favicon-api)
+  - [Server-side proxy cache](#server-side-proxy-cache)
+- [Custom App Favicons (PWA)](#custom-app-favicons-pwa)
+  - [Logo creation](#logo-creation)
+  - [Mount the favicons volume](#mount-the-favicons-volume)
+
+
 ## Service Icons
 
 MAFL+ supports multiple icon sources for services:
