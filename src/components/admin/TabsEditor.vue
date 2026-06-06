@@ -188,24 +188,39 @@
                   </div>
                 </div>
 
-                <!-- Add item buttons -->
-                <div class="flex flex-wrap gap-1 mt-2">
-                  <button class="text-xs text-brand-500 hover:text-brand-400" @click="addItem(ti, gi, 'bookmark')">+ Bookmark</button>
-                  <template v-if="group.display === 'grid'">
-                    <span class="text-xs text-fg-dimmed">|</span>
-                    <button class="text-xs text-brand-500 hover:text-brand-400" @click="addItem(ti, gi, 'openweathermap')">+ Weather</button>
-                    <span class="text-xs text-fg-dimmed">|</span>
-                    <button class="text-xs text-brand-500 hover:text-brand-400" @click="addItem(ti, gi, 'ip-api')">+ IP API</button>
-                    <span class="text-xs text-fg-dimmed">|</span>
-                    <button class="text-xs text-brand-500 hover:text-brand-400" @click="addItem(ti, gi, 'time')">+ Time</button>
-                    <span class="text-xs text-fg-dimmed">|</span>
-                    <button class="text-xs text-brand-500 hover:text-brand-400" @click="addItem(ti, gi, 'datetime-weather')">+ DateTime Weather</button>
-                    <span class="text-xs text-fg-dimmed">|</span>
-                    <button class="text-xs text-brand-500 hover:text-brand-400" @click="addItem(ti, gi, 'greeting')">+ Greeting</button>
-                    <span class="text-xs text-fg-dimmed">|</span>
-                    <button class="text-xs text-brand-500 hover:text-brand-400" @click="addItem(ti, gi, 'custom-html')">+ Custom HTML</button>
-                  </template>
+                <!-- Add bookmark -->
+                <div class="mt-2">
+                  <button
+                    class="text-xs text-brand-500 hover:text-brand-400"
+                    @click="addItem(ti, gi, 'bookmark')"
+                  >+ Bookmark</button>
                 </div>
+
+                <!-- Add module accordion -->
+                <template v-if="group.display === 'grid'">
+                  <div class="mt-1.5 border border-fg/10 rounded">
+                    <button
+                      class="w-full flex items-center gap-1 px-2 py-1 text-[11px] text-fg-dimmed hover:text-fg transition-colors"
+                      @click="toggleModulePanel(ti, gi)"
+                    >
+                      <span class="text-[10px]" :class="isModulePanelOpen(ti, gi) ? 'rotate-90' : ''" style="transition: transform 0.15s">&#9656;</span>
+                      <span>Modules</span>
+                    </button>
+                    <div v-show="isModulePanelOpen(ti, gi)" class="px-2 pb-2 space-y-2">
+                      <div v-for="cat in MODULE_CATEGORIES" :key="cat.category">
+                        <div class="text-[9px] uppercase tracking-wider text-fg-dimmed/60 font-medium mb-1">{{ cat.category }}</div>
+                        <div class="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
+                          <button
+                            v-for="mod in cat.modules"
+                            :key="mod.type"
+                            class="text-[11px] px-2 py-1 rounded border border-brand-500/30 text-brand-500 hover:bg-brand-500/10 hover:border-brand-500/50 transition-colors text-center truncate"
+                            @click="addItem(ti, gi, mod.type)"
+                          >+ {{ mod.label }}</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </template>
               </div>
             </div>
             <button
@@ -249,6 +264,7 @@ const open = ref(true)
 const openTabs = ref(new Set<number>())
 const openEdits = ref(new Set<string>())
 const openCards = ref(new Set<string>())
+const openModulePanels = ref(new Set<string>())
 
 function isTabOpen(ti: number) {
   return openTabs.value.has(ti)
@@ -281,6 +297,24 @@ function toggleCard(ti: number, gi: number) {
   }
 }
 
+function modulePanelKey(ti: number, gi: number) {
+  return `mod-${ti}-${gi}`
+}
+
+function isModulePanelOpen(ti: number, gi: number) {
+  return openModulePanels.value.has(modulePanelKey(ti, gi))
+}
+
+function toggleModulePanel(ti: number, gi: number) {
+  const key = modulePanelKey(ti, gi)
+  if (openModulePanels.value.has(key)) {
+    openModulePanels.value.delete(key)
+  }
+  else {
+    openModulePanels.value.add(key)
+  }
+}
+
 function editKey(ti: number, gi: number, ii: number) {
   return `${ti}-${gi}-${ii}`
 }
@@ -310,6 +344,41 @@ function resetGroupCard(group: BuilderGroup) {
   group.card.padding = ''
 }
 
+interface ModuleOption { type: ServiceType; label: string }
+interface ModuleCategory { category: string; modules: ModuleOption[] }
+
+const MODULE_CATEGORIES: ModuleCategory[] = [
+  {
+    category: 'Basic',
+    modules: [
+      { type: 'greeting', label: 'Greeting' },
+      { type: 'custom-html', label: 'Custom HTML' },
+    ],
+  },
+  {
+    category: 'Weather',
+    modules: [
+      { type: 'openweathermap', label: 'OpenWeatherMap' },
+      { type: 'datetime-weather', label: 'DateTime Weather' },
+    ],
+  },
+  {
+    category: 'Tools',
+    modules: [
+      { type: 'ip-api', label: 'IP API' },
+      { type: 'time', label: 'Time' },
+    ],
+  },
+  {
+    category: 'Navigation',
+    modules: [
+      { type: 'tomtom-eta', label: 'TomTom ETA' },
+      { type: 'tomtom-eta-map', label: 'TomTom Route' },
+      { type: 'tomtom-traffic-map', label: 'TomTom Traffic' },
+    ],
+  },
+]
+
 const TYPE_LABELS: Record<string, string> = {
   openweathermap: 'Weather',
   'ip-api': 'IP API',
@@ -317,6 +386,9 @@ const TYPE_LABELS: Record<string, string> = {
   'datetime-weather': 'DateTime Weather',
   greeting: 'Greeting',
   'custom-html': 'Custom HTML',
+  'tomtom-eta': 'TomTom ETA',
+  'tomtom-eta-map': 'TomTom Route',
+  'tomtom-traffic-map': 'TomTom Traffic',
 }
 
 function typeLabel(t: string) {

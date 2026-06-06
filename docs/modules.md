@@ -11,6 +11,11 @@ MAFL+ includes several built-in service modules that can be added to your dashbo
 * [IP API](#ip-api)
 * [Greeting](#greeting)
 * [Custom HTML](#custom-html)
+* [TomTom](#tomtom)
+  * [Getting a TomTom API Key](#getting-a-tomtom-api-key)
+  * [TomTom ETA](#tomtom-eta)
+  * [TomTom ETA Map](#tomtom-eta-map)
+  * [TomTom Traffic Map](#tomtom-traffic-map)
 * [Grid Span](#grid-span)
 * [Date Formats](#date-formats)
 
@@ -26,6 +31,9 @@ MAFL+ includes several built-in service modules that can be added to your dashbo
 | [IP API](#ip-api) | `ip-api` | Public IP address information with country flag |
 | [Greeting](#greeting) | `greeting` | Custom greeting message with optional subtitle |
 | [Custom HTML](#custom-html) | `custom-html` | Render arbitrary HTML content (including scripts) |
+| [TomTom ETA](#tomtom-eta) | `tomtom-eta` | Estimated time of arrival for a route using TomTom |
+| [TomTom ETA Map](#tomtom-eta-map) | `tomtom-eta-map` | Route map with traffic flow and incidents using TomTom |
+| [TomTom Traffic Map](#tomtom-traffic-map) | `tomtom-traffic-map` | Traffic map centered on a location without route |
 
 All modules support common service properties like `span`, `icon` and `tags`. See [Configuration](configuration.md#service-item-properties) for the full list.
 
@@ -316,6 +324,330 @@ services:
     options:
       hidden: true
       html: '<script src="https://example.com/widget.js"></script>'
+```
+
+---
+
+## TomTom
+
+MAFL+ integrates with the [TomTom](https://www.tomtom.com/) platform to provide real-time traffic information, route calculations and interactive maps on your dashboard. Three TomTom modules are available:
+
+| Module | Type | Description |
+|--------|------|-------------|
+| [TomTom ETA](#tomtom-eta) | `tomtom-eta` | Estimated arrival time, travel duration, traffic delay and distance for a route |
+| [TomTom ETA Map](#tomtom-eta-map) | `tomtom-eta-map` | Interactive map showing a calculated route with traffic flow and incidents |
+| [TomTom Traffic Map](#tomtom-traffic-map) | `tomtom-traffic-map` | Interactive traffic map centered on a city, region or area (no route) |
+
+All three modules require a **TomTom API key** (see below). The same key works for all modules.
+
+**Key features across all TomTom modules:**
+- Locations can be specified as **coordinates** (latitude/longitude) or as an **address** — the server geocodes addresses automatically via the TomTom Search API
+- If both coordinates and an address are provided, coordinates take priority
+- Route calculations and geocoding are performed **server-side** (privacy-friendly)
+- API responses are cached to reduce the number of requests (geocoding: 24 hours, routing: 2 minutes)
+- Map modules support three map styles: `standard`, `dark` and `satellite`
+
+> **Privacy note:** The ETA module (without map) performs all requests server-side. The map modules load map tiles directly from TomTom CDN in the browser — this is inherent to interactive maps.
+
+### Getting a TomTom API Key
+
+All TomTom modules require an API key. TomTom offers a free tier with 2,500 daily transactions — more than enough for a personal dashboard.
+
+1. Go to the [TomTom Developer Portal](https://developer.tomtom.com/) and click **Register** (or sign in if you already have an account)
+2. After signing in, go to the [Dashboard](https://developer.tomtom.com/user/me/apps)
+3. Click **+ Add new Key** (or use the default key that was created with your account)
+4. Give your key a name (e.g. `MAFL+ Dashboard`)
+5. Make sure the following products are enabled for the key:
+   - **Map Display API** — required for map tiles (ETA Map and Traffic Map)
+   - **Routing API** — required for route calculations (ETA and ETA Map)
+   - **Traffic API** — required for traffic flow and incidents (ETA Map and Traffic Map)
+   - **Search API** — required for address geocoding (when using `address` instead of coordinates)
+6. Click **Create Key** and copy the API key
+7. Paste the key in the `secrets.apiKey` field of your TomTom module in `config.yml`
+
+> **Tip:** You can use the same API key for all TomTom modules on your dashboard.
+
+---
+
+### TomTom ETA
+
+Displays the estimated time of arrival, travel time, traffic delay and distance for a configured route. The widget shows a compact card with:
+- The route name and arrival time (e.g. "Amsterdam - Eindhoven: 14:32")
+- Travel duration, traffic delay and distance (e.g. "1h 23min · +12 min delay · 125 km")
+- An icon that matches the travel mode (car, truck, bicycle or pedestrian)
+
+Route data is fetched from the [TomTom Routing API](https://developer.tomtom.com/routing-api/documentation/tomtom-maps/calculate-route) with live traffic enabled.
+
+#### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `originLat` | `number` | — | Latitude of the origin |
+| `originLon` | `number` | — | Longitude of the origin |
+| `originAddress` | `string` | — | Origin address (geocoded automatically) |
+| `destLat` | `number` | — | Latitude of the destination |
+| `destLon` | `number` | — | Longitude of the destination |
+| `destAddress` | `string` | — | Destination address (geocoded automatically) |
+| `routeName` | `string` | auto-generated | Display name for the route |
+| `travelMode` | `string` | `car` | Travel mode: `car`, `truck`, `bicycle`, or `pedestrian` |
+| `timeFormat` | `string` | `24h` | Time format: `24h` or `12h` |
+
+#### Secrets
+
+| Secret | Type | Description |
+|--------|------|-------------|
+| `apiKey` | `string` | TomTom API key ([how to get one](#getting-a-tomtom-api-key)) |
+
+#### Examples
+
+##### With coordinates
+
+```yaml
+services:
+  - type: tomtom-eta
+    options:
+      originLat: 52.370216
+      originLon: 4.895168
+      destLat: 51.441643
+      destLon: 5.469722
+      routeName: "Amsterdam - Eindhoven"
+    secrets:
+      apiKey: your-tomtom-api-key
+```
+
+##### With addresses
+
+```yaml
+services:
+  - type: tomtom-eta
+    options:
+      originAddress: "Amsterdam Centraal"
+      destAddress: "Eindhoven Centraal"
+      routeName: "Amsterdam - Eindhoven"
+      travelMode: car
+    secrets:
+      apiKey: your-tomtom-api-key
+```
+
+##### Home-to-work commute
+
+```yaml
+services:
+  - type: tomtom-eta
+    options:
+      originAddress: "Kalverstraat 1, Amsterdam"
+      destAddress: "Strijp-S, Eindhoven"
+      routeName: "Home - Work"
+      travelMode: car
+    secrets:
+      apiKey: your-tomtom-api-key
+```
+
+##### Bicycle route with 12h time format
+
+```yaml
+services:
+  - type: tomtom-eta
+    options:
+      originAddress: "Central Park, New York"
+      destAddress: "Brooklyn Bridge, New York"
+      routeName: "Park to Bridge"
+      travelMode: bicycle
+      timeFormat: 12h
+    secrets:
+      apiKey: your-tomtom-api-key
+```
+
+---
+
+### TomTom ETA Map
+
+Displays an interactive map with a calculated route, real-time traffic flow and traffic incidents. Combines the ETA information from [TomTom ETA](#tomtom-eta) with a visual map rendered using [Leaflet](https://leafletjs.com/) and TomTom raster tiles.
+
+The widget shows:
+- **Above the map:** route name, arrival time, travel duration, traffic delay and distance
+- **On the map:** the route as a colored polyline, with green (start) and red (destination) markers
+- **Traffic flow overlay:** color-coded road segments (green = free flow, orange = slow, red = congestion)
+- **Traffic incidents overlay:** jams, accidents, road works, lane closures
+
+#### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `originLat` | `number` | — | Latitude of the origin |
+| `originLon` | `number` | — | Longitude of the origin |
+| `originAddress` | `string` | — | Origin address (geocoded automatically) |
+| `destLat` | `number` | — | Latitude of the destination |
+| `destLon` | `number` | — | Longitude of the destination |
+| `destAddress` | `string` | — | Destination address (geocoded automatically) |
+| `routeName` | `string` | auto-generated | Display name for the route |
+| `travelMode` | `string` | `car` | Travel mode: `car`, `truck`, `bicycle`, or `pedestrian` |
+| `timeFormat` | `string` | `24h` | Time format: `24h` or `12h` |
+| `showTrafficFlow` | `boolean` | `true` | Show traffic flow color overlay on the map |
+| `showIncidents` | `boolean` | `true` | Show traffic incident markers on the map |
+| `mapStyle` | `string` | `standard` | Map style: `standard`, `dark`, or `satellite` |
+| `mapHeight` | `number` | `300` | Map height in pixels |
+
+#### Secrets
+
+| Secret | Type | Description |
+|--------|------|-------------|
+| `apiKey` | `string` | TomTom API key ([how to get one](#getting-a-tomtom-api-key)) |
+
+#### Examples
+
+##### Route map with traffic
+
+```yaml
+services:
+  - type: tomtom-eta-map
+    span: 3
+    options:
+      originAddress: "Amsterdam Centraal"
+      destAddress: "Rotterdam Centraal"
+      routeName: "Amsterdam - Rotterdam"
+      showTrafficFlow: true
+      showIncidents: true
+      mapHeight: 350
+    secrets:
+      apiKey: your-tomtom-api-key
+```
+
+##### Satellite map with coordinates
+
+```yaml
+services:
+  - type: tomtom-eta-map
+    span: 2
+    options:
+      originLat: 52.370216
+      originLon: 4.895168
+      destLat: 51.441643
+      destLon: 5.469722
+      routeName: "Amsterdam - Eindhoven"
+      mapStyle: satellite
+      mapHeight: 400
+    secrets:
+      apiKey: your-tomtom-api-key
+```
+
+##### Dark map, traffic flow only
+
+```yaml
+services:
+  - type: tomtom-eta-map
+    span: 2
+    options:
+      originAddress: "Utrecht Centraal"
+      destAddress: "Den Haag Centraal"
+      routeName: "Utrecht - Den Haag"
+      mapStyle: dark
+      showIncidents: false
+    secrets:
+      apiKey: your-tomtom-api-key
+```
+
+---
+
+### TomTom Traffic Map
+
+Displays an interactive traffic map centered on a city, region or area — without calculating a route. Ideal for monitoring traffic conditions around your home, workplace or any location of interest.
+
+The map shows:
+- **Traffic flow:** color-coded road segments showing current speeds (green = free flow, orange = slow, red = congestion)
+- **Traffic incidents:** jams, accidents, road works, closures and other events
+
+Use the `zoom` level to control the area visible on the map: lower values show a wider area (country or region), higher values zoom in to street level.
+
+| Zoom | Area |
+|------|------|
+| `6` | Country |
+| `8` | Region / province |
+| `10` | City and surroundings |
+| `12` | City center (default) |
+| `14` | Neighborhood |
+| `16`–`18` | Street level |
+
+#### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `lat` | `number` | — | Latitude of the map center |
+| `lon` | `number` | — | Longitude of the map center |
+| `address` | `string` | — | Address or place name (geocoded automatically) |
+| `zoom` | `number` | `12` | Map zoom level (1 = world, 18 = street level) |
+| `showTrafficFlow` | `boolean` | `true` | Show traffic flow color overlay |
+| `showIncidents` | `boolean` | `true` | Show traffic incident markers |
+| `mapStyle` | `string` | `standard` | Map style: `standard`, `dark`, or `satellite` |
+| `mapHeight` | `number` | `300` | Map height in pixels |
+
+#### Secrets
+
+| Secret | Type | Description |
+|--------|------|-------------|
+| `apiKey` | `string` | TomTom API key ([how to get one](#getting-a-tomtom-api-key)) |
+
+#### Examples
+
+##### Traffic around a city
+
+```yaml
+services:
+  - type: tomtom-traffic-map
+    span: 3
+    options:
+      address: "Amsterdam"
+      zoom: 12
+      showTrafficFlow: true
+      showIncidents: true
+    secrets:
+      apiKey: your-tomtom-api-key
+```
+
+##### Country overview with satellite view
+
+```yaml
+services:
+  - type: tomtom-traffic-map
+    span: 3
+    options:
+      address: "Nederland"
+      zoom: 8
+      mapStyle: satellite
+      mapHeight: 400
+    secrets:
+      apiKey: your-tomtom-api-key
+```
+
+##### Dark map centered on coordinates
+
+```yaml
+services:
+  - type: tomtom-traffic-map
+    span: 2
+    options:
+      lat: 51.9225
+      lon: 4.4792
+      zoom: 13
+      mapStyle: dark
+    secrets:
+      apiKey: your-tomtom-api-key
+```
+
+##### Neighborhood view, incidents only
+
+```yaml
+services:
+  - type: tomtom-traffic-map
+    span: 2
+    options:
+      address: "Zuidas, Amsterdam"
+      zoom: 15
+      showTrafficFlow: false
+      showIncidents: true
+      mapHeight: 250
+    secrets:
+      apiKey: your-tomtom-api-key
 ```
 
 ---

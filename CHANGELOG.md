@@ -1,6 +1,59 @@
 # Changelog
 
 
+## TomTom traffic & route modules
+
+### 🚀 Enhancements
+
+- **module: tomtom-eta** — Displays estimated time of arrival, travel duration, traffic delay and distance for a configured route using the TomTom Routing API; supports car, truck, bicycle and pedestrian travel modes
+- **module: tomtom-eta-map** — Interactive map with the calculated route drawn as a polyline, real-time traffic flow overlay and traffic incident markers (jams, road works, closures) using Leaflet with TomTom raster tiles
+- **module: tomtom-traffic-map** — Interactive traffic map centered on a city, region or area without route calculation; shows traffic flow and incidents with configurable zoom level
+- **tomtom:** All three modules support location input as coordinates (lat/lon), address (geocoded server-side via TomTom Search API), or a mix of both — coordinates take priority when both are provided
+- **tomtom:** Geocoding results are cached for 24 hours and route calculations for 2 minutes to reduce API calls
+- **tomtom:** Map modules support three map styles: `standard`, `dark` and `satellite`
+- **tomtom:** Map height is configurable via `mapHeight` option (default 300px)
+- **tomtom:** Traffic flow and incident overlays can be toggled independently per module
+
+### 🐛 Bug Fixes
+
+- **admin:** Fixed full page reload when saving config in the admin panel — the `config:update` WebSocket event now skips `reloadNuxtApp` on `/admin` routes, preventing disruptive reloads while editing (especially noticeable with Leaflet map modules)
+
+### 📖 Documentation
+
+- **modules.md:** Added TomTom overview section with shared features, privacy notes and API key setup instructions
+- **modules.md:** Step-by-step guide for creating a TomTom API key (register, create key, enable required products)
+- **modules.md:** Detailed documentation for all three TomTom modules with options tables and YAML examples
+
+### 📦 Dependencies
+
+- Added `leaflet` and `@types/leaflet` for interactive map rendering
+
+### New files
+
+| File | Purpose |
+|------|---------|
+| `src/components/service/TomtomEta.vue` | ETA widget component with travel mode icon and formatted arrival time, duration, delay and distance |
+| `src/components/service/TomtomEtaMap.vue` | Route map component using Leaflet with TomTom base tiles, traffic flow and incident layers |
+| `src/components/service/TomtomTrafficMap.vue` | Traffic map component centered on a location with traffic overlays |
+| `src/server/api/services/tomtom-eta.ts` | Server handler for route calculation with geocoding and caching |
+| `src/server/api/services/tomtom-eta-map.ts` | Server handler for route calculation with geometry for map display |
+| `src/server/api/services/tomtom-traffic-map.ts` | Server handler for location resolution and API key passthrough |
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/types/services.d.ts` | Added `TomtomEtaService`, `TomtomEtaMapService` and `TomtomTrafficMapService` interfaces |
+| `src/components/Item.vue` | Added type-to-component mappings for `tomtom-eta`, `tomtom-eta-map` and `tomtom-traffic-map` |
+| `src/composables/useConfigBuilder.ts` | Extended `ServiceType`, `BuilderItem`, `newItem()`, `parseRawItem()` and `serializeItem()` with TomTom module fields |
+| `src/components/admin/ItemFields.vue` | Added form fields for all three TomTom module configurations |
+| `src/components/admin/TabsEditor.vue` | Added TomTom ETA, TomTom Route and TomTom Traffic to module options and type labels |
+| `src/plugins/settings.ts` | Skip `reloadNuxtApp` on admin routes to prevent page reload while editing |
+| `package.json` | Added `leaflet` and `@types/leaflet` dependencies |
+| `docs/modules.md` | TomTom modules documentation with API key guide, options and examples |
+
+---
+
 ## Fix admin dark mode in Firefox / incognito (SSR)
 
 ### 🐛 Bug Fixes

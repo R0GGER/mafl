@@ -7,6 +7,8 @@ export default defineNuxtPlugin(async () => {
   const { on } = useWebsocket()
 
   on('config:update', () => {
+    const route = useRoute()
+    if (route.path.startsWith('/admin')) return
     reloadNuxtApp({
       force: true,
     })

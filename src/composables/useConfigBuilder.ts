@@ -3,7 +3,7 @@ import yaml from 'yaml'
 
 // --- Types ---
 
-export type ServiceType = 'bookmark' | 'openweathermap' | 'ip-api' | 'time' | 'datetime-weather' | 'greeting' | 'custom-html'
+export type ServiceType = 'bookmark' | 'openweathermap' | 'ip-api' | 'time' | 'datetime-weather' | 'greeting' | 'custom-html' | 'tomtom-eta' | 'tomtom-eta-map' | 'tomtom-traffic-map'
 export type IconType = 'favicon' | 'url' | 'name'
 
 export interface BuilderItem {
@@ -49,6 +49,31 @@ export interface BuilderItem {
   // custom-html
   customHtml: string
   customHidden: boolean
+  // tomtom-eta / tomtom-eta-map
+  ttOriginLat: string
+  ttOriginLon: string
+  ttOriginAddress: string
+  ttDestLat: string
+  ttDestLon: string
+  ttDestAddress: string
+  ttRouteName: string
+  ttTravelMode: string
+  ttApiKey: string
+  ttTimeFormat: string
+  ttShowTrafficFlow: boolean
+  ttShowIncidents: boolean
+  ttMapHeight: string
+  ttMapStyle: string
+  // tomtom-traffic-map
+  ttmLat: string
+  ttmLon: string
+  ttmAddress: string
+  ttmZoom: string
+  ttmApiKey: string
+  ttmShowTrafficFlow: boolean
+  ttmShowIncidents: boolean
+  ttmMapHeight: string
+  ttmMapStyle: string
 }
 
 export interface BuilderCardStyle {
@@ -205,6 +230,12 @@ export function newItem(serviceType: ServiceType = 'bookmark'): BuilderItem {
     dtwLat: '', dtwLon: '', dtwUnits: 'metric', dtwApiKey: '', dtwTimezone: '', dtwTimeFormat: '24h', dtwDateFormat: 'medium',
     greetText: '', greetSubtitle: '',
     customHtml: '', customHidden: false,
+    ttOriginLat: '', ttOriginLon: '', ttOriginAddress: '',
+    ttDestLat: '', ttDestLon: '', ttDestAddress: '',
+    ttRouteName: '', ttTravelMode: 'car', ttApiKey: '', ttTimeFormat: '24h',
+    ttShowTrafficFlow: true, ttShowIncidents: true, ttMapHeight: '300', ttMapStyle: 'standard',
+    ttmLat: '', ttmLon: '', ttmAddress: '', ttmZoom: '12', ttmApiKey: '',
+    ttmShowTrafficFlow: true, ttmShowIncidents: true, ttmMapHeight: '300', ttmMapStyle: 'standard',
   }
 }
 
@@ -267,6 +298,35 @@ function parseRawItem(raw: any): BuilderItem {
   else if (sType === 'custom-html') {
     if (raw.options?.html) item.customHtml = raw.options.html
     if (raw.options?.hidden) item.customHidden = true
+  }
+  else if (sType === 'tomtom-traffic-map') {
+    if (raw.options?.lat != null) item.ttmLat = String(raw.options.lat)
+    if (raw.options?.lon != null) item.ttmLon = String(raw.options.lon)
+    if (raw.options?.address) item.ttmAddress = raw.options.address
+    if (raw.options?.zoom != null) item.ttmZoom = String(raw.options.zoom)
+    if (raw.options?.showTrafficFlow === false) item.ttmShowTrafficFlow = false
+    if (raw.options?.showIncidents === false) item.ttmShowIncidents = false
+    if (raw.options?.mapHeight != null) item.ttmMapHeight = String(raw.options.mapHeight)
+    if (raw.options?.mapStyle) item.ttmMapStyle = raw.options.mapStyle
+    if (raw.secrets?.apiKey) item.ttmApiKey = String(raw.secrets.apiKey)
+  }
+  else if (sType === 'tomtom-eta' || sType === 'tomtom-eta-map') {
+    if (raw.options?.originLat != null) item.ttOriginLat = String(raw.options.originLat)
+    if (raw.options?.originLon != null) item.ttOriginLon = String(raw.options.originLon)
+    if (raw.options?.originAddress) item.ttOriginAddress = raw.options.originAddress
+    if (raw.options?.destLat != null) item.ttDestLat = String(raw.options.destLat)
+    if (raw.options?.destLon != null) item.ttDestLon = String(raw.options.destLon)
+    if (raw.options?.destAddress) item.ttDestAddress = raw.options.destAddress
+    if (raw.options?.routeName) item.ttRouteName = raw.options.routeName
+    if (raw.options?.travelMode) item.ttTravelMode = raw.options.travelMode
+    if (raw.options?.timeFormat) item.ttTimeFormat = raw.options.timeFormat
+    if (raw.secrets?.apiKey) item.ttApiKey = String(raw.secrets.apiKey)
+    if (sType === 'tomtom-eta-map') {
+      if (raw.options?.showTrafficFlow === false) item.ttShowTrafficFlow = false
+      if (raw.options?.showIncidents === false) item.ttShowIncidents = false
+      if (raw.options?.mapHeight != null) item.ttMapHeight = String(raw.options.mapHeight)
+      if (raw.options?.mapStyle) item.ttMapStyle = raw.options.mapStyle
+    }
   }
   else {
     item.title = raw.title || ''
@@ -447,6 +507,8 @@ function serializeItem(item: BuilderItem): Record<string, any> | null {
   if (sType === 'datetime-weather' && !item.dtwTimezone && !item.dtwLat) return null
   if (sType === 'greeting' && !item.greetText) return null
   if (sType === 'custom-html' && !item.customHtml) return null
+  if ((sType === 'tomtom-eta' || sType === 'tomtom-eta-map') && !item.ttApiKey) return null
+  if (sType === 'tomtom-traffic-map' && !item.ttmApiKey) return null
 
   const it: Record<string, any> = {}
 
@@ -503,6 +565,41 @@ function serializeItem(item: BuilderItem): Record<string, any> | null {
     if (item.customHtml) opts.html = item.customHtml
     if (item.customHidden) opts.hidden = true
     if (Object.keys(opts).length) it.options = opts
+  }
+  else if (sType === 'tomtom-traffic-map') {
+    it.type = 'tomtom-traffic-map'
+    const opts: any = {}
+    if (item.ttmLat) opts.lat = parseFloat(item.ttmLat) || item.ttmLat
+    if (item.ttmLon) opts.lon = parseFloat(item.ttmLon) || item.ttmLon
+    if (item.ttmAddress) opts.address = item.ttmAddress
+    if (item.ttmZoom && item.ttmZoom !== '12') opts.zoom = parseInt(item.ttmZoom)
+    if (!item.ttmShowTrafficFlow) opts.showTrafficFlow = false
+    if (!item.ttmShowIncidents) opts.showIncidents = false
+    if (item.ttmMapHeight && item.ttmMapHeight !== '300') opts.mapHeight = parseInt(item.ttmMapHeight)
+    if (item.ttmMapStyle && item.ttmMapStyle !== 'standard') opts.mapStyle = item.ttmMapStyle
+    if (Object.keys(opts).length) it.options = opts
+    if (item.ttmApiKey) it.secrets = { apiKey: item.ttmApiKey }
+  }
+  else if (sType === 'tomtom-eta' || sType === 'tomtom-eta-map') {
+    it.type = sType
+    const opts: any = {}
+    if (item.ttOriginLat) opts.originLat = parseFloat(item.ttOriginLat) || item.ttOriginLat
+    if (item.ttOriginLon) opts.originLon = parseFloat(item.ttOriginLon) || item.ttOriginLon
+    if (item.ttOriginAddress) opts.originAddress = item.ttOriginAddress
+    if (item.ttDestLat) opts.destLat = parseFloat(item.ttDestLat) || item.ttDestLat
+    if (item.ttDestLon) opts.destLon = parseFloat(item.ttDestLon) || item.ttDestLon
+    if (item.ttDestAddress) opts.destAddress = item.ttDestAddress
+    if (item.ttRouteName) opts.routeName = item.ttRouteName
+    if (item.ttTravelMode && item.ttTravelMode !== 'car') opts.travelMode = item.ttTravelMode
+    if (item.ttTimeFormat && item.ttTimeFormat !== '24h') opts.timeFormat = item.ttTimeFormat
+    if (sType === 'tomtom-eta-map') {
+      if (!item.ttShowTrafficFlow) opts.showTrafficFlow = false
+      if (!item.ttShowIncidents) opts.showIncidents = false
+      if (item.ttMapHeight && item.ttMapHeight !== '300') opts.mapHeight = parseInt(item.ttMapHeight)
+      if (item.ttMapStyle && item.ttMapStyle !== 'standard') opts.mapStyle = item.ttMapStyle
+    }
+    if (Object.keys(opts).length) it.options = opts
+    if (item.ttApiKey) it.secrets = { apiKey: item.ttApiKey }
   }
   else {
     if (item.title) it.title = item.title

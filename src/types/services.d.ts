@@ -134,3 +134,80 @@ export interface GreetingService extends Service {
     subtitle: string
   }
 }
+
+export interface TomtomTrafficMapService extends Service {
+  options: {
+    lat?: number
+    lon?: number
+    address?: string
+    zoom?: number
+    showTrafficFlow?: boolean
+    showIncidents?: boolean
+    mapHeight?: number
+    mapStyle?: 'standard' | 'dark' | 'satellite'
+  }
+  secrets: {
+    apiKey: string
+  }
+  server: {
+    lat: number
+    lon: number
+    zoom: number
+    apiKey: string
+  }
+}
+
+export interface TomtomEtaService extends Service {
+  options: {
+    originLat?: number
+    originLon?: number
+    originAddress?: string
+    destLat?: number
+    destLon?: number
+    destAddress?: string
+    routeName?: string
+    travelMode?: 'car' | 'truck' | 'bicycle' | 'pedestrian'
+    timeFormat?: '12h' | '24h'
+  }
+  secrets: {
+    apiKey: string
+  }
+  server: {
+    arrivalTime: string
+    travelTimeInSeconds: number
+    trafficDelayInSeconds: number
+    lengthInMeters: number
+    routeName: string
+  }
+}
+
+export interface TomtomEtaMapService extends Service {
+  options: {
+    originLat?: number
+    originLon?: number
+    originAddress?: string
+    destLat?: number
+    destLon?: number
+    destAddress?: string
+    routeName?: string
+    travelMode?: 'car' | 'truck' | 'bicycle' | 'pedestrian'
+    showTrafficFlow?: boolean
+    showIncidents?: boolean
+    mapHeight?: number
+    mapStyle?: 'standard' | 'dark' | 'satellite'
+    timeFormat?: '12h' | '24h'
+  }
+  secrets: {
+    apiKey: string
+  }
+  server: {
+    arrivalTime: string
+    travelTimeInSeconds: number
+    trafficDelayInSeconds: number
+    lengthInMeters: number
+    routeName: string
+    routePoints: { lat: number, lon: number }[]
+    bbox: { minLat: number, minLon: number, maxLat: number, maxLon: number }
+    apiKey: string
+  }
+}

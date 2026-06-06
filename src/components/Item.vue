@@ -48,6 +48,18 @@ function resolveByTypeComponent(type: string) {
     return resolveComponent('ServiceCustomHtml')
   }
 
+  if (type === 'tomtom-eta') {
+    return resolveComponent('ServiceTomtomEta')
+  }
+
+  if (type === 'tomtom-eta-map') {
+    return resolveComponent('ServiceTomtomEtaMap')
+  }
+
+  if (type === 'tomtom-traffic-map') {
+    return resolveComponent('ServiceTomtomTrafficMap')
+  }
+
   return resolveComponent('ServiceBase')
 }
 
