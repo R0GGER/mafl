@@ -1,7 +1,25 @@
 # Changelog
 
 
-## Admin performance: debounced YAML preview
+## Fix admin dark mode in Firefox / incognito (SSR)
+
+### 🐛 Bug Fixes
+
+- **admin:** Fixed admin pages (login + config builder) rendering in light mode on first visit in Firefox, incognito/private browsing, or any browser without a stored `nuxt-color-mode` cookie — the server now sends `<html class="dark" data-color-mode-forced="dark">` in the initial SSR HTML so the page is dark before any JavaScript runs
+- **admin:** The `@nuxtjs/color-mode` inline script (which reads stored preferences) now respects the `data-color-mode-forced` attribute and uses dark mode regardless of what's in localStorage or cookies
+- **admin:** `app.vue` no longer overrides the color mode preference on admin routes — previously it reset the admin's dark mode back to the dashboard theme on mount
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/pages/admin/login.vue` | Added `definePageMeta({ colorMode: 'dark' })` and `useHead({ htmlAttrs: { class: 'dark' } })` for SSR-level dark mode; added `forceColorMode()` helper that sets both `colorMode.preference` and `document.documentElement.classList` directly |
+| `src/pages/admin/index.vue` | Same SSR-level dark mode approach; `forceColorMode()` used by the light/dark toggle to ensure immediate class updates |
+| `src/app.vue` | Added route guard to skip `colorMode.preference` override on `/admin` routes |
+
+---
+
+## Optional syntax highlighting & admin performance
 
 ### ⚡ Performance
 
@@ -9,11 +27,18 @@
 - **admin:** YAML generation (`stateToYaml`) and syntax highlighting (`highlightYaml`) are now fully debounced at 400ms — neither function runs during active typing or slider movement
 - **admin:** Removed `yamlOutput` computed dependency from the preview pipeline — Save, Copy and Export call `stateToYaml()` on demand instead of maintaining a reactive computed
 
+### 💅 Improvements
+
+- **admin:** Syntax highlighting in the YAML output panel is now optional — toggle on/off via the paint icon button next to "YAML Output"
+- **admin:** Highlighting is **off by default** for maximum typing responsiveness; when enabled, a subtle "may slow input" hint is shown
+- **admin:** Highlight preference is stored in `localStorage` (`mafl-admin-highlight`) and remembered between sessions
+- **admin:** When highlighting is off, `highlightYaml()` is never called — the YAML is rendered as plain text with zero overhead
+
 ### Changed files
 
 | File | Change |
 |------|--------|
-| `src/pages/admin/index.vue` | Replaced `watch(state, { deep: true })` with `@input.capture` / `@change.capture` / `@click.capture` event handlers on the form container; replaced `yamlOutput` computed with direct `stateToYaml(state)` calls; added `schedulePreview()` and `schedulePreviewAfterClick()` debounce functions; explicit `updatePreview()` calls after reset, import and config load |
+| `src/pages/admin/index.vue` | Added `syntaxHighlight` ref with localStorage persistence; added paint icon toggle button with info hint; conditional `<pre v-html>` (highlighted) vs `<pre>{{ plain }}</pre>` rendering; `updatePreview()` skips `highlightYaml()` when highlighting is off; replaced `watch(state, { deep: true })` with DOM event handlers; replaced `yamlOutput` computed with direct `stateToYaml(state)` calls |
 
 ---
 
@@ -106,7 +131,7 @@ logo:
 
 ### 🐛 Bug Fixes
 
-- **admin:** Fixed admin pages (login + editor) rendering in light mode on first visit in Firefox or incognito — `colorMode.preference` is now set to `dark` during the setup phase (SSR) instead of waiting for `onMounted`, preventing a flash of light theme when no cookie or localStorage is present
+- **admin:** Moved initial `colorMode.preference = 'dark'` from `onMounted` to the setup phase — partial fix for first-visit light mode flash (fully resolved in the SSR dark mode fix above)
 
 ### New files
 

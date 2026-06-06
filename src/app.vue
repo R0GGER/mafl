@@ -16,8 +16,11 @@ const i18nHead = useLocaleHead({
   identifierAttribute: 'id',
 })
 
+const route = useRoute()
 onMounted(() => {
-  colorMode.preference = $settings.theme || 'system'
+  if (!route.path.startsWith('/admin')) {
+    colorMode.preference = $settings.theme || 'system'
+  }
 })
 
 useHead({

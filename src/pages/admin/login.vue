@@ -55,14 +55,28 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: false })
+definePageMeta({ layout: false, colorMode: 'dark' })
 
 const colorMode = useColorMode()
-colorMode.preference = 'dark'
+const allThemeClasses = ['light', 'dark', 'deep', 'sepia', 'bluer']
+
+useHead({
+  htmlAttrs: { class: 'dark' },
+})
+
+function forceColorMode(mode: string) {
+  colorMode.preference = mode
+  if (import.meta.client) {
+    allThemeClasses.forEach(c => document.documentElement.classList.remove(c))
+    document.documentElement.classList.add(mode)
+  }
+}
+
+forceColorMode('dark')
 
 onMounted(() => {
   const saved = localStorage.getItem('mafl-admin-theme')
-  if (saved === 'light') colorMode.preference = 'light'
+  forceColorMode(saved === 'light' ? 'light' : 'dark')
 })
 
 onUnmounted(() => {

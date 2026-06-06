@@ -127,7 +127,20 @@
       <div class="lg:sticky lg:top-16 lg:self-start">
         <div class="border border-fg/10 rounded-lg bg-fg/[0.02]">
           <div class="flex items-center justify-between p-4 border-b border-fg/10">
-            <span class="font-semibold text-fg">YAML Output</span>
+            <div class="flex items-center gap-2">
+              <span class="font-semibold text-fg">YAML Output</span>
+              <button
+                class="p-1 rounded border transition-colors"
+                :class="syntaxHighlight
+                  ? 'border-brand-500/40 text-brand-500 bg-brand-500/10'
+                  : 'border-fg/10 text-fg-dimmed hover:bg-fg/5'"
+                title="Syntax highlighting (may cause slight input delay on large configs)"
+                @click="toggleHighlight"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
+              </button>
+              <span v-if="syntaxHighlight" class="text-[10px] text-fg-dimmed italic">may slow input</span>
+            </div>
             <button
               class="text-sm px-3 py-1.5 rounded bg-brand-600 hover:bg-brand-700 text-white transition-colors"
               @click="copyYaml"
@@ -136,7 +149,8 @@
             </button>
           </div>
           <div class="p-4 max-h-[80vh] overflow-auto">
-            <pre class="yaml-hl text-xs font-mono leading-relaxed whitespace-pre" v-html="highlightedYaml" />
+            <pre v-if="syntaxHighlight" class="yaml-hl text-xs font-mono leading-relaxed whitespace-pre" v-html="highlightedYaml" />
+            <pre v-else class="text-xs font-mono leading-relaxed whitespace-pre text-fg">{{ plainYaml }}</pre>
           </div>
         </div>
 
@@ -157,14 +171,29 @@ import { stateToYaml } from '~/composables/useConfigBuilder'
 definePageMeta({
   layout: false,
   middleware: 'admin',
+  colorMode: 'dark',
 })
 
 const colorMode = useColorMode()
-colorMode.preference = 'dark'
+const allThemeClasses = ['light', 'dark', 'deep', 'sepia', 'bluer']
 const adminDark = ref(true)
 
+useHead({
+  htmlAttrs: { class: 'dark' },
+})
+
+function forceColorMode(mode: string) {
+  colorMode.preference = mode
+  if (import.meta.client) {
+    allThemeClasses.forEach(c => document.documentElement.classList.remove(c))
+    document.documentElement.classList.add(mode)
+  }
+}
+
+forceColorMode('dark')
+
 function applyAdminTheme(dark: boolean) {
-  colorMode.preference = dark ? 'dark' : 'light'
+  forceColorMode(dark ? 'dark' : 'light')
 }
 
 function toggleAdminTheme() {
@@ -198,13 +227,27 @@ const {
 
 function freshYaml() { return stateToYaml(state) }
 
-const highlightedYaml = ref(highlightYaml(freshYaml()))
+const syntaxHighlight = ref(false)
+const highlightedYaml = ref('')
+const plainYaml = ref('')
 let _previewTimer: ReturnType<typeof setTimeout> | null = null
 
 function updatePreview() {
   if (_previewTimer) clearTimeout(_previewTimer)
   _previewTimer = null
-  highlightedYaml.value = highlightYaml(freshYaml())
+  const yml = freshYaml()
+  plainYaml.value = yml
+  if (syntaxHighlight.value) {
+    highlightedYaml.value = highlightYaml(yml)
+  }
+}
+
+function toggleHighlight() {
+  syntaxHighlight.value = !syntaxHighlight.value
+  localStorage.setItem('mafl-admin-highlight', String(syntaxHighlight.value))
+  if (syntaxHighlight.value) {
+    highlightedYaml.value = highlightYaml(plainYaml.value)
+  }
 }
 
 function schedulePreview() {
@@ -364,6 +407,7 @@ onMounted(() => {
   const saved = localStorage.getItem('mafl-admin-theme')
   adminDark.value = saved !== 'light'
   applyAdminTheme(adminDark.value)
+  syntaxHighlight.value = localStorage.getItem('mafl-admin-highlight') === 'true'
   loadCurrentConfig()
 })
 </script>
