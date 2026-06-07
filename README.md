@@ -49,12 +49,12 @@ This fork adds several features on top of the original [Mafl](https://github.com
 | **Logo** | Fixed responsive logo in the top-left corner — image, text/letter or both combined |
 | **Background** | Full-screen background image with optional color overlay |
 | **Tabs** | Organise services into switchable tabs with icons, lock protection, visibility toggle and deep linking via URL hash. Tab bar auto-hides with a single tab. |
-| **Search** | Filter bookmarks across tabs; web search fallback (`/`, `Ctrl+K`) |
+| **Search** | Filter bookmarks across tabs; optional live Webradio search via Radio Browser; web search fallback (`/`, `Ctrl+K`) |
 | **Favicon API** | Auto-fetch service icons by domain name with server-side proxy cache |
 | **Caching** | Server-side favicon proxy with disk cache (7 days per domain) and Service Worker offline support |
 | **Status position** | Align the status indicator to `left` or `right` |
 | **Admin Panel** | Built-in visual config editor at `/admin` with config import/export, YAML syntax highlighting, reorder groups/items and WebSocket hot-reload |
-| **Modules** | Time, DateTime Weather, Greeting, Custom HTML, IP API, OpenWeatherMap widgets |
+| **Modules** | Time, DateTime Weather, Greeting, Custom HTML, IP API, OpenWeatherMap, TomTom, **Web Radio** |
 | **Grid span** | Any service item can span multiple grid columns |
 | **Footer** | Global footer with text and/or HTML content |
 | **PWA** | Dynamic manifest uses the app title from config — no rebuild needed |
@@ -65,13 +65,14 @@ This fork adds several features on top of the original [Mafl](https://github.com
 
 * 🔐 **Privacy** - All requests to third-party services happen server-side.
 * ⚡ **Real-time** - Interactive service cards with live status information.
-* 🔍 **Search** - Filter bookmarks instantly; fall back to Google or DuckDuckGo.
+* 🔍 **Search** - Filter bookmarks instantly; optional live internet radio search; fall back to Google or DuckDuckGo.
 * 📑 **Tabs** - Organise services into switchable tabs with lock protection, visibility toggle and deep linking via URL hash.
 * 🛡️ **Admin Panel** - Built-in config editor at `/admin` with secure login.
 * 🖼️ **Backgrounds** - Full-screen background images with color overlay.
 * 🎨 **Themes** - Six built-in themes or full custom styling.
 * 🗂️ **Grouping** - Grid and list display modes per group.
-* 📦 **Modules** - Time, DateTime Weather, Greeting, Custom HTML, IP API, OpenWeatherMap.
+* 📦 **Modules** - Time, DateTime Weather, Greeting, Custom HTML, IP API, OpenWeatherMap, TomTom, Web Radio.
+* 📻 **Web Radio** - Stream internet radio in the browser via Radio Browser; one station per grid item with mini player.
 * 🏷️ **Tags** - Add tags to your services.
 * 🌎 **Multi-language** - Automatic language detection with 10 locales.
 * 👌 **Easy setup** - A few lines of YAML and your homepage is ready.
@@ -323,21 +324,33 @@ Clicking a tab automatically updates the URL hash. Browser back/forward navigati
 
 ### Search
 
-A search bar is displayed at the top of every page. It filters bookmarks across all tabs as you type and offers web search when no match is found.
+A search bar is displayed at the top of every page. It filters bookmarks across all tabs as you type and offers web search as a fallback.
+
+Optionally include live internet radio stations from the [Radio Browser API](https://api.radio-browser.info/) in search results (global setting — not tied to `web-radio` modules on the page):
 
 ```yaml
 searchProvider: google
+searchWebradio: true
+searchWebradioCountryCode: NL
 ```
 
-Values: `google`, `duckduckgo` - Default: `google`
+| Option | Default | Description |
+|--------|---------|-------------|
+| `searchProvider` | `google` | Web search engine: `google` or `duckduckgo` |
+| `searchWebradio` | `false` | Search live radio stations in the **Webradio** section |
+| `searchWebradioCountryCode` | `NL` | Country filter for Webradio search (when enabled) |
+
+When enabled, results are grouped into **Bookmarks**, **Webradio** and **Search the web**. Press Enter or click a station to play it in the mini player. Saved `web-radio` bookmarks also appear under **Bookmarks** and start playback instead of opening a link.
+
+This setting is **independent** of whether you have `web-radio` modules on the page. Enable it in the [Config Builder](#-config-builder) or [Admin Panel](#-admin-panel) via **Include Webradio stations in search results** (Global Settings, next to Search Provider).
 
 **Keyboard shortcuts:**
 | Key | Action |
 |-----|--------|
 | `/` | Focus the search bar |
 | `Ctrl+K` / `Cmd+K` | Focus the search bar |
-| `↑` / `↓` | Navigate results |
-| `Enter` | Open selected result |
+| `↑` / `↓` | Navigate results (bookmarks, radio, web) |
+| `Enter` | Open bookmark, play radio station, or web search |
 | `Escape` | Clear / close |
 
 ### Display modes
@@ -411,13 +424,13 @@ footer:
 A built-in visual config editor at `/admin` for editing your `config.yml` directly from the browser. Changes are saved and applied instantly.
 
 **Features:**
-* Global settings, layout, styles, tabs, tags and per-item editing
+* Global settings, layout, styles, tabs, tags and per-item editing (including search provider and optional Webradio search)
 * Tab lock - protect tabs from accidental deletion
 * Collapsible tabs for easier navigation
 * Reorder groups and items with ▲/▼ buttons
 * Auto-fill favicon domain from link URL
 * Browse icons links (Iconify, emoji, selfh.st, dashboardicons)
-* Module configuration (Time, DateTime Weather, Greeting, Custom HTML, IP API, OpenWeatherMap)
+* Module configuration (Time, DateTime Weather, Greeting, Custom HTML, IP API, OpenWeatherMap, TomTom, Web Radio)
 * Secure login with scrypt password hashing and encrypted sessions
 
 **Setup:** generate secrets with [maflpass](#maflpass) and set the `NUXT_ADMIN_PASSWORD_HASH` and `NUXT_SESSION_PASSWORD` environment variables. See the [full documentation](docs/admin.md).
@@ -434,6 +447,24 @@ Built-in service types:
 * **DateTime Weather** - Combined clock and weather widget.
 * **Greeting** - Custom greeting message with optional subtitle.
 * **Custom HTML** - Render arbitrary HTML content (including scripts).
+* **TomTom** - ETA, route map and traffic map widgets.
+* **Web Radio** - Stream internet radio stations in the browser via [Radio Browser](https://api.radio-browser.info/). Each station is a separate grid item; click to play. A mini player bar appears at the bottom with play/pause, volume and stop. Live station search in the homepage search bar is controlled separately via [`searchWebradio`](#search). No API key required.
+
+```yaml
+services:
+  Radio:
+    display: grid
+    items:
+      - type: web-radio
+        title: Radio 538
+        icon:
+          url: https://www.radio538.nl/favicon.ico
+        options:
+          stationUuid: your-station-uuid-here
+          countryCode: NL   # admin station picker only
+```
+
+Use the admin panel (**Media → Web Radio**) to search stations by name — title, icon URL and UUID are filled in automatically. See [modules.md](docs/modules.md#web-radio) for details. For homepage search, use [`searchWebradio`](#search).
 
 ## 🖼 Icons
 
@@ -472,17 +503,17 @@ A standalone visual tool for creating and editing your `config.yml` - no server 
 **Open** the [Config Builder](https://config.maflplus.eu/) in your browser.
 
 Features:
-* Edit all global settings (title, language, theme, background, search, footer, etc.)
+* Edit all global settings (title, language, theme, background, search provider, optional Webradio search, footer, etc.)
 * Add and reorder tabs, groups and bookmarks
 * Configure icons (favicon, URL or Iconify name with color)
-* Configure modules (Time, DateTime Weather, Greeting, Custom HTML, IP API, OpenWeatherMap)
+* Configure modules (Time, DateTime Weather, Greeting, Custom HTML, IP API, OpenWeatherMap, TomTom, Web Radio)
 * Grid span setting per service item
 * Import an existing `config.yml` to modify it
 * Live YAML preview with one-click copy to clipboard
 * Light and dark theme
 
 ## 📒 Wiki
-A step-by-step guide covering installation, configuration (layout, styles, backgrounds, tabs, search), icon types, and service tags: [wiki.maflplus.eu](https://wiki.maflplus.eu)
+A step-by-step guide covering installation, configuration (layout, styles, backgrounds, tabs, search including Webradio), icon types, and service tags: [wiki.maflplus.eu](https://wiki.maflplus.eu)
 
 ## 📄 License
 
