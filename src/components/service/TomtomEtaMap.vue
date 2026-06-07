@@ -1,21 +1,23 @@
 <template>
-  <ServiceBase v-bind="props">
-    <template #icon>
-      <ServiceBaseIcon :name="travelIcon" v-bind="iconProps" />
-    </template>
-    <template #title="{ service }">
-      {{ service?.data?.routeName || '' }}: {{ formattedArrival(service?.data) }}
-    </template>
-    <template #description="{ service }">
-      {{ formattedDuration(service?.data) }} · {{ formattedDelay(service?.data) }} · {{ formattedDistance(service?.data) }}
-    </template>
-  </ServiceBase>
+  <div>
+    <ServiceBase v-bind="props">
+      <template #icon>
+        <ServiceBaseIcon :name="travelIcon" v-bind="iconProps" />
+      </template>
+      <template #title="{ service }">
+        {{ service?.data?.routeName || '' }}: {{ formattedArrival(service?.data) }}
+      </template>
+      <template #description="{ service }">
+        {{ formattedDuration(service?.data) }} · {{ formattedDelay(service?.data) }} · {{ formattedDistance(service?.data) }}
+      </template>
+    </ServiceBase>
 
-  <div
-    v-if="mapReady"
-    ref="mapContainer"
-    :style="{ height: `${mapHeight}px`, width: '100%', borderRadius: '0.75rem', overflow: 'hidden' }"
-  />
+    <div
+      v-if="mapReady"
+      ref="mapContainer"
+      :style="{ height: `${mapHeight}px`, width: '100%', borderRadius: '0.75rem', overflow: 'hidden' }"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">

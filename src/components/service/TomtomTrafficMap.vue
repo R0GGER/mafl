@@ -1,10 +1,12 @@
 <template>
-  <div
-    v-if="mapReady"
-    ref="mapContainer"
-    :style="{ height: `${mapHeight}px`, width: '100%', borderRadius: '0.75rem', overflow: 'hidden' }"
-  />
-  <ServicePlaceholder v-else />
+  <div>
+    <div
+      v-if="mapReady"
+      ref="mapContainer"
+      :style="{ height: `${mapHeight}px`, width: '100%', borderRadius: '0.75rem', overflow: 'hidden' }"
+    />
+    <ServicePlaceholder v-else />
+  </div>
 </template>
 
 <script setup lang="ts">

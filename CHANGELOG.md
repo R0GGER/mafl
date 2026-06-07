@@ -1,6 +1,30 @@
 # Changelog
 
 
+## Fix grid alignment next to large modules
+
+### 🐛 Bug Fixes
+
+- **layout:** Fixed items next to large spanning modules (like TomTom maps) not aligning properly and jumping — caused by Vue fragments rendering as separate grid items instead of being contained in one cell
+- **layout:** Added `items-start` to the grid so smaller items keep their natural height instead of stretching to match the tallest item in the row
+- **tomtom-eta-map:** Wrapped the two root elements (`ServiceBase` + map div) in a single root `<div>` to prevent fragment breakout in CSS Grid
+- **tomtom-traffic-map:** Same single-root wrapper applied
+
+### 💅 Improvements
+
+- **admin:** Hidden the Icon Type section (favicon / url / name) for all three TomTom modules — these modules use built-in icons (travel mode icon for ETA, no icon for maps)
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/components/Group.vue` | Added `items-start` to grid classes to prevent vertical stretching |
+| `src/components/service/TomtomEtaMap.vue` | Wrapped template in single root `<div>` |
+| `src/components/service/TomtomTrafficMap.vue` | Wrapped template in single root `<div>` |
+| `src/components/admin/ItemFields.vue` | Hidden Icon Type section for `tomtom-eta`, `tomtom-eta-map` and `tomtom-traffic-map` |
+
+---
+
 ## TomTom traffic & route modules
 
 ### 🚀 Enhancements

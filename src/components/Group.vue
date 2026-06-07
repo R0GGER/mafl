@@ -121,6 +121,7 @@ const cardBgStyle = computed(() => {
 const gridClasses = computed(() => [
   'grid',
   'grid-cols-1',
+  'items-start',
   'gap-2 lg:gap-4 xl:gap-6',
   `sm:grid-cols-${props.grid.small}`,
   `md:grid-cols-${props.grid.medium}`,
