@@ -38,6 +38,7 @@
 | Area | What changed |
 |------|-------------|
 | **Grid layout** | Responsive grid with up to 6 columns (`small` / `medium` / `large` / `xlarge`) |
+| **Grid item size** | Configurable icon size and item padding for compact grid cards |
 | **List layout** | Compact list display mode per group with its own column config |
 | **Spacing** | Configurable spacing between groups and items |
 | **Styles** | Per-element styling for category headers, titles and descriptions |
@@ -152,7 +153,7 @@ theme: dark
 
 ### Layout
 
-Control the responsive grid columns and spacing for both grid and list display modes.
+Control the responsive grid columns, item sizing and spacing for both grid and list display modes.
 
 ```yaml
 layout:
@@ -161,6 +162,8 @@ layout:
     medium: 2     # ≥768px
     large: 3      # ≥1024px
     xlarge: 5     # ≥1280px
+    iconSize: 2.5rem    # optional — default 4rem
+    itemPadding: 0.5rem # optional — default 1rem
   list:
     small: 2
     medium: 3
@@ -171,7 +174,7 @@ layout:
     item: 0.25rem
 ```
 
-Column values range from `1` to `6`.
+Column values range from `1` to `6`. Use smaller `iconSize` and `itemPadding` values together with more columns to fit more icons per row.
 
 ### Styles
 

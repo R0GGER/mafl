@@ -283,6 +283,11 @@
             <div><label class="text-xs text-gray-500">Large</label><input type="number" id="cfg-grid-large" min="1" max="12" value="3" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
             <div><label class="text-xs text-gray-500">XLarge</label><input type="number" id="cfg-grid-xlarge" min="1" max="12" value="5" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
           </div>
+          <label class="block text-xs text-gray-400 mb-2 mt-3">Grid item size</label>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="text-xs text-gray-500">Icon size</label><input type="text" id="cfg-grid-icon-size" placeholder="4rem" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
+            <div><label class="text-xs text-gray-500">Item padding</label><input type="text" id="cfg-grid-item-padding" placeholder="1rem" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
+          </div>
           <label class="block text-xs text-gray-400 mb-2 mt-3">List Columns (1-12)</label>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div><label class="text-xs text-gray-500">Small</label><input type="number" id="cfg-list-small" min="1" max="12" value="2" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
@@ -528,7 +533,7 @@ function newItem(serviceType = 'bookmark') {
     title: '', description: '', link: '', target: '', span: '',
     iconType: 'favicon', iconFavicon: '', iconUrl: '', iconName: '', iconColor: '', iconWrap: false,
     statusEnabled: false, tags: [],
-    owmLat: '', owmLon: '', owmUnits: 'metric', owmApiKey: '',
+    owmLat: '', owmLon: '', owmUnits: 'metric', owmApiKey: '', owmShowDescription: 'true',
     ipapiLocationName: '',
     ipapiFlagIcon: 'true',
     tzTimezone: '', tzLocationName: '', tzCountry: '', tzTimeFormat: '24h', tzDateFormat: 'medium',
@@ -698,6 +703,10 @@ function renderItem(ti, gi, ii, item) {
         </select></div>
         <div><label class="text-gray-500">API Key</label><input type="text" value="${escHtml(item.owmApiKey)}" placeholder="your-api-key" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].owmApiKey=this.value; generateYaml()"></div>
       </div>
+      <div><label class="text-gray-500">Show weather type</label><select class="w-full bg-surface border border-gray-600 rounded px-2 py-1" onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].owmShowDescription=this.value; generateYaml()">
+          <option value="true" ${item.owmShowDescription !== 'false' ? 'selected' : ''}>true</option>
+          <option value="false" ${item.owmShowDescription === 'false' ? 'selected' : ''}>false</option>
+        </select></div>
       ${spanField}`;
   } else if (sType === 'ip-api') {
     typeFields = `
@@ -912,6 +921,8 @@ function generateYaml() {
   const gm = numVal('cfg-grid-medium'); if (gm) grid.medium = gm;
   const gl = numVal('cfg-grid-large'); if (gl) grid.large = gl;
   const gx = numVal('cfg-grid-xlarge'); if (gx) grid.xlarge = gx;
+  const gis = val('cfg-grid-icon-size'); if (gis) grid.iconSize = gis;
+  const gip = val('cfg-grid-item-padding'); if (gip) grid.itemPadding = gip;
   if (Object.keys(grid).length) layout.grid = grid;
 
   const list = {};
@@ -982,6 +993,7 @@ function generateYaml() {
             if (item.owmLat) opts.lat = parseFloat(item.owmLat) || item.owmLat;
             if (item.owmLon) opts.lon = parseFloat(item.owmLon) || item.owmLon;
             if (item.owmUnits && item.owmUnits !== 'metric') opts.units = item.owmUnits;
+            if (item.owmShowDescription === 'false') opts.showDescription = false;
             if (Object.keys(opts).length) it.options = opts;
             if (item.owmApiKey) it.secrets = { apiKey: item.owmApiKey };
           } else if (sType === 'ip-api') {
@@ -1158,6 +1170,8 @@ function resetAll() {
   document.getElementById('cfg-grid-medium').value = '2';
   document.getElementById('cfg-grid-large').value = '3';
   document.getElementById('cfg-grid-xlarge').value = '5';
+  document.getElementById('cfg-grid-icon-size').value = '';
+  document.getElementById('cfg-grid-item-padding').value = '';
   document.getElementById('cfg-list-small').value = '2';
   document.getElementById('cfg-list-medium').value = '3';
   document.getElementById('cfg-list-large').value = '4';
@@ -1237,6 +1251,7 @@ function parseRawItem(raw) {
     if (raw.options?.lat != null) item.owmLat = String(raw.options.lat);
     if (raw.options?.lon != null) item.owmLon = String(raw.options.lon);
     if (raw.options?.units) item.owmUnits = raw.options.units;
+    if (raw.options?.showDescription === false) item.owmShowDescription = 'false';
     if (raw.secrets?.apiKey) item.owmApiKey = String(raw.secrets.apiKey);
   } else if (sType === 'ip-api') {
     if (raw.options?.locationName) item.ipapiLocationName = raw.options.locationName;
@@ -1326,6 +1341,8 @@ function loadConfig(config) {
     if (config.layout.grid.medium) document.getElementById('cfg-grid-medium').value = config.layout.grid.medium;
     if (config.layout.grid.large) document.getElementById('cfg-grid-large').value = config.layout.grid.large;
     if (config.layout.grid.xlarge) document.getElementById('cfg-grid-xlarge').value = config.layout.grid.xlarge;
+    if (config.layout.grid.iconSize) document.getElementById('cfg-grid-icon-size').value = config.layout.grid.iconSize;
+    if (config.layout.grid.itemPadding) document.getElementById('cfg-grid-item-padding').value = config.layout.grid.itemPadding;
   }
   if (config.layout?.list) {
     if (config.layout.list.small) document.getElementById('cfg-list-small').value = config.layout.list.small;

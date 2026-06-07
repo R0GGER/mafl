@@ -42,6 +42,7 @@ This fork adds several features on top of the original [Mafl](https://github.com
 | Area | What changed |
 |------|-------------|
 | **Grid layout** | Responsive grid with up to 6 columns (`small` / `medium` / `large` / `xlarge`) |
+| **Grid item size** | Configurable icon size and item padding for compact grid cards |
 | **List layout** | Compact list display mode per group with its own column config |
 | **Spacing** | Configurable spacing between groups and items |
 | **Styles** | Per-element styling for category headers, titles and descriptions |
@@ -132,7 +133,7 @@ All settings live in a single `config.yml` file inside the data volume.
 
 ### Layout
 
-Control the responsive grid columns and spacing.
+Control the responsive grid columns, item sizing and spacing.
 
 ```yaml
 layout:
@@ -141,6 +142,8 @@ layout:
     medium: 2     # ≥768px
     large: 3      # ≥1024px
     xlarge: 5     # ≥1280px
+    iconSize: 2.5rem    # optional — default 4rem
+    itemPadding: 0.5rem # optional — default 1rem
   list:
     small: 2
     medium: 3
@@ -151,7 +154,7 @@ layout:
     item: 0.25rem
 ```
 
-Column values range from `1` to `6`. The `list` key provides separate column settings for groups displayed as lists.
+Column values range from `1` to `6`. The `list` key provides separate column settings for groups displayed as lists. Use smaller `iconSize` and `itemPadding` values together with more columns to fit more icons per row.
 
 ### Styles
 
@@ -424,7 +427,7 @@ footer:
 A built-in visual config editor at `/admin` for editing your `config.yml` directly from the browser. Changes are saved and applied instantly.
 
 **Features:**
-* Global settings, layout, styles, tabs, tags and per-item editing (including search provider and optional Webradio search)
+* Global settings, layout (columns, grid icon size, spacing), styles, tabs, tags and per-item editing (including search provider and optional Webradio search)
 * Tab lock - protect tabs from accidental deletion
 * Collapsible tabs for easier navigation
 * Reorder groups and items with ▲/▼ buttons

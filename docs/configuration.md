@@ -199,6 +199,28 @@ Values: `1` – `6`
 
 You can specify only the breakpoints you want to override; the rest will be set automatically.
 
+### Grid item size
+
+Optional settings under `layout.grid` to control the size of icons and padding inside grid cards. Use smaller values to fit more items per row — especially when combined with a higher column count.
+
+```yaml
+layout:
+  grid:
+    small: 2
+    medium: 3
+    large: 4
+    xlarge: 8
+    iconSize: 2.5rem
+    itemPadding: 0.5rem
+```
+
+| Property | Description | Default |
+|---|---|---|
+| `iconSize` | Width and height of service icons in grid cards | `4rem` |
+| `itemPadding` | Inner padding and gap between icon and text in each grid card | `1rem` |
+
+Any valid CSS unit works (`rem`, `px`, `em`, etc).
+
 ### List columns
 
 Sets the number of columns for groups using `display: list` at different screen widths.
@@ -230,7 +252,7 @@ layout:
 | Property | Description | Default |
 |---|---|---|
 | `group` | Vertical padding around each category group | `2.5rem` |
-| `item` | Gap between items within a group | `0.5rem` |
+| `item` | Gap between items within a grid or list group | `0.5rem` |
 
 Any valid CSS unit works (`rem`, `px`, `em`, etc).
 
@@ -243,6 +265,8 @@ layout:
     medium: 2
     large: 3
     xlarge: 5
+    iconSize: 2.5rem
+    itemPadding: 0.5rem
   list:
     small: 2
     medium: 3
@@ -928,6 +952,8 @@ layout:
     medium: 2
     large: 3
     xlarge: 5
+    iconSize: 2.5rem
+    itemPadding: 0.5rem
   spacing:
     group: 1.5rem
     item: 0.25rem

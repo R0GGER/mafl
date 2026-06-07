@@ -56,6 +56,13 @@
           <input v-model="item.owmApiKey" type="text" class="admin-input w-full" placeholder="your-api-key">
         </div>
       </div>
+      <div>
+        <label class="admin-label">Show weather type</label>
+        <select v-model="item.owmShowDescription" class="admin-input w-full">
+          <option value="true">true</option>
+          <option value="false">false</option>
+        </select>
+      </div>
     </template>
 
     <!-- IP-API -->

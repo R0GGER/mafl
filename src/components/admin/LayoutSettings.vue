@@ -25,6 +25,19 @@
         </div>
       </div>
 
+      <p class="text-xs text-fg-dimmed mt-4 mb-2">Grid item size</p>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="admin-label">Icon size</label>
+          <input v-model="state.gridIconSize" type="text" class="admin-input w-full" placeholder="4rem">
+        </div>
+        <div>
+          <label class="admin-label">Item padding</label>
+          <input v-model="state.gridItemPadding" type="text" class="admin-input w-full" placeholder="1rem">
+        </div>
+      </div>
+      <p class="text-xs text-fg-dimmed mt-1">Use smaller values (e.g. 2.5rem / 0.5rem) to fit more icons per row.</p>
+
       <p class="text-xs text-fg-dimmed mt-4 mb-2">List columns per breakpoint</p>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <div>

@@ -1,6 +1,63 @@
 # Changelog
 
 
+## Layout — configurable grid icon size
+
+### 🚀 Enhancements
+
+- **layout:** Added `layout.grid.iconSize` to control the width and height of service icons in grid cards (default `4rem`)
+- **layout:** Added `layout.grid.itemPadding` to control inner padding of grid card items (default `1rem`)
+- **layout:** `layout.spacing.item` is now applied as the gap between grid and list items (was previously ignored in favour of fixed Tailwind gaps)
+- **admin:** Layout section — **Icon size** and **Item padding** fields under *Grid item size*
+- **config-builder:** Same fields under Layout → *Grid item size*
+
+### 📖 Documentation
+
+- **configuration.md:** New *Grid item size* section; updated spacing and full layout examples
+- **home.md:** Feature table and layout example updated
+- **admin.md:** Layout & Styles description updated
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/types/config.d.ts` | Added `iconSize`, `itemPadding` to `LayoutGrid` |
+| `src/server/validations/config.ts` | Validation for new grid layout options |
+| `src/composables/useGridItemStyle.ts` | Shared composable for grid card icon/padding styles |
+| `src/components/service/base/Index.vue` | Uses configurable icon size and item padding |
+| `src/components/service/Placeholder.vue` | Matches configurable grid item sizing |
+| `src/components/Group.vue` | Applies `spacing.item` as grid gap; `stackStyle()` helper |
+| `src/composables/useConfigBuilder.ts` | Import/export `gridIconSize` / `gridItemPadding` |
+| `src/components/admin/LayoutSettings.vue` | Icon size and item padding inputs |
+| `config-builder/index.html` | Grid item size fields in Layout section |
+| `docs/configuration.md` | Grid item size documentation |
+| `docs/home.md` | Feature and layout docs updated |
+| `docs/admin.md` | Admin layout description updated |
+| `README.md` | Feature table, layout section and admin panel description updated |
+
+---
+
+## OpenWeatherMap — layout & optional weather type
+
+### 🚀 Enhancements
+
+- **openweathermap:** Updated widget layout — place name and temperature on separate lines (no colon after the city name)
+- **openweathermap:** Added optional `showDescription` setting (default `true`) to hide the weather type line (e.g. "overcast clouds")
+- **admin:** OpenWeatherMap module — **Show weather type** field (`true` / `false`)
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/components/service/OpenWeatherMap.vue` | Two-line title (place + temperature); conditional weather type in description |
+| `src/components/service/base/Index.vue` | Title `line-clamp-2`; hide empty description paragraph |
+| `src/types/services.d.ts` | Added `showDescription?: boolean` to OpenWeatherMap options |
+| `src/components/admin/ItemFields.vue` | Show weather type select for OpenWeatherMap |
+| `src/composables/useConfigBuilder.ts` | Import/export `owmShowDescription` / `showDescription` |
+| `config-builder/index.html` | Show weather type field in OpenWeatherMap item editor |
+
+---
+
 ## Web Radio — default volume
 
 ### 🚀 Enhancements

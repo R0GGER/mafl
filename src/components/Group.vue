@@ -16,17 +16,17 @@
       <h2 v-if="title" class="text-2xl font-light py-2 px-4" :style="categoryStyle">
         {{ title }}
       </h2>
-      <div v-if="display === 'list'" :class="listGridClasses">
+      <div v-if="display === 'list'" :class="listGridClasses" :style="gridStyle">
         <template v-for="item in items" :key="item.id">
           <ListItem v-bind="item" />
         </template>
       </div>
-      <div v-else :class="gridClasses">
+      <div v-else :class="gridClasses" :style="gridStyle">
         <template v-for="item in items" :key="item.id">
           <div
             v-if="item.stack && item.stack.length"
-            class="flex flex-col gap-2 lg:gap-4 xl:gap-6"
-            :style="item.span && item.span > 1 ? { gridColumn: `span ${item.span}` } : undefined"
+            class="flex flex-col"
+            :style="stackStyle(item)"
           >
             <Item v-for="child in item.stack" :key="child.id" v-bind="child" />
           </div>
@@ -57,6 +57,7 @@ const props = defineProps<Props>()
 const { $settings } = useNuxtApp()
 
 const groupSpacing = computed(() => props.spacing?.group ?? '2.5rem')
+const itemSpacing = computed(() => props.spacing?.item ?? '0.5rem')
 
 function toCSS(style?: TextStyle): Record<string, string | undefined> {
   if (!style) return {}
@@ -125,11 +126,19 @@ const cardBgStyle = computed(() => {
   return style
 })
 
+const gridStyle = computed(() => ({ gap: itemSpacing.value }))
+
+function stackStyle(item: Service) {
+  return {
+    gap: itemSpacing.value,
+    ...(item.span && item.span > 1 ? { gridColumn: `span ${item.span}` } : {}),
+  }
+}
+
 const gridClasses = computed(() => [
   'grid',
   'grid-cols-1',
   'items-start',
-  'gap-2 lg:gap-4 xl:gap-6',
   `sm:grid-cols-${props.grid.small}`,
   `md:grid-cols-${props.grid.medium}`,
   `lg:grid-cols-${props.grid.large}`,
@@ -139,7 +148,6 @@ const gridClasses = computed(() => [
 const listGridClasses = computed(() => [
   'grid',
   'grid-cols-1',
-  'gap-2 lg:gap-4 xl:gap-6',
   `sm:grid-cols-${props.grid.small}`,
   `md:grid-cols-${props.grid.medium}`,
   `lg:grid-cols-${props.grid.large}`,

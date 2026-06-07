@@ -1,7 +1,7 @@
 <template>
-  <div class="p-4 flex gap-4">
+  <div class="flex" :style="cardStyle">
     <div class="flex-shrink-0 flex">
-      <div class="self-center w-16 h-16 overflow-hidden rounded-2xl border border-black/5" :class="{ 'animate-pulse': props.animate }">
+      <div class="self-center overflow-hidden rounded-2xl border border-black/5" :class="{ 'animate-pulse': props.animate }" :style="iconStyle">
         <div class="bg-fg/5 dark:bg-fg/10 h-full w-full" />
       </div>
     </div>
@@ -20,4 +20,6 @@
 const props = withDefaults(defineProps<{ animate?: boolean }>(), {
   animate: true,
 })
+
+const { cardStyle, iconStyle } = useGridItemStyle()
 </script>

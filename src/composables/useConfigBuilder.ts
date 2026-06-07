@@ -26,6 +26,7 @@ export interface BuilderItem {
   owmLon: string
   owmUnits: string
   owmApiKey: string
+  owmShowDescription: string
   // ip-api
   ipapiLocationName: string
   ipapiFlagIcon: string
@@ -148,6 +149,8 @@ export interface BuilderState {
   gridMedium: number | null
   gridLarge: number | null
   gridXlarge: number | null
+  gridIconSize: string
+  gridItemPadding: string
   listSmall: number | null
   listMedium: number | null
   listLarge: number | null
@@ -206,6 +209,8 @@ function defaultState(): BuilderState {
     gridMedium: 2,
     gridLarge: 3,
     gridXlarge: 5,
+    gridIconSize: '',
+    gridItemPadding: '',
     listSmall: 2,
     listMedium: 3,
     listLarge: 4,
@@ -231,7 +236,7 @@ export function newItem(serviceType: ServiceType = 'bookmark'): BuilderItem {
     title: '', description: '', link: '', target: '', span: '',
     iconType: 'favicon', iconFavicon: '', iconUrl: '', iconName: '', iconColor: '', iconWrap: false,
     statusEnabled: false, tags: [],
-    owmLat: '', owmLon: '', owmUnits: 'metric', owmApiKey: '',
+    owmLat: '', owmLon: '', owmUnits: 'metric', owmApiKey: '', owmShowDescription: 'true',
     ipapiLocationName: '',
     ipapiFlagIcon: 'true',
     tzTimezone: '', tzLocationName: '', tzCountry: '', tzTimeFormat: '24h', tzDateFormat: 'medium',
@@ -283,6 +288,7 @@ function parseRawItem(raw: any): BuilderItem {
     if (raw.options?.lat != null) item.owmLat = String(raw.options.lat)
     if (raw.options?.lon != null) item.owmLon = String(raw.options.lon)
     if (raw.options?.units) item.owmUnits = raw.options.units
+    if (raw.options?.showDescription === false) item.owmShowDescription = 'false'
     if (raw.secrets?.apiKey) item.owmApiKey = String(raw.secrets.apiKey)
   }
   else if (sType === 'ip-api') {
@@ -456,6 +462,8 @@ export function loadConfigFromYaml(state: BuilderState, yamlStr: string) {
     if (config.layout.grid.medium != null) state.gridMedium = config.layout.grid.medium
     if (config.layout.grid.large != null) state.gridLarge = config.layout.grid.large
     if (config.layout.grid.xlarge != null) state.gridXlarge = config.layout.grid.xlarge
+    if (config.layout.grid.iconSize) state.gridIconSize = config.layout.grid.iconSize
+    if (config.layout.grid.itemPadding) state.gridItemPadding = config.layout.grid.itemPadding
   }
   if (config.layout?.list) {
     if (config.layout.list.small != null) state.listSmall = config.layout.list.small
@@ -550,6 +558,7 @@ function serializeItem(item: BuilderItem): Record<string, any> | null {
     if (item.owmLat) opts.lat = parseFloat(item.owmLat) || item.owmLat
     if (item.owmLon) opts.lon = parseFloat(item.owmLon) || item.owmLon
     if (item.owmUnits && item.owmUnits !== 'metric') opts.units = item.owmUnits
+    if (item.owmShowDescription === 'false') opts.showDescription = false
     if (Object.keys(opts).length) it.options = opts
     if (item.owmApiKey) it.secrets = { apiKey: item.owmApiKey }
   }
@@ -737,6 +746,8 @@ export function stateToYaml(state: BuilderState): string {
   if (state.gridMedium) grid.medium = state.gridMedium
   if (state.gridLarge) grid.large = state.gridLarge
   if (state.gridXlarge) grid.xlarge = state.gridXlarge
+  if (state.gridIconSize) grid.iconSize = state.gridIconSize
+  if (state.gridItemPadding) grid.itemPadding = state.gridItemPadding
   if (Object.keys(grid).length) layout.grid = grid
 
   const list: any = {}

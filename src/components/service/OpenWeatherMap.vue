@@ -4,10 +4,13 @@
       <ServiceBaseIcon :name="`wi:owm-${service?.data?.iconId}`" v-bind="iconProps" />
     </template>
     <template #title="{ service }">
-      {{ service.data?.place ? `${service.data.place}: ` : '' }}{{ service.data?.temp.toFixed(1) }} {{ metricSymbol }}
+      <span class="flex flex-col items-start">
+        <span v-if="service.data?.place">{{ service.data.place }}</span>
+        <span>{{ service.data?.temp?.toFixed(1) }} {{ metricSymbol }}</span>
+      </span>
     </template>
     <template #description="{ service }">
-      {{ service.data?.description }}
+      <template v-if="showDescription">{{ service.data?.description }}</template>
     </template>
   </ServiceBase>
 </template>
@@ -16,6 +19,7 @@
 import type { OpenWeatherMapService, ServiceClient } from '~/types'
 
 const props = defineProps<ServiceClient<OpenWeatherMapService>>()
+const showDescription = computed(() => props.options?.showDescription !== false)
 const iconProps = computed(() => {
   if (!props.icon) {
     return {}

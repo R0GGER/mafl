@@ -37,6 +37,8 @@ export interface LayoutGrid {
   medium: number
   large: number
   xlarge: number
+  iconSize?: string
+  itemPadding?: string
 }
 
 export interface Layout {

@@ -1,18 +1,18 @@
 <template>
   <ServicePlaceholder v-if="loadingOverlay" />
-  <Component :is="isLink ? 'a' : 'div'" v-else :href="link" :target="target" class="p-4 flex gap-4 hover:bg-fg/5 dark:hover:bg-fg/9 rounded-2xl transition-all">
+  <Component :is="isLink ? 'a' : 'div'" v-else :href="link" :target="target" class="flex hover:bg-fg/5 dark:hover:bg-fg/9 rounded-2xl transition-all" :style="cardStyle">
     <slot v-if="status && status.enabled && statusPosition === 'left'" name="status" :data="data">
       <ServiceBaseStatus :ping="{ ...data?.ping, animation: status?.animation }" class="flex-shrink-0 self-center" />
     </slot>
     <div class="flex-shrink-0 flex">
-      <div class="self-center w-16 h-16 overflow-hidden">
+      <div class="self-center overflow-hidden" :style="iconStyle">
         <slot name="icon" :service="data">
           <ServiceBaseIcon v-if="icon" v-bind="icon" />
         </slot>
       </div>
     </div>
     <div>
-      <h3 class="text-lg pr-1 font-semibold line-clamp-1 flex gap-2 items-center" :style="titleStyle">
+      <h3 class="text-lg pr-1 font-semibold line-clamp-2 flex gap-2 items-center" :style="titleStyle">
         <slot name="title" :service="data">
           {{ title }}
         </slot>
@@ -21,7 +21,7 @@
         </slot>
       </h3>
 
-      <p class="text-sm text-fg-dimmed line-clamp-1" :style="descriptionStyle">
+      <p class="text-sm text-fg-dimmed line-clamp-1 empty:hidden" :style="descriptionStyle">
         <slot name="description" :service="data">
           {{ description }}
         </slot>
@@ -43,6 +43,7 @@ import type { Service, ServiceClient, TextStyle } from '~/types'
 const props = defineProps<ServiceClient<Service>>()
 
 const { $settings } = useNuxtApp()
+const { cardStyle, iconStyle } = useGridItemStyle()
 const isLink = computed(() => isUrl(props.link || ''))
 const target = computed(() => props.target || $settings.behaviour.target)
 

@@ -38,6 +38,8 @@ const layoutGridSchema = z.object({
   medium: z.number().optional(),
   large: z.number().optional(),
   xlarge: z.number().optional(),
+  iconSize: z.string().optional(),
+  itemPadding: z.string().optional(),
 })
 
 const layoutSchema = z.object({

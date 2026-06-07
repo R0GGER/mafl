@@ -67,6 +67,7 @@ export interface OpenWeatherMapService extends Service {
     lon: number
     lat: number
     units: 'metric' | 'imperial' | 'standard'
+    showDescription?: boolean
   }
   secrets: {
     apiKey: string
