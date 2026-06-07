@@ -60,6 +60,10 @@ function resolveByTypeComponent(type: string) {
     return resolveComponent('ServiceTomtomTrafficMap')
   }
 
+  if (type === 'web-radio') {
+    return resolveComponent('ServiceWebRadio')
+  }
+
   return resolveComponent('ServiceBase')
 }
 

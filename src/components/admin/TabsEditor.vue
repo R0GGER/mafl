@@ -441,6 +441,12 @@ const MODULE_CATEGORIES: ModuleCategory[] = [
     ],
   },
   {
+    category: 'Media',
+    modules: [
+      { type: 'web-radio', label: 'Web Radio' },
+    ],
+  },
+  {
     category: 'Navigation',
     modules: [
       { type: 'tomtom-eta', label: 'TomTom' },
@@ -468,6 +474,7 @@ const TYPE_LABELS: Record<string, string> = {
   'tomtom-eta': 'TomTom ETA',
   'tomtom-eta-map': 'TomTom Route',
   'tomtom-traffic-map': 'TomTom Traffic',
+  'web-radio': 'Web Radio',
 }
 
 function typeLabel(t: string) {
@@ -478,6 +485,7 @@ function itemTitle(item: BuilderItem) {
   if (item.stack && item.stack.length) return `${item.stack.length} items`
   if (item.title) return item.title
   if (item.serviceType === 'greeting' && item.greetText) return item.greetText
+  if (item.serviceType === 'web-radio' && item.wrStationUuid) return typeLabel(item.serviceType) || item.serviceType
   if (item.serviceType !== 'bookmark') return typeLabel(item.serviceType) || item.serviceType
   return '(untitled)'
 }

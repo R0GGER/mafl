@@ -113,6 +113,8 @@ export const configSchema = z.object({
   layout: layoutSchema,
   checkUpdates: z.boolean().optional(),
   searchProvider: z.enum(['google', 'duckduckgo']).optional(),
+  searchWebradio: z.boolean().optional(),
+  searchWebradioCountryCode: z.string().max(2).optional(),
   tags: z.array(tagSchema).optional(),
   tabs: z.array(tabSchema).optional(),
   services: servicesSchema.optional(),

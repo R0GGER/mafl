@@ -3,7 +3,7 @@ import yaml from 'yaml'
 
 // --- Types ---
 
-export type ServiceType = 'bookmark' | 'openweathermap' | 'ip-api' | 'time' | 'datetime-weather' | 'greeting' | 'custom-html' | 'tomtom-eta' | 'tomtom-eta-map' | 'tomtom-traffic-map'
+export type ServiceType = 'bookmark' | 'openweathermap' | 'ip-api' | 'time' | 'datetime-weather' | 'greeting' | 'custom-html' | 'tomtom-eta' | 'tomtom-eta-map' | 'tomtom-traffic-map' | 'web-radio'
 export type IconType = 'favicon' | 'url' | 'name'
 
 export interface BuilderItem {
@@ -74,6 +74,9 @@ export interface BuilderItem {
   ttmShowIncidents: boolean
   ttmMapHeight: string
   ttmMapStyle: string
+  // web-radio
+  wrStationUuid: string
+  wrCountryCode: string
   stack?: BuilderItem[]
 }
 
@@ -139,6 +142,8 @@ export interface BuilderState {
   overlayOpacity: number
   target: string
   searchProvider: string
+  searchWebradio: boolean
+  searchWebradioCountryCode: string
   gridSmall: number | null
   gridMedium: number | null
   gridLarge: number | null
@@ -195,6 +200,8 @@ function defaultState(): BuilderState {
     overlayOpacity: 0.5,
     target: '_blank',
     searchProvider: 'google',
+    searchWebradio: false,
+    searchWebradioCountryCode: 'NL',
     gridSmall: 2,
     gridMedium: 2,
     gridLarge: 3,
@@ -237,6 +244,7 @@ export function newItem(serviceType: ServiceType = 'bookmark'): BuilderItem {
     ttShowTrafficFlow: true, ttShowIncidents: true, ttMapHeight: '300', ttMapStyle: 'standard',
     ttmLat: '', ttmLon: '', ttmAddress: '', ttmZoom: '12', ttmApiKey: '',
     ttmShowTrafficFlow: true, ttmShowIncidents: true, ttmMapHeight: '300', ttmMapStyle: 'standard',
+    wrStationUuid: '', wrCountryCode: 'NL',
   }
 }
 
@@ -304,6 +312,12 @@ function parseRawItem(raw: any): BuilderItem {
   else if (sType === 'custom-html') {
     if (raw.options?.html) item.customHtml = raw.options.html
     if (raw.options?.hidden) item.customHidden = true
+  }
+  else if (sType === 'web-radio') {
+    item.title = raw.title || ''
+    item.description = raw.description || ''
+    if (raw.options?.stationUuid) item.wrStationUuid = raw.options.stationUuid
+    if (raw.options?.countryCode) item.wrCountryCode = raw.options.countryCode
   }
   else if (sType === 'tomtom-traffic-map') {
     if (raw.options?.lat != null) item.ttmLat = String(raw.options.lat)
@@ -428,6 +442,8 @@ export function loadConfigFromYaml(state: BuilderState, yamlStr: string) {
   if (config.background) state.background = config.background
   if (config.faviconApi) state.faviconApi = config.faviconApi
   if (config.searchProvider) state.searchProvider = config.searchProvider
+  if (config.searchWebradio != null) state.searchWebradio = config.searchWebradio
+  if (config.searchWebradioCountryCode) state.searchWebradioCountryCode = config.searchWebradioCountryCode
   if (config.behaviour?.target) state.target = config.behaviour.target
 
   if (config.backgroundOverlay) {
@@ -520,6 +536,7 @@ function serializeItem(item: BuilderItem): Record<string, any> | null {
   if (sType === 'datetime-weather' && !item.dtwTimezone && !item.dtwLat) return null
   if (sType === 'greeting' && !item.greetText) return null
   if (sType === 'custom-html' && !item.customHtml) return null
+  if (sType === 'web-radio' && !item.wrStationUuid) return null
   if ((sType === 'tomtom-eta' || sType === 'tomtom-eta-map') && !item.ttApiKey) return null
   if (sType === 'tomtom-traffic-map' && !item.ttmApiKey) return null
 
@@ -578,6 +595,14 @@ function serializeItem(item: BuilderItem): Record<string, any> | null {
     if (item.customHtml) opts.html = item.customHtml
     if (item.customHidden) opts.hidden = true
     if (Object.keys(opts).length) it.options = opts
+  }
+  else if (sType === 'web-radio') {
+    it.type = 'web-radio'
+    if (item.title) it.title = item.title
+    if (item.description) it.description = item.description
+    const opts: any = { stationUuid: item.wrStationUuid }
+    if (item.wrCountryCode && item.wrCountryCode !== 'NL') opts.countryCode = item.wrCountryCode
+    it.options = opts
   }
   else if (sType === 'tomtom-traffic-map') {
     it.type = 'tomtom-traffic-map'
@@ -698,6 +723,12 @@ export function stateToYaml(state: BuilderState): string {
 
   if (state.target) config.behaviour = { target: state.target }
   if (state.searchProvider) config.searchProvider = state.searchProvider
+  if (state.searchWebradio) {
+    config.searchWebradio = true
+    if (state.searchWebradioCountryCode && state.searchWebradioCountryCode !== 'NL') {
+      config.searchWebradioCountryCode = state.searchWebradioCountryCode.toUpperCase()
+    }
+  }
 
   // Layout
   const layout: any = {}

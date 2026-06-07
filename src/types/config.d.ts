@@ -122,6 +122,8 @@ export interface Config {
   layout?: Layout
   behaviour?: Behaviour
   searchProvider?: 'google' | 'duckduckgo'
+  searchWebradio?: boolean
+  searchWebradioCountryCode?: string
   tags: Tag[]
   services: ServicesGroup[]
   tabs?: Tab[]

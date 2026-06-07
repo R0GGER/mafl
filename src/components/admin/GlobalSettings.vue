@@ -44,6 +44,25 @@
             <option value="duckduckgo">DuckDuckGo</option>
           </select>
         </div>
+        <div class="sm:col-span-2">
+          <label class="admin-label flex items-center gap-2 cursor-pointer">
+            <input v-model="state.searchWebradio" type="checkbox" class="accent-brand-500">
+            Include Webradio stations in search results
+          </label>
+          <p class="mt-1 text-xs text-fg-dimmed">
+            Search online radio stations via Radio Browser when typing in the search bar.
+          </p>
+        </div>
+        <div v-if="state.searchWebradio">
+          <label class="admin-label">Webradio country code</label>
+          <input
+            v-model="state.searchWebradioCountryCode"
+            type="text"
+            class="admin-input w-full uppercase"
+            maxlength="2"
+            placeholder="NL"
+          >
+        </div>
         <div>
           <label class="admin-label">Logo Type</label>
           <select v-model="state.logoType" class="admin-input w-full">

@@ -14,7 +14,7 @@
 - **Secure** — No database, no tracking — your entire configuration lives in a single `config.yml` file.
 - **Single config file** — One YAML file is all you need. Easy to back up, version and migrate.
 - **Real-time** — Interactive service cards with live status information.
-- **Search** — Filter bookmarks instantly; fall back to Google or DuckDuckGo.
+- **Search** — Filter bookmarks instantly; optional live Webradio search; fall back to Google or DuckDuckGo.
 - **Tabs** — Organise services into switchable tabs with lock protection, visibility toggle and deep linking via URL hash.
 - **Admin Panel** — Built-in config editor at `/admin` with secure login.
 - **Backgrounds** — Full-screen background images with color overlay.
@@ -45,7 +45,7 @@
 | **Logo** | Fixed responsive logo in the top-left corner — image, text/letter or both combined |
 | **Background** | Full-screen background image with optional color overlay |
 | **Tabs** | Organise services into switchable tabs with icons, lock protection, visibility toggle and deep linking via URL hash. Tab bar auto-hides with a single tab. |
-| **Search** | Filter bookmarks across tabs; web search fallback (`/`, `Ctrl+K`) |
+| **Search** | Filter bookmarks across tabs; optional Webradio search (`searchWebradio`); web search fallback (`/`, `Ctrl+K`) |
 | **Favicon API** | Auto-fetch service icons by domain name with server-side proxy cache |
 | **Caching** | Server-side favicon proxy with disk cache (7 days per domain) and Service Worker offline support |
 | **Status position** | Align the status indicator to `left` or `right` |
@@ -286,13 +286,21 @@ tabs:
 
 ### Search
 
-A search bar filters bookmarks across all tabs and falls back to web search.
+A search bar filters bookmarks across all tabs, optionally includes live Webradio stations (Radio Browser), and falls back to web search.
 
 ```yaml
 searchProvider: google
+searchWebradio: true
+searchWebradioCountryCode: NL
 ```
 
-Values: `google`, `duckduckgo` — Default: `google`
+| Option | Default | Description |
+|--------|---------|-------------|
+| `searchProvider` | `google` | Web search engine: `google` or `duckduckgo` |
+| `searchWebradio` | `false` | Search live internet radio stations in the search bar |
+| `searchWebradioCountryCode` | `NL` | Country filter for Webradio search results |
+
+See [Configuration — Search](configuration.md#search) for details.
 
 | Key | Action |
 |-----|--------|

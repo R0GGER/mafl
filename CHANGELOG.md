@@ -1,6 +1,86 @@
 # Changelog
 
 
+## Search — Webradio option & dropdown layering
+
+### 🚀 Enhancements
+
+- **search:** Added `searchWebradio` global setting — enable Radio Browser station search in the search bar independently of whether a `web-radio` module is on the page
+- **search:** Added optional `searchWebradioCountryCode` (default `NL`) to filter live station results by country
+- **admin:** Config Builder checkbox **Include Webradio stations in search results** under Global Settings → Search Provider, with country code field when enabled
+
+### 🐛 Bug Fixes
+
+- **search:** Fixed search results dropdown rendering behind TomTom/Leaflet map widgets — dropdown is teleported to `document.body` with a high z-index; map widgets use an isolated stacking context
+
+### 📖 Documentation
+
+- **configuration.md:** Documented `searchWebradio` and `searchWebradioCountryCode` in the Search section
+- **modules.md:** Web Radio search bar behaviour moved to global search settings; clarified `countryCode` on web-radio items (admin station picker only)
+- **home.md**, **admin.md:** Updated search and Global Settings descriptions
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/types/config.d.ts` | Added `searchWebradio`, `searchWebradioCountryCode` |
+| `src/server/validations/config.ts` | Validation for new search settings |
+| `src/server/utils/config.ts` | Default `searchWebradio: false` |
+| `src/composables/useConfigBuilder.ts` | Import/export and builder state for search webradio settings |
+| `src/components/admin/GlobalSettings.vue` | Checkbox and country code field under Search Provider |
+| `src/components/SearchBar.vue` | Uses `$settings.searchWebradio`; Teleport + fixed positioning for dropdown |
+| `src/assets/style/tailwind.css` | `.leaflet-map-widget` isolation for map stacking |
+| `src/components/service/TomtomEtaMap.vue` | Map container class for stacking isolation |
+| `src/components/service/TomtomTrafficMap.vue` | Same map container class |
+| `docs/configuration.md` | Search section expanded |
+| `docs/modules.md` | Web Radio search behaviour updated |
+| `docs/home.md` | Search section updated |
+| `docs/admin.md` | Global Settings description updated |
+
+---
+
+## Web Radio — internet radio streaming
+
+### 🚀 Enhancements
+
+- **module: web-radio** — Stream internet radio stations in the browser via the Radio Browser API; each station is a separate grid item with the station logo as icon
+- **web-radio:** Click a station card to play; mini player bar at the bottom with play/pause, volume and stop
+- **search:** Optional live Radio Browser station search in the search bar via `searchWebradio: true` (see Search section in configuration.md)
+- **admin:** Web Radio module with station search picker — auto-fills title, icon URL and station UUID
+
+### 🐛 Bug Fixes
+
+- **web-radio:** Fixed "Audio player unavailable" when starting playback from grid cards or search bar — audio element is now shared globally instead of per-component
+- **web-radio:** Refresh stream URL from Radio Browser on failed playback; clearer error messages for network/unsupported streams
+
+### 📖 Documentation
+
+- **modules.md:** Web Radio section expanded (playback, mini player, search via `searchWebradio`, admin, icon, tab example, notes)
+- **configuration.md:** Web Radio config section; Search documents `searchWebradio` / `searchWebradioCountryCode`
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/server/utils/radioBrowser.ts` | Radio Browser API client with server failover and User-Agent |
+| `src/server/api/radio-browser/stations/search.get.ts` | Station search proxy |
+| `src/server/api/radio-browser/stations/[uuid].get.ts` | Single station lookup |
+| `src/server/api/radio-browser/click/[uuid].post.ts` | Click counter for Radio Browser |
+| `src/server/api/services/web-radio.ts` | Resolves `stationUuid` to stream metadata |
+| `src/types/services.d.ts` | Added `WebRadioService` interface |
+| `src/composables/useRadioBrowser.ts` | Client fetch helpers for Radio Browser API |
+| `src/composables/useWebRadioPlayer.ts` | Shared HTML5 audio player state and playback |
+| `src/components/service/WebRadio.vue` | Grid card module — click to play |
+| `src/components/service/web-radio/MiniPlayer.vue` | Fixed bottom mini player bar |
+| `src/components/SearchBar.vue` | Live radio search (when `searchWebradio` enabled) and play from web-radio bookmarks |
+| `src/components/Item.vue` | Registered `web-radio` module type |
+| `src/composables/useConfigBuilder.ts` | Parse/serialize admin fields for web-radio |
+| `src/components/admin/TabsEditor.vue` | Web Radio in Media module category |
+| `src/components/admin/ItemFields.vue` | Station search picker in admin |
+| `src/layouts/default.vue` | Mount mini player globally |
+| `docs/modules.md` | Web Radio module documentation |
+| `docs/configuration.md` | Web Radio config section and search bar notes |
+
 ## Grid Stack — vertical stacking in grid view
 
 ### 🚀 Enhancements

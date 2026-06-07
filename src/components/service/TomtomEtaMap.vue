@@ -15,6 +15,7 @@
     <div
       v-if="mapReady"
       ref="mapContainer"
+      class="leaflet-map-widget"
       :style="{ height: `${mapHeight}px`, width: '100%', borderRadius: '0.75rem', overflow: 'hidden' }"
     />
   </div>

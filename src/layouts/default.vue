@@ -59,6 +59,7 @@
       <slot />
     </div>
     <Footer />
+    <ServiceWebRadioMiniPlayer />
   </div>
 </template>
 

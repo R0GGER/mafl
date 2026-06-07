@@ -182,6 +182,21 @@ export interface TomtomEtaService extends Service {
   }
 }
 
+export interface WebRadioService extends Service {
+  options: {
+    stationUuid: string
+    countryCode?: string
+  }
+  server: {
+    stationuuid: string
+    name: string
+    urlResolved: string
+    favicon: string
+    tags: string
+    meta: string
+  }
+}
+
 export interface TomtomEtaMapService extends Service {
   options: {
     originLat?: number

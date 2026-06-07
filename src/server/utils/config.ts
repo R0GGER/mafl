@@ -79,6 +79,7 @@ export function getDefaultConfig(): CompleteConfig {
       target: '_blank',
     },
     searchProvider: 'google',
+    searchWebradio: false,
     tags: [],
     services: [],
     tabs: [],

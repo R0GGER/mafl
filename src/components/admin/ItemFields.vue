@@ -169,6 +169,57 @@
       </div>
     </template>
 
+    <!-- Web Radio -->
+    <template v-if="item.serviceType === 'web-radio'">
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="admin-label">Title</label>
+          <input v-model="item.title" type="text" class="admin-input w-full" placeholder="Radio 538">
+        </div>
+        <div>
+          <label class="admin-label">Country Code</label>
+          <input v-model="item.wrCountryCode" type="text" class="admin-input w-full" placeholder="NL" maxlength="2">
+        </div>
+      </div>
+      <div>
+        <label class="admin-label">Description</label>
+        <input v-model="item.description" type="text" class="admin-input w-full" placeholder="pop, hits">
+      </div>
+      <div>
+        <label class="admin-label">Search station</label>
+        <input
+          v-model="wrSearchQuery"
+          type="text"
+          class="admin-input w-full"
+          placeholder="Search Radio Browser (NL)..."
+          @input="debouncedWrSearch"
+        >
+      </div>
+      <div v-if="wrSearchLoading" class="text-[10px] text-fg-dimmed">Searching...</div>
+      <div v-else-if="wrSearchResults.length" class="max-h-40 overflow-y-auto border border-fg/10 rounded-lg">
+        <button
+          v-for="station in wrSearchResults"
+          :key="station.stationuuid"
+          type="button"
+          class="w-full flex items-center gap-2 px-2 py-1.5 text-left hover:bg-fg/5 transition-colors text-xs"
+          @click="selectWrStation(station)"
+        >
+          <img
+            v-if="station.favicon"
+            :src="station.favicon"
+            alt=""
+            class="w-5 h-5 rounded object-cover flex-shrink-0"
+          >
+          <Icon v-else name="mdi:radio" class="w-5 h-5 flex-shrink-0 text-fg-dimmed" />
+          <span class="truncate">{{ station.name }}</span>
+        </button>
+      </div>
+      <div>
+        <label class="admin-label">Station UUID</label>
+        <input v-model="item.wrStationUuid" type="text" class="admin-input w-full font-mono text-[11px]" placeholder="stationuuid">
+      </div>
+    </template>
+
     <!-- TomTom (all types) -->
     <template v-if="isTomtom">
       <div class="grid grid-cols-2 gap-2">
@@ -484,4 +535,54 @@ watch(() => props.item.iconType, (newType) => {
     props.item.iconFavicon = extractDomain(props.item.link)
   }
 })
+
+const wrSearchQuery = ref('')
+const wrSearchResults = ref<Array<{
+  stationuuid: string
+  name: string
+  favicon: string
+  tags: string
+  codec: string
+  bitrate: number
+}>>([])
+const wrSearchLoading = ref(false)
+
+const { searchStations } = useRadioBrowser()
+
+async function runWrSearch() {
+  if (props.item.serviceType !== 'web-radio' || wrSearchQuery.value.length < 2) {
+    wrSearchResults.value = []
+    return
+  }
+
+  wrSearchLoading.value = true
+  try {
+    wrSearchResults.value = await searchStations(
+      wrSearchQuery.value,
+      props.item.wrCountryCode || 'NL',
+      10,
+    )
+  }
+  catch {
+    wrSearchResults.value = []
+  }
+  finally {
+    wrSearchLoading.value = false
+  }
+}
+
+const debouncedWrSearch = useDebounceFn(runWrSearch, 300)
+
+function selectWrStation(station: typeof wrSearchResults.value[number]) {
+  props.item.wrStationUuid = station.stationuuid
+  props.item.title = station.name
+  if (station.favicon) {
+    props.item.iconType = 'url'
+    props.item.iconUrl = station.favicon
+  }
+  const meta = [station.codec, station.bitrate ? `${station.bitrate} kbps` : ''].filter(Boolean).join(' · ')
+  props.item.description = station.tags || meta
+  wrSearchResults.value = []
+  wrSearchQuery.value = ''
+}
 </script>

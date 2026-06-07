@@ -25,6 +25,7 @@ All settings live in a single `config.yml` file inside the data volume (`./mafl/
 - [Display Modes](#display-modes)
 - [Grid Span](#grid-span)
 - [Grid Stack](#grid-stack)
+- [Web Radio](#web-radio)
 - [Service Item Properties](#service-item-properties)
 - [Icon](#icon)
 - [Status Indicator](#status-indicator)
@@ -355,11 +356,19 @@ A search bar is displayed at the top of the page. It filters your bookmarks acro
 
 ```yaml
 searchProvider: google
+searchWebradio: true
+searchWebradioCountryCode: NL
 ```
 
-Values: `google`, `duckduckgo`
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `searchProvider` | `google` \| `duckduckgo` | `google` | Web search engine shown in the “Search the web” section |
+| `searchWebradio` | `boolean` | `false` | Include live internet radio stations from [Radio Browser](https://api.radio-browser.info/) in search results |
+| `searchWebradioCountryCode` | `string` | `NL` | ISO country code filter for Webradio search (only when `searchWebradio` is `true`) |
 
-Default: `google`
+When `searchWebradio` is enabled, results are grouped into **Bookmarks**, **Webradio** (live stations), and **Search the web**. Press Enter or click a station to play it in the mini player. Saved `web-radio` bookmarks also appear under **Bookmarks** and start playback instead of opening a link.
+
+This setting is **independent** of whether you have `web-radio` modules on the page. Enable it in the [Config Builder](https://config.maflplus.eu/) or [Admin Panel](admin.md) via **Include Webradio stations in search results** (Global Settings, next to Search Provider).
 
 ### Keyboard shortcuts
 
@@ -367,9 +376,11 @@ Default: `google`
 |-----|--------|
 | `/` | Focus the search bar |
 | `Ctrl+K` / `Cmd+K` | Focus the search bar |
-| `↑` / `↓` | Navigate results |
-| `Enter` | Open selected result |
+| `↑` / `↓` | Navigate results (bookmarks, radio, web search) |
+| `Enter` | Open bookmark, play radio station, or web search |
 | `Escape` | Clear / close |
+
+For streaming stations as dashboard widgets, see [Web Radio](modules.md#web-radio).
 
 ---
 
@@ -610,6 +621,49 @@ services:
 ```
 
 A stack item supports `span` to control how many columns it occupies. `stack` only works in `display: grid` mode. See [Modules — Grid Stack](modules.md#grid-stack) for more examples.
+
+---
+
+## Web Radio
+
+Add internet radio stations as grid items using `type: web-radio`. Each item is one station — place multiple items in a group to show several stations side by side. Use the station logo as the card icon via `icon.url`.
+
+Playback starts in the browser (no external player). A mini player bar appears at the bottom with play/pause, volume and stop. Stream metadata and URLs are fetched from the free Radio Browser API — no API key required.
+
+For full module documentation (admin station picker, troubleshooting), see [Modules — Web Radio](modules.md#web-radio). To search live stations from the homepage search bar, use [`searchWebradio`](#search) (global setting).
+
+```yaml
+services:
+  Radio:
+    display: grid
+    items:
+      - type: web-radio
+        title: Radio 538
+        description: pop, hits
+        icon:
+          url: https://www.radio538.nl/favicon.ico
+        options:
+          stationUuid: your-station-uuid-here
+          countryCode: NL
+
+      - type: web-radio
+        title: NPO Radio 2
+        icon:
+          url: https://www.nporadio2.nl/static/favicon/apple-touch-icon.png
+        options:
+          stationUuid: your-station-uuid-here
+```
+
+### Web radio options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `stationUuid` | `string` | *required* | Radio Browser station UUID (stable identifier) |
+| `countryCode` | `string` | `NL` | ISO country code; default filter when searching stations in the admin Config Builder |
+
+Web radio items support `title`, `description`, `icon`, and `span`. They do not use `link` or `target` — clicking plays the stream on the same page.
+
+Use the admin panel (**Media → Web Radio**) to search stations by name; title, icon URL and UUID are filled in automatically.
 
 ---
 
@@ -865,6 +919,8 @@ behaviour:
   target: _blank
 
 searchProvider: google
+searchWebradio: true
+searchWebradioCountryCode: NL
 
 layout:
   grid:

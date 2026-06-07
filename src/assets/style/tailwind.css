@@ -89,6 +89,11 @@ html.bluer {
         transform: rotate(45deg);
     }
 
+    /* Keep Leaflet tile panes from stacking above global overlays */
+    .leaflet-map-widget {
+        @apply relative z-0 isolate;
+    }
+
     /* YAML syntax highlighting – light mode */
     .yaml-hl { color: #24292e; }
     .yaml-hl .yl-key { color: #005cc5; }

@@ -16,6 +16,7 @@ MAFL+ includes several built-in service modules that can be added to your dashbo
   * [TomTom ETA](#tomtom-eta)
   * [TomTom ETA Map](#tomtom-eta-map)
   * [TomTom Traffic Map](#tomtom-traffic-map)
+* [Web Radio](#web-radio)
 * [Grid Span](#grid-span)
 * [Grid Stack](#grid-stack)
 * [Date Formats](#date-formats)
@@ -35,6 +36,7 @@ MAFL+ includes several built-in service modules that can be added to your dashbo
 | [TomTom ETA](#tomtom-eta) | `tomtom-eta` | Estimated time of arrival for a route using TomTom |
 | [TomTom ETA Map](#tomtom-eta-map) | `tomtom-eta-map` | Route map with traffic flow and incidents using TomTom |
 | [TomTom Traffic Map](#tomtom-traffic-map) | `tomtom-traffic-map` | Traffic map centered on a location without route |
+| [Web Radio](#web-radio) | `web-radio` | Internet radio station with on-site streaming via Radio Browser |
 
 All modules support common service properties like `span`, `icon` and `tags`. See [Configuration](configuration.md#service-item-properties) for the full list.
 
@@ -650,6 +652,97 @@ services:
     secrets:
       apiKey: your-tomtom-api-key
 ```
+
+---
+
+## Web Radio
+
+Stream internet radio stations directly in your browser using the free [Radio Browser API](https://api.radio-browser.info/). Each station is a **separate grid item** — add multiple stations in one group, each with the station logo as its icon.
+
+### Playback
+
+- **Grid card** — click a station to start or pause playback
+- **Mini player** — a fixed bar at the bottom of the page shows the current station with play/pause, volume and stop
+- **Search bar** — enable global [`searchWebradio`](configuration.md#search) to search live stations from the homepage (independent of grid widgets). Saved `web-radio` items also appear under **Bookmarks** and start playback instead of opening a link
+
+No API key required. Streams use HTML5 audio with `url_resolved` from Radio Browser (redirects and playlists resolved server-side).
+
+### Admin
+
+In the Config Builder, add **Media → Web Radio** to a grid group. Use the built-in station search to find a station by name — **title**, **icon URL** (station logo) and **station UUID** are filled in automatically. You can also paste a UUID manually.
+
+Enable **Include Webradio stations in search results** under Global Settings → Search Provider to add live Radio Browser search to the search bar.
+
+### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `stationUuid` | `string` | *required* | Radio Browser station UUID |
+| `countryCode` | `string` | `NL` | Country filter when searching stations in the admin Config Builder |
+
+### Icon
+
+Set the station logo with `icon.url` (recommended). If omitted, the API favicon is used at runtime; if that is also missing, a default radio icon is shown.
+
+```yaml
+icon:
+  url: https://www.radio538.nl/favicon.ico
+```
+
+### Examples
+
+#### Multiple stations in one group
+
+```yaml
+services:
+  Radio:
+    display: grid
+    items:
+      - type: web-radio
+        title: Radio 538
+        description: pop, hits
+        icon:
+          url: https://www.radio538.nl/favicon.ico
+        options:
+          stationUuid: your-station-uuid-here
+          countryCode: NL
+
+      - type: web-radio
+        title: NPO Radio 2
+        icon:
+          url: https://www.nporadio2.nl/static/favicon/apple-touch-icon.png
+        options:
+          stationUuid: your-station-uuid-here
+
+      - type: web-radio
+        title: Sky Radio
+        options:
+          stationUuid: your-station-uuid-here
+```
+
+#### Inside a tab
+
+```yaml
+tabs:
+  - name: Home
+    icon: mdi:home
+    services:
+      Radio:
+        display: grid
+        items:
+          - type: web-radio
+            title: Radio 538
+            options:
+              stationUuid: your-station-uuid-here
+```
+
+### Notes
+
+- Only one stream plays at a time; selecting another station switches playback
+- Stream URLs are refreshed from Radio Browser when playback starts
+- Some community-listed streams may be offline — try another station or search again
+- Search bar Webradio section requires `searchWebradio: true` in config (see [Search](configuration.md#search)); filter country via `searchWebradioCountryCode`
+- See also [Configuration — Web Radio](configuration.md#web-radio)
 
 ---
 
