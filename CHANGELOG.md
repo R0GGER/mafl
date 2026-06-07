@@ -1,6 +1,20 @@
 # Changelog
 
 
+## Web Radio — default volume
+
+### 🚀 Enhancements
+
+- **web-radio:** Default playback volume is 65% when starting a stream (was 100%); adjustable via the mini player slider during the session
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/composables/useWebRadioPlayer.ts` | Default `webRadioVolume` state set to `0.65` |
+
+---
+
 ## Search — Webradio option & dropdown layering
 
 ### 🚀 Enhancements

@@ -46,7 +46,7 @@ async function resolveStreamUrl(station: PlayableStation): Promise<string> {
 export function useWebRadioPlayer() {
   const current = useState<PlayableStation | null>('webRadioCurrent', () => null)
   const playing = useState('webRadioPlaying', () => false)
-  const volume = useState('webRadioVolume', () => 1)
+  const volume = useState('webRadioVolume', () => 0.65)
   const error = useState<string | null>('webRadioError', () => null)
   const loading = useState('webRadioLoading', () => false)
 
