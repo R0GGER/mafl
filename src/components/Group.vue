@@ -23,7 +23,14 @@
       </div>
       <div v-else :class="gridClasses">
         <template v-for="item in items" :key="item.id">
-          <div v-if="item.span && item.span > 1" :style="{ gridColumn: `span ${item.span}` }">
+          <div
+            v-if="item.stack && item.stack.length"
+            class="flex flex-col gap-2 lg:gap-4 xl:gap-6"
+            :style="item.span && item.span > 1 ? { gridColumn: `span ${item.span}` } : undefined"
+          >
+            <Item v-for="child in item.stack" :key="child.id" v-bind="child" />
+          </div>
+          <div v-else-if="item.span && item.span > 1" :style="{ gridColumn: `span ${item.span}` }">
             <Item v-bind="item" />
           </div>
           <Item v-else v-bind="item" />

@@ -54,7 +54,6 @@ const mapStyle = computed(() => props.options?.mapStyle || 'standard')
 const MAP_TILE_PATHS: Record<string, string> = {
   standard: 'basic/main',
   dark: 'basic/night',
-  satellite: 'hybrid/main',
 }
 
 function formattedArrival(data: any) {
@@ -121,17 +120,30 @@ async function initMap(routeData: any) {
   const bbox = routeData.bbox
   const routePoints = routeData.routePoints
 
+  const isSatellite = mapStyle.value === 'satellite'
+
   leafletMap = L.map(mapContainer.value, {
     zoomControl: true,
     attributionControl: false,
   })
 
-  const tilePath = MAP_TILE_PATHS[mapStyle.value] || 'basic/main'
-  const tileExt = mapStyle.value === 'satellite' ? 'jpg' : 'png'
-  L.tileLayer(
-    `https://api.tomtom.com/map/1/tile/${tilePath}/{z}/{x}/{y}.${tileExt}?key=${apiKey}&tileSize=256`,
-    { maxZoom: 18 },
-  ).addTo(leafletMap)
+  if (isSatellite) {
+    L.tileLayer(
+      `https://api.tomtom.com/map/1/tile/sat/main/{z}/{x}/{y}.jpg?key=${apiKey}&tileSize=256`,
+      { maxZoom: 19 },
+    ).addTo(leafletMap)
+    L.tileLayer(
+      `https://api.tomtom.com/map/1/tile/hybrid/main/{z}/{x}/{y}.png?key=${apiKey}&tileSize=256`,
+      { maxZoom: 18, opacity: 0.9 },
+    ).addTo(leafletMap)
+  }
+  else {
+    const tilePath = MAP_TILE_PATHS[mapStyle.value] || 'basic/main'
+    L.tileLayer(
+      `https://api.tomtom.com/map/1/tile/${tilePath}/{z}/{x}/{y}.png?key=${apiKey}&tileSize=256`,
+      { maxZoom: 18 },
+    ).addTo(leafletMap)
+  }
 
   if (showTrafficFlow.value) {
     L.tileLayer(

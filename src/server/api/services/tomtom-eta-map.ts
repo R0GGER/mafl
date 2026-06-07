@@ -24,7 +24,7 @@ interface TomTomRouteResponse {
 
 const cachedGeocode = defineCachedFunction(async (address: string, apiKey: string) => {
   const response = await $fetch<TomTomGeoResult>(
-    `https://api.tomtom.com/search/2/geocode/${encodeURIComponent(address)}.json?key=${apiKey}&limit=1`,
+    `https://api.tomtom.com/search/2/search/${encodeURIComponent(address)}.json?key=${apiKey}&limit=1&typeahead=false`,
   )
   if (!response.results?.length) {
     throw createError({ statusCode: 400, statusMessage: `Could not geocode address: ${address}` })
@@ -96,9 +96,12 @@ export default defineEventHandler(async (event) => {
 
   const route = await cachedRouteWithGeometry(origin.lat, origin.lon, dest.lat, dest.lon, travelMode, apiKey)
 
+  const originLabel = options.originAddress || `${origin.lat.toFixed(2)},${origin.lon.toFixed(2)}`
+  const destLabel = options.destAddress || `${dest.lat.toFixed(2)},${dest.lon.toFixed(2)}`
+
   return returnServiceWithData(service, {
     ...route,
-    routeName: options.routeName || `${origin.lat.toFixed(2)},${origin.lon.toFixed(2)} → ${dest.lat.toFixed(2)},${dest.lon.toFixed(2)}`,
+    routeName: options.routeName || `${originLabel} → ${destLabel}`,
     apiKey,
   })
 })

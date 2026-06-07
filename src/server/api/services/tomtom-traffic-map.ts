@@ -9,7 +9,7 @@ interface TomTomGeoResult {
 
 const cachedGeocode = defineCachedFunction(async (address: string, apiKey: string) => {
   const response = await $fetch<TomTomGeoResult>(
-    `https://api.tomtom.com/search/2/geocode/${encodeURIComponent(address)}.json?key=${apiKey}&limit=1`,
+    `https://api.tomtom.com/search/2/search/${encodeURIComponent(address)}.json?key=${apiKey}&limit=1&typeahead=false`,
   )
   if (!response.results?.length) {
     throw createError({ statusCode: 400, statusMessage: `Could not geocode address: ${address}` })

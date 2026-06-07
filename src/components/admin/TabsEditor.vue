@@ -166,25 +166,83 @@
                     :key="ii"
                     class="border border-fg/10 rounded p-2 bg-fg/[0.03] text-xs"
                   >
-                    <!-- Item summary row -->
-                    <div class="flex items-center gap-1 mb-1">
-                      <button class="text-fg-dimmed hover:text-fg px-1" title="Move up" @click="moveItem(ti, gi, ii, -1)">&#9650;</button>
-                      <button class="text-fg-dimmed hover:text-fg px-1" title="Move down" @click="moveItem(ti, gi, ii, 1)">&#9660;</button>
-                      <span v-if="item.serviceType !== 'bookmark'" class="text-[10px] px-1.5 py-0.5 rounded bg-brand-500/20 text-brand-500">
-                        {{ typeLabel(item.serviceType) }}
-                      </span>
-                      <span class="flex-1 font-medium text-fg truncate">{{ itemTitle(item) }}</span>
-                      <button class="text-brand-500 hover:text-brand-400 px-1 text-xs" @click="toggleEdit(ti, gi, ii)">
-                        {{ isEditing(ti, gi, ii) ? 'close' : 'edit' }}
-                      </button>
-                      <button v-if="!tab.locked" class="text-red-400 hover:text-red-300 px-1" @click="removeItem(ti, gi, ii)">&times;</button>
-                    </div>
+                    <!-- Stack item -->
+                    <template v-if="item.stack">
+                      <div class="flex items-center gap-1 mb-1">
+                        <button class="text-fg-dimmed hover:text-fg px-1" title="Move up" @click="moveItem(ti, gi, ii, -1)">&#9650;</button>
+                        <button class="text-fg-dimmed hover:text-fg px-1" title="Move down" @click="moveItem(ti, gi, ii, 1)">&#9660;</button>
+                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-400">Stack</span>
+                        <span v-if="item.span && parseInt(item.span) > 1" class="text-[10px] px-1.5 py-0.5 rounded bg-fg/10 text-fg-dimmed">span {{ item.span }}</span>
+                        <span class="flex-1 font-medium text-fg truncate">{{ item.stack.length }} {{ item.stack.length === 1 ? 'item' : 'items' }}</span>
+                        <button class="text-brand-500 hover:text-brand-400 px-1 text-xs" @click="toggleEdit(ti, gi, ii)">
+                          {{ isEditing(ti, gi, ii) ? 'close' : 'edit' }}
+                        </button>
+                        <button v-if="!tab.locked" class="text-red-400 hover:text-red-300 px-1" @click="removeItem(ti, gi, ii)">&times;</button>
+                      </div>
+                      <!-- Stack children (always visible) -->
+                      <div class="ml-4 mt-1 space-y-1 border-l-2 border-violet-500/30 pl-2">
+                        <div
+                          v-for="(child, ci) in item.stack"
+                          :key="ci"
+                          class="border border-fg/10 rounded p-2 bg-fg/[0.03]"
+                        >
+                          <div class="flex items-center gap-1">
+                            <button class="text-fg-dimmed hover:text-fg px-0.5" title="Move up" @click="moveStackChild(ti, gi, ii, ci, -1)">&#9650;</button>
+                            <button class="text-fg-dimmed hover:text-fg px-0.5" title="Move down" @click="moveStackChild(ti, gi, ii, ci, 1)">&#9660;</button>
+                            <span v-if="child.serviceType !== 'bookmark'" class="text-[10px] px-1.5 py-0.5 rounded bg-brand-500/20 text-brand-500">
+                              {{ typeLabel(child.serviceType) }}
+                            </span>
+                            <span class="flex-1 font-medium text-fg truncate">{{ itemTitle(child) }}</span>
+                            <button class="text-brand-500 hover:text-brand-400 px-1 text-xs" @click="toggleEdit(ti, gi, ii, ci)">
+                              {{ isEditing(ti, gi, ii, ci) ? 'close' : 'edit' }}
+                            </button>
+                            <button v-if="!tab.locked" class="text-red-400 hover:text-red-300 px-1" @click="removeStackChild(ti, gi, ii, ci)">&times;</button>
+                          </div>
+                          <div v-if="isEditing(ti, gi, ii, ci)" class="mt-2 space-y-2">
+                            <AdminItemFields :item="child" :tab-index="ti" :group-index="gi" :item-index="ii" />
+                          </div>
+                        </div>
 
-                    <!-- Expanded edit fields -->
-                    <div v-if="isEditing(ti, gi, ii)" class="mt-2 space-y-2">
-                      <!-- Module-specific fields -->
-                      <AdminItemFields :item="item" :tab-index="ti" :group-index="gi" :item-index="ii" />
-                    </div>
+                        <!-- Add child to stack -->
+                        <div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+                          <button
+                            class="text-[11px] text-brand-500 hover:text-brand-400"
+                            @click="addStackChild(ti, gi, ii, 'bookmark')"
+                          >+ Bookmark</button>
+                          <span class="text-fg-dimmed/30">|</span>
+                          <button
+                            v-for="mod in STACK_MODULES"
+                            :key="mod.type"
+                            class="text-[11px] text-violet-400 hover:text-violet-300"
+                            @click="addStackChild(ti, gi, ii, mod.type)"
+                          >+ {{ mod.label }}</button>
+                        </div>
+                      </div>
+                      <!-- Stack span editor -->
+                      <div v-if="isEditing(ti, gi, ii)" class="mt-2 ml-4">
+                        <label class="admin-label">Stack span</label>
+                        <input v-model="item.span" type="text" class="admin-input w-20" placeholder="1">
+                      </div>
+                    </template>
+
+                    <!-- Regular item -->
+                    <template v-else>
+                      <div class="flex items-center gap-1 mb-1">
+                        <button class="text-fg-dimmed hover:text-fg px-1" title="Move up" @click="moveItem(ti, gi, ii, -1)">&#9650;</button>
+                        <button class="text-fg-dimmed hover:text-fg px-1" title="Move down" @click="moveItem(ti, gi, ii, 1)">&#9660;</button>
+                        <span v-if="item.serviceType !== 'bookmark'" class="text-[10px] px-1.5 py-0.5 rounded bg-brand-500/20 text-brand-500">
+                          {{ typeLabel(item.serviceType) }}
+                        </span>
+                        <span class="flex-1 font-medium text-fg truncate">{{ itemTitle(item) }}</span>
+                        <button class="text-brand-500 hover:text-brand-400 px-1 text-xs" @click="toggleEdit(ti, gi, ii)">
+                          {{ isEditing(ti, gi, ii) ? 'close' : 'edit' }}
+                        </button>
+                        <button v-if="!tab.locked" class="text-red-400 hover:text-red-300 px-1" @click="removeItem(ti, gi, ii)">&times;</button>
+                      </div>
+                      <div v-if="isEditing(ti, gi, ii)" class="mt-2 space-y-2">
+                        <AdminItemFields :item="item" :tab-index="ti" :group-index="gi" :item-index="ii" />
+                      </div>
+                    </template>
                   </div>
                 </div>
 
@@ -216,6 +274,15 @@
                             class="text-[11px] px-2 py-1 rounded border border-brand-500/30 text-brand-500 hover:bg-brand-500/10 hover:border-brand-500/50 transition-colors text-center truncate"
                             @click="addItem(ti, gi, mod.type)"
                           >+ {{ mod.label }}</button>
+                        </div>
+                      </div>
+                      <div>
+                        <div class="text-[9px] uppercase tracking-wider text-fg-dimmed/60 font-medium mb-1">Layout</div>
+                        <div class="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
+                          <button
+                            class="text-[11px] px-2 py-1 rounded border border-violet-500/30 text-violet-400 hover:bg-violet-500/10 hover:border-violet-500/50 transition-colors text-center"
+                            @click="addStack(ti, gi)"
+                          >+ Stack</button>
                         </div>
                       </div>
                     </div>
@@ -258,6 +325,10 @@ defineProps<{
   removeItem: (tabIndex: number, groupIndex: number, itemIndex: number) => void
   moveItem: (tabIndex: number, groupIndex: number, itemIndex: number, direction: -1 | 1) => void
   moveGroup: (tabIndex: number, groupIndex: number, direction: -1 | 1) => void
+  addStack: (tabIndex: number, groupIndex: number) => void
+  addStackChild: (tabIndex: number, groupIndex: number, itemIndex: number, serviceType?: ServiceType) => void
+  removeStackChild: (tabIndex: number, groupIndex: number, itemIndex: number, childIndex: number) => void
+  moveStackChild: (tabIndex: number, groupIndex: number, itemIndex: number, childIndex: number, direction: -1 | 1) => void
 }>()
 
 const open = ref(true)
@@ -315,16 +386,16 @@ function toggleModulePanel(ti: number, gi: number) {
   }
 }
 
-function editKey(ti: number, gi: number, ii: number) {
-  return `${ti}-${gi}-${ii}`
+function editKey(ti: number, gi: number, ii: number, ci?: number) {
+  return ci != null ? `${ti}-${gi}-${ii}-${ci}` : `${ti}-${gi}-${ii}`
 }
 
-function isEditing(ti: number, gi: number, ii: number) {
-  return openEdits.value.has(editKey(ti, gi, ii))
+function isEditing(ti: number, gi: number, ii: number, ci?: number) {
+  return openEdits.value.has(editKey(ti, gi, ii, ci))
 }
 
-function toggleEdit(ti: number, gi: number, ii: number) {
-  const key = editKey(ti, gi, ii)
+function toggleEdit(ti: number, gi: number, ii: number, ci?: number) {
+  const key = editKey(ti, gi, ii, ci)
   if (openEdits.value.has(key)) {
     openEdits.value.delete(key)
   }
@@ -372,11 +443,19 @@ const MODULE_CATEGORIES: ModuleCategory[] = [
   {
     category: 'Navigation',
     modules: [
-      { type: 'tomtom-eta', label: 'TomTom ETA' },
-      { type: 'tomtom-eta-map', label: 'TomTom Route' },
-      { type: 'tomtom-traffic-map', label: 'TomTom Traffic' },
+      { type: 'tomtom-eta', label: 'TomTom' },
     ],
   },
+]
+
+const STACK_MODULES: ModuleOption[] = [
+  { type: 'time', label: 'Time' },
+  { type: 'ip-api', label: 'IP API' },
+  { type: 'greeting', label: 'Greeting' },
+  { type: 'openweathermap', label: 'Weather' },
+  { type: 'datetime-weather', label: 'DT Weather' },
+  { type: 'custom-html', label: 'HTML' },
+  { type: 'tomtom-eta', label: 'TomTom ETA' },
 ]
 
 const TYPE_LABELS: Record<string, string> = {
@@ -396,6 +475,7 @@ function typeLabel(t: string) {
 }
 
 function itemTitle(item: BuilderItem) {
+  if (item.stack && item.stack.length) return `${item.stack.length} items`
   if (item.title) return item.title
   if (item.serviceType === 'greeting' && item.greetText) return item.greetText
   if (item.serviceType !== 'bookmark') return typeLabel(item.serviceType) || item.serviceType

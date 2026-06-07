@@ -1,6 +1,78 @@
 # Changelog
 
 
+## Grid Stack — vertical stacking in grid view
+
+### 🚀 Enhancements
+
+- **layout: stack** — Multiple modules can now be stacked vertically inside a single grid cell using the `stack` property; children are rendered top-to-bottom with the same gap as regular grid items
+- **layout: stack** — Stack items support `span` to control how many columns the stack occupies, just like regular items
+- **admin:** Stack items are fully manageable in the Config Builder — create stacks via the "+ Stack" button in the Modules panel, add/remove/reorder children, and edit each child's settings
+- **admin:** Stacks are visually distinct with a purple "Stack" badge and indented children with a violet left border
+
+### 📖 Documentation
+
+- **modules.md:** Added Grid Stack section with usage explanation, two YAML examples (ETA + clock next to a map, stack with span) and notes on grid-only behavior
+- **configuration.md:** Added Grid Stack section with YAML example and cross-reference to modules.md; added `stack` to the Service Item Properties table
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/types/services.d.ts` | Added `stack?: Service[]` to the `Service` interface |
+| `src/server/validations/service.ts` | Added recursive `stack` field to Zod schema using `z.lazy()` |
+| `src/server/utils/config.ts` | `determineService()` recursively assigns UUIDs to stack children; `extractServicesFromConfig()` flattens stacked children into the service map |
+| `src/components/Group.vue` | Grid rendering detects `item.stack` and renders children in a `flex-col` container with responsive gap; supports `span` on the stack wrapper |
+| `src/composables/useConfigBuilder.ts` | Added `stack?: BuilderItem[]` to `BuilderItem`; `parseRawItem()` and `serializeItem()` handle stack recursively; added `addStack()`, `addStackChild()`, `removeStackChild()`, `moveStackChild()` functions |
+| `src/components/admin/TabsEditor.vue` | Stack items render with purple badge, indented children with move/edit/delete buttons, inline add-child buttons (Bookmark + module types), and "+ Stack" button in the Modules panel under Layout category |
+| `src/pages/admin/index.vue` | Destructured and passed stack management functions to `AdminTabsEditor` |
+| `docs/modules.md` | Added Grid Stack section with examples |
+| `docs/configuration.md` | Added Grid Stack section and `stack` property to Service Item Properties table |
+
+---
+
+## TomTom UX improvements
+
+### 🐛 Bug Fixes
+
+- **tomtom:** Fixed geocoding failing for free-form addresses like "Rubenslaan 1, Bilthoven" — switched from TomTom's structured geocoding endpoint (`/search/2/geocode/`) to the fuzzy search endpoint (`/search/2/search/`) which accepts free-form text, street addresses, place names and POIs
+- **tomtom:** Route name now uses the configured address text instead of raw coordinates as fallback — e.g. "Amsterdam → Parijs" instead of "52.37,4.89 → 48.86,2.35"; coordinates are only shown when no address is provided
+
+### 💅 Improvements
+
+- **admin:** Consolidated three separate TomTom module buttons ("+ TomTom ETA", "+ TomTom Route", "+ TomTom Traffic") into a single "+ TomTom" button — the specific module type is selected via a dropdown inside the configuration panel
+- **admin:** TomTom configuration now shows a "TomTom Module" dropdown at the top with three options: ETA (arrival time), Route Map, and Traffic Map
+- **admin:** Shared fields (API key, map style, map height, traffic flow, incidents) are synced when switching between TomTom types — no need to re-enter them
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/server/api/services/tomtom-eta.ts` | Switched to `/search/2/search/` for geocoding; route name fallback uses address text instead of coordinates |
+| `src/server/api/services/tomtom-eta-map.ts` | Same geocoding and route name fix |
+| `src/server/api/services/tomtom-traffic-map.ts` | Same geocoding fix |
+| `src/components/admin/TabsEditor.vue` | Replaced three TomTom buttons with single "+ TomTom" entry in Navigation category |
+| `src/components/admin/ItemFields.vue` | Added TomTom Module type dropdown; unified TomTom fields with computed proxies for shared values |
+
+---
+
+## Fix TomTom satellite map style
+
+### 🐛 Bug Fixes
+
+- **tomtom:** Fixed satellite map style showing a blank/basic map instead of satellite imagery — the `hybrid/main` tile layer is only a transparent overlay with roads and labels, not actual satellite photos; satellite mode now loads `sat/main` (real satellite imagery from TomTom/Maxar) as the base layer with `hybrid/main` on top for road labels
+- **tomtom-traffic-map:** Satellite style now correctly displays satellite background with traffic flow and incident overlays
+- **tomtom-eta-map:** Satellite style now correctly displays satellite background with route polyline and traffic overlays
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/components/service/TomtomTrafficMap.vue` | Satellite mode loads `sat/main` (jpg) base + `hybrid/main` (png) overlay instead of only `hybrid/main` |
+| `src/components/service/TomtomEtaMap.vue` | Same satellite tile fix applied |
+
+---
+
 ## Fix grid alignment next to large modules
 
 ### 🐛 Bug Fixes

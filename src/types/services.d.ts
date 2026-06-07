@@ -27,6 +27,7 @@ export interface Service {
   status?: ServiceStatus
   tags: Tag['name'][] | Tag[]
   span?: number
+  stack?: Service[]
   options?: Record<string, any>
   secrets?: Record<string, any>
   server?: Record<string, any>

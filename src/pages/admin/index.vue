@@ -120,6 +120,10 @@
           :remove-item="removeItem"
           :move-item="moveItem"
           :move-group="moveGroup"
+          :add-stack="addStack"
+          :add-stack-child="addStackChild"
+          :remove-stack-child="removeStackChild"
+          :move-stack-child="moveStackChild"
         />
       </div>
 
@@ -223,6 +227,10 @@ const {
   removeItem,
   moveItem,
   moveGroup,
+  addStack,
+  addStackChild,
+  removeStackChild,
+  moveStackChild,
 } = useConfigBuilder()
 
 function freshYaml() { return stateToYaml(state) }

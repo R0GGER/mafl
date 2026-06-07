@@ -21,7 +21,7 @@ export const tagSchema = z.object({
   color: z.string(),
 })
 
-export const serviceSchema = z.object({
+export const serviceSchema: z.ZodType = z.object({
   title: z.string().nullish().optional(),
   description: z.string().nullish().optional(),
   link: z.string().nullish().optional(),
@@ -30,6 +30,7 @@ export const serviceSchema = z.object({
   status: statusSchema.optional(),
   type: z.string().optional(),
   span: z.number().optional(),
+  stack: z.lazy(() => z.array(serviceSchema)).optional(),
   options: z.record(z.any()).optional(),
   secrets: z.record(z.any()).optional(),
 })

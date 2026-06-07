@@ -169,126 +169,111 @@
       </div>
     </template>
 
-    <!-- TomTom Traffic Map -->
-    <template v-if="item.serviceType === 'tomtom-traffic-map'">
+    <!-- TomTom (all types) -->
+    <template v-if="isTomtom">
       <div class="grid grid-cols-2 gap-2">
         <div>
-          <label class="admin-label">Address / Place</label>
-          <input v-model="item.ttmAddress" type="text" class="admin-input w-full" placeholder="Amsterdam">
-        </div>
-        <div>
-          <label class="admin-label">API Key</label>
-          <input v-model="item.ttmApiKey" type="text" class="admin-input w-full" placeholder="your-tomtom-api-key">
-        </div>
-      </div>
-      <div class="grid grid-cols-3 gap-2">
-        <div>
-          <label class="admin-label">Latitude</label>
-          <input v-model="item.ttmLat" type="text" class="admin-input w-full" placeholder="52.3676">
-        </div>
-        <div>
-          <label class="admin-label">Longitude</label>
-          <input v-model="item.ttmLon" type="text" class="admin-input w-full" placeholder="4.9041">
-        </div>
-        <div>
-          <label class="admin-label">Zoom (1-18)</label>
-          <input v-model="item.ttmZoom" type="number" min="1" max="18" class="admin-input w-full" placeholder="12">
-        </div>
-      </div>
-      <div class="mt-1 text-[10px] text-fg-dimmed">Use address OR coordinates. Coordinates take priority if both are set.</div>
-      <div class="grid grid-cols-3 gap-2">
-        <div>
-          <label class="admin-label">Map Style</label>
-          <select v-model="item.ttmMapStyle" class="admin-input w-full">
-            <option value="standard">Standard</option>
-            <option value="dark">Dark</option>
-            <option value="satellite">Satellite</option>
+          <label class="admin-label">TomTom Module</label>
+          <select v-model="item.serviceType" class="admin-input w-full">
+            <option value="tomtom-eta">ETA (arrival time)</option>
+            <option value="tomtom-eta-map">Route Map</option>
+            <option value="tomtom-traffic-map">Traffic Map</option>
           </select>
         </div>
         <div>
-          <label class="admin-label">Map Height (px)</label>
-          <input v-model="item.ttmMapHeight" type="number" min="150" max="800" class="admin-input w-full" placeholder="300">
-        </div>
-        <div />
-      </div>
-      <div class="grid grid-cols-2 gap-2">
-        <div class="flex items-end">
-          <label class="inline-flex items-center gap-1 text-fg-dimmed admin-input cursor-pointer">
-            <input v-model="item.ttmShowTrafficFlow" type="checkbox" style="accent-color: #69a870"> Traffic Flow
-          </label>
-        </div>
-        <div class="flex items-end">
-          <label class="inline-flex items-center gap-1 text-fg-dimmed admin-input cursor-pointer">
-            <input v-model="item.ttmShowIncidents" type="checkbox" style="accent-color: #69a870"> Incidents
-          </label>
+          <label class="admin-label">API Key</label>
+          <input v-model="tomtomApiKey" type="text" class="admin-input w-full" placeholder="your-tomtom-api-key">
         </div>
       </div>
-    </template>
 
-    <!-- TomTom ETA / TomTom ETA Map -->
-    <template v-if="item.serviceType === 'tomtom-eta' || item.serviceType === 'tomtom-eta-map'">
-      <div class="grid grid-cols-2 gap-2">
-        <div>
-          <label class="admin-label">Origin Address</label>
-          <input v-model="item.ttOriginAddress" type="text" class="admin-input w-full" placeholder="Amsterdam">
+      <!-- ETA / Route Map fields -->
+      <template v-if="item.serviceType !== 'tomtom-traffic-map'">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="admin-label">Origin Address</label>
+            <input v-model="item.ttOriginAddress" type="text" class="admin-input w-full" placeholder="Amsterdam">
+          </div>
+          <div>
+            <label class="admin-label">Dest Address</label>
+            <input v-model="item.ttDestAddress" type="text" class="admin-input w-full" placeholder="Paris">
+          </div>
         </div>
-        <div>
-          <label class="admin-label">Dest Address</label>
-          <input v-model="item.ttDestAddress" type="text" class="admin-input w-full" placeholder="Paris">
+        <div class="grid grid-cols-4 gap-2">
+          <div>
+            <label class="admin-label">Origin Lat</label>
+            <input v-model="item.ttOriginLat" type="text" class="admin-input w-full" placeholder="52.3791">
+          </div>
+          <div>
+            <label class="admin-label">Origin Lon</label>
+            <input v-model="item.ttOriginLon" type="text" class="admin-input w-full" placeholder="4.9003">
+          </div>
+          <div>
+            <label class="admin-label">Dest Lat</label>
+            <input v-model="item.ttDestLat" type="text" class="admin-input w-full" placeholder="48.8566">
+          </div>
+          <div>
+            <label class="admin-label">Dest Lon</label>
+            <input v-model="item.ttDestLon" type="text" class="admin-input w-full" placeholder="2.3522">
+          </div>
         </div>
-      </div>
-      <div class="grid grid-cols-4 gap-2">
-        <div>
-          <label class="admin-label">Origin Lat</label>
-          <input v-model="item.ttOriginLat" type="text" class="admin-input w-full" placeholder="52.3791">
+        <div class="mt-1 text-[10px] text-fg-dimmed">Use address OR coordinates. Coordinates take priority if both are set.</div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="admin-label">Route Name</label>
+            <input v-model="item.ttRouteName" type="text" class="admin-input w-full" placeholder="Home - Work">
+          </div>
+          <div>
+            <label class="admin-label">Travel Mode</label>
+            <select v-model="item.ttTravelMode" class="admin-input w-full">
+              <option value="car">car</option>
+              <option value="truck">truck</option>
+              <option value="bicycle">bicycle</option>
+              <option value="pedestrian">pedestrian</option>
+            </select>
+          </div>
         </div>
-        <div>
-          <label class="admin-label">Origin Lon</label>
-          <input v-model="item.ttOriginLon" type="text" class="admin-input w-full" placeholder="4.9003">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="admin-label">Time Format</label>
+            <select v-model="item.ttTimeFormat" class="admin-input w-full">
+              <option value="24h">24h</option>
+              <option value="12h">12h</option>
+            </select>
+          </div>
         </div>
-        <div>
-          <label class="admin-label">Dest Lat</label>
-          <input v-model="item.ttDestLat" type="text" class="admin-input w-full" placeholder="48.8566">
+      </template>
+
+      <!-- Traffic Map fields -->
+      <template v-if="item.serviceType === 'tomtom-traffic-map'">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="admin-label">Address / Place</label>
+            <input v-model="item.ttmAddress" type="text" class="admin-input w-full" placeholder="Amsterdam">
+          </div>
+          <div>
+            <label class="admin-label">Zoom (1-18)</label>
+            <input v-model="item.ttmZoom" type="number" min="1" max="18" class="admin-input w-full" placeholder="12">
+          </div>
         </div>
-        <div>
-          <label class="admin-label">Dest Lon</label>
-          <input v-model="item.ttDestLon" type="text" class="admin-input w-full" placeholder="2.3522">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="admin-label">Latitude</label>
+            <input v-model="item.ttmLat" type="text" class="admin-input w-full" placeholder="52.3676">
+          </div>
+          <div>
+            <label class="admin-label">Longitude</label>
+            <input v-model="item.ttmLon" type="text" class="admin-input w-full" placeholder="4.9041">
+          </div>
         </div>
-      </div>
-      <div class="mt-1 text-[10px] text-fg-dimmed">Use address OR coordinates. Coordinates take priority if both are set.</div>
-      <div class="grid grid-cols-2 gap-2">
-        <div>
-          <label class="admin-label">Route Name</label>
-          <input v-model="item.ttRouteName" type="text" class="admin-input w-full" placeholder="Home - Work">
-        </div>
-        <div>
-          <label class="admin-label">API Key</label>
-          <input v-model="item.ttApiKey" type="text" class="admin-input w-full" placeholder="your-tomtom-api-key">
-        </div>
-      </div>
-      <div class="grid grid-cols-2 gap-2">
-        <div>
-          <label class="admin-label">Travel Mode</label>
-          <select v-model="item.ttTravelMode" class="admin-input w-full">
-            <option value="car">car</option>
-            <option value="truck">truck</option>
-            <option value="bicycle">bicycle</option>
-            <option value="pedestrian">pedestrian</option>
-          </select>
-        </div>
-        <div>
-          <label class="admin-label">Time Format</label>
-          <select v-model="item.ttTimeFormat" class="admin-input w-full">
-            <option value="24h">24h</option>
-            <option value="12h">12h</option>
-          </select>
-        </div>
-      </div>
-      <template v-if="item.serviceType === 'tomtom-eta-map'">
+        <div class="mt-1 text-[10px] text-fg-dimmed">Use address OR coordinates. Coordinates take priority if both are set.</div>
+      </template>
+
+      <!-- Map options (Route Map & Traffic Map) -->
+      <template v-if="item.serviceType !== 'tomtom-eta'">
         <div class="grid grid-cols-3 gap-2">
           <div>
             <label class="admin-label">Map Style</label>
-            <select v-model="item.ttMapStyle" class="admin-input w-full">
+            <select v-model="tomtomMapStyle" class="admin-input w-full">
               <option value="standard">Standard</option>
               <option value="dark">Dark</option>
               <option value="satellite">Satellite</option>
@@ -296,19 +281,19 @@
           </div>
           <div>
             <label class="admin-label">Map Height (px)</label>
-            <input v-model="item.ttMapHeight" type="number" min="150" max="800" class="admin-input w-full" placeholder="300">
+            <input v-model="tomtomMapHeight" type="number" min="150" max="800" class="admin-input w-full" placeholder="300">
           </div>
           <div />
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div class="flex items-end">
             <label class="inline-flex items-center gap-1 text-fg-dimmed admin-input cursor-pointer">
-              <input v-model="item.ttShowTrafficFlow" type="checkbox" style="accent-color: #69a870"> Traffic Flow
+              <input v-model="tomtomShowTrafficFlow" type="checkbox" style="accent-color: #69a870"> Traffic Flow
             </label>
           </div>
           <div class="flex items-end">
             <label class="inline-flex items-center gap-1 text-fg-dimmed admin-input cursor-pointer">
-              <input v-model="item.ttShowIncidents" type="checkbox" style="accent-color: #69a870"> Incidents
+              <input v-model="tomtomShowIncidents" type="checkbox" style="accent-color: #69a870"> Incidents
             </label>
           </div>
         </div>
@@ -446,6 +431,38 @@ const props = defineProps<{
 }>()
 
 const dateFormats = ['short', 'medium', 'long', 'eu', 'compact', 'short-eu', 'iso']
+
+const isTomtom = computed(() =>
+  ['tomtom-eta', 'tomtom-eta-map', 'tomtom-traffic-map'].includes(props.item.serviceType),
+)
+
+const tomtomApiKey = computed({
+  get: () => props.item.serviceType === 'tomtom-traffic-map' ? props.item.ttmApiKey : props.item.ttApiKey,
+  set: (v: string) => {
+    props.item.ttApiKey = v
+    props.item.ttmApiKey = v
+  },
+})
+
+const tomtomMapStyle = computed({
+  get: () => props.item.serviceType === 'tomtom-traffic-map' ? props.item.ttmMapStyle : props.item.ttMapStyle,
+  set: (v: string) => { props.item.ttMapStyle = v; props.item.ttmMapStyle = v },
+})
+
+const tomtomMapHeight = computed({
+  get: () => props.item.serviceType === 'tomtom-traffic-map' ? props.item.ttmMapHeight : props.item.ttMapHeight,
+  set: (v: string) => { props.item.ttMapHeight = v; props.item.ttmMapHeight = v },
+})
+
+const tomtomShowTrafficFlow = computed({
+  get: () => props.item.serviceType === 'tomtom-traffic-map' ? props.item.ttmShowTrafficFlow : props.item.ttShowTrafficFlow,
+  set: (v: boolean) => { props.item.ttShowTrafficFlow = v; props.item.ttmShowTrafficFlow = v },
+})
+
+const tomtomShowIncidents = computed({
+  get: () => props.item.serviceType === 'tomtom-traffic-map' ? props.item.ttmShowIncidents : props.item.ttShowIncidents,
+  set: (v: boolean) => { props.item.ttShowIncidents = v; props.item.ttmShowIncidents = v },
+})
 
 function extractDomain(url: string): string {
   try {

@@ -74,6 +74,7 @@ export interface BuilderItem {
   ttmShowIncidents: boolean
   ttmMapHeight: string
   ttmMapStyle: string
+  stack?: BuilderItem[]
 }
 
 export interface BuilderCardStyle {
@@ -264,6 +265,11 @@ function parseRawItem(raw: any): BuilderItem {
   }
 
   if (raw.span) item.span = String(raw.span)
+
+  if (raw.stack && Array.isArray(raw.stack)) {
+    item.stack = raw.stack.map(parseRawItem)
+    return item
+  }
 
   if (sType === 'openweathermap') {
     if (raw.options?.lat != null) item.owmLat = String(raw.options.lat)
@@ -501,6 +507,13 @@ export function loadConfigFromYaml(state: BuilderState, yamlStr: string) {
 // --- State -> YAML (export) ---
 
 function serializeItem(item: BuilderItem): Record<string, any> | null {
+  if (item.stack && item.stack.length) {
+    const it: Record<string, any> = {}
+    if (item.span && parseInt(item.span) > 1) it.span = parseInt(item.span)
+    it.stack = item.stack.map(serializeItem).filter(Boolean)
+    return it.stack.length ? it : null
+  }
+
   const sType = item.serviceType || 'bookmark'
   if (sType === 'bookmark' && !item.title && !item.link) return null
   if (sType === 'time' && !item.tzTimezone) return null
@@ -847,6 +860,35 @@ export function useConfigBuilder() {
     groups[newIndex] = temp
   }
 
+  function addStack(tabIndex: number, groupIndex: number) {
+    const stack = newItem()
+    stack.stack = []
+    state.tabs[tabIndex].groups[groupIndex].items.push(stack)
+  }
+
+  function addStackChild(tabIndex: number, groupIndex: number, itemIndex: number, serviceType: ServiceType = 'bookmark') {
+    const item = state.tabs[tabIndex].groups[groupIndex].items[itemIndex]
+    if (!item.stack) item.stack = []
+    item.stack.push(newItem(serviceType))
+  }
+
+  function removeStackChild(tabIndex: number, groupIndex: number, itemIndex: number, childIndex: number) {
+    if (state.tabs[tabIndex]?.locked) return
+    const item = state.tabs[tabIndex].groups[groupIndex].items[itemIndex]
+    if (!item.stack) return
+    item.stack.splice(childIndex, 1)
+  }
+
+  function moveStackChild(tabIndex: number, groupIndex: number, itemIndex: number, childIndex: number, direction: -1 | 1) {
+    const children = state.tabs[tabIndex].groups[groupIndex].items[itemIndex].stack
+    if (!children) return
+    const newIndex = childIndex + direction
+    if (newIndex < 0 || newIndex >= children.length) return
+    const temp = children[childIndex]
+    children[childIndex] = children[newIndex]
+    children[newIndex] = temp
+  }
+
   return {
     state,
     yamlOutput,
@@ -864,5 +906,9 @@ export function useConfigBuilder() {
     removeItem,
     moveItem,
     moveGroup,
+    addStack,
+    addStackChild,
+    removeStackChild,
+    moveStackChild,
   }
 }

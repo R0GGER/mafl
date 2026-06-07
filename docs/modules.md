@@ -17,6 +17,7 @@ MAFL+ includes several built-in service modules that can be added to your dashbo
   * [TomTom ETA Map](#tomtom-eta-map)
   * [TomTom Traffic Map](#tomtom-traffic-map)
 * [Grid Span](#grid-span)
+* [Grid Stack](#grid-stack)
 * [Date Formats](#date-formats)
 
 ---
@@ -685,6 +686,67 @@ services:
 The maximum useful value depends on how many columns your [layout](configuration.md#layout) defines at the current breakpoint. A span larger than the column count will simply fill the entire row.
 
 `span` is not limited to modules — it works on any service item (bookmarks, links, etc.).
+
+---
+
+## Grid Stack
+
+With `stack` you can place multiple modules vertically (on top of each other) inside a single grid cell. This is useful when you want to combine smaller widgets in one column while a larger widget spans the remaining columns.
+
+A stack item has a `stack` array containing the child items and an optional `span` to control column width.
+
+### Example: ETA + clock next to a route map
+
+```yaml
+services:
+  Widgets:
+    display: grid
+    items:
+      - stack:
+          - type: tomtom-eta
+            options:
+              originAddress: Amsterdam
+              destAddress: Paris
+            secrets:
+              apiKey: your-tomtom-api-key
+          - type: time
+            options:
+              timezone: Europe/Amsterdam
+              country: nl
+      - type: tomtom-eta-map
+        span: 2
+        options:
+          originAddress: Amsterdam
+          destAddress: Paris
+        secrets:
+          apiKey: your-tomtom-api-key
+```
+
+This places the ETA text widget and the clock stacked vertically in one column, with the route map spanning the other two columns.
+
+### Example: stack spanning two columns
+
+```yaml
+services:
+  Widgets:
+    display: grid
+    items:
+      - stack:
+          - type: greeting
+            options:
+              text: Welcome Home
+              subtitle: Have a great day
+          - type: ip-api
+        span: 2
+      - type: time
+        options:
+          timezone: Europe/Amsterdam
+          country: nl
+```
+
+Any service item can be placed inside a `stack` — modules, bookmarks, links, etc. The children are rendered top-to-bottom with the same gap as regular grid items.
+
+`stack` only works in groups with `display: grid`. It has no effect in `display: list` mode.
 
 ---
 

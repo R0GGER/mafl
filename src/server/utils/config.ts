@@ -12,20 +12,28 @@ type TagMap = Map<Tag['name'], Tag>
 const logger = useLogger('config')
 
 function determineService(items: DraftService[], tags: TagMap): Service[] {
-  return items.map((item) => ({
-    ...item,
-    id: crypto.randomUUID(),
-    tags: (item.tags || []).map((tag): Tag => {
-      if (typeof tag === 'string') {
-        return tags.get(tag) || {
-          name: tag,
-          color: 'blue',
+  return items.map((item) => {
+    const service: Service = {
+      ...item,
+      id: crypto.randomUUID(),
+      tags: (item.tags || []).map((tag): Tag => {
+        if (typeof tag === 'string') {
+          return tags.get(tag) || {
+            name: tag,
+            color: 'blue',
+          }
         }
-      }
 
-      return tag
-    }),
-  }))
+        return tag
+      }),
+    }
+
+    if (item.stack && Array.isArray(item.stack)) {
+      service.stack = determineService(item.stack as DraftService[], tags)
+    }
+
+    return service
+  })
 }
 
 export const configFileName = 'config.yml'
@@ -209,11 +217,17 @@ export function extractServicesFromConfig(config: CompleteConfig): Record<string
     ? config.tabs.flatMap(tab => tab.services)
     : config.services
 
-  return allGroups.reduce<Record<string, Service>>((acc, group) => {
-    for (const item of group.items) {
+  function registerServices(items: Service[], acc: Record<string, Service>) {
+    for (const item of items) {
       acc[item.id] = item
+      if (item.stack) {
+        registerServices(item.stack, acc)
+      }
     }
+  }
 
+  return allGroups.reduce<Record<string, Service>>((acc, group) => {
+    registerServices(group.items, acc)
     return acc
   }, {})
 }

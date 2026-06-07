@@ -24,6 +24,7 @@ All settings live in a single `config.yml` file inside the data volume (`./mafl/
 - [Services](#services)
 - [Display Modes](#display-modes)
 - [Grid Span](#grid-span)
+- [Grid Stack](#grid-stack)
 - [Service Item Properties](#service-item-properties)
 - [Icon](#icon)
 - [Status Indicator](#status-indicator)
@@ -579,6 +580,39 @@ This works for all service types and modules.
 
 ---
 
+## Grid Stack
+
+Place multiple items vertically inside a single grid cell using the `stack` property. The children are rendered top-to-bottom with the same gap as regular grid items.
+
+```yaml
+services:
+  Widgets:
+    display: grid
+    items:
+      - stack:
+          - type: tomtom-eta
+            options:
+              originAddress: Amsterdam
+              destAddress: Paris
+            secrets:
+              apiKey: your-key
+          - type: time
+            options:
+              timezone: Europe/Amsterdam
+              country: nl
+      - type: tomtom-eta-map
+        span: 2
+        options:
+          originAddress: Amsterdam
+          destAddress: Paris
+        secrets:
+          apiKey: your-key
+```
+
+A stack item supports `span` to control how many columns it occupies. `stack` only works in `display: grid` mode. See [Modules — Grid Stack](modules.md#grid-stack) for more examples.
+
+---
+
 ## Service Item Properties
 
 Each service item supports the following properties:
@@ -593,6 +627,7 @@ Each service item supports the following properties:
 | `status` | `object` | Uptime monitoring (see [Status Indicator](#status-indicator)) | — |
 | `tags` | `array` | Tag names or inline tag objects (see [Tags](#tags)) | `[]` |
 | `span` | `number` | Number of grid columns to span (see [Grid Span](#grid-span)) | `1` |
+| `stack` | `array` | Child items to render vertically in one cell (see [Grid Stack](#grid-stack)) | — |
 | `type` | `string` | Module type (see [Modules](modules.md)) | — |
 | `options` | `object` | Module-specific options | — |
 | `secrets` | `object` | Module-specific secrets (e.g. API keys) | — |
