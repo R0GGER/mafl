@@ -1,6 +1,6 @@
 <template>
   <template v-for="(section, sIdx) in sections" :key="sIdx">
-    <div v-if="section.type === 'list-row'" :class="listRowClasses" :style="{ padding: `${$settings.layout.spacing?.group ?? '2.5rem'} 0` }">
+    <div v-if="section.type === 'list-row'" :class="listRowClasses" :style="listRowStyle">
       <Group
         v-for="(group, gIdx) in section.groups"
         :key="gIdx"
@@ -39,12 +39,17 @@ const listGrid = computed(() => $settings.layout.list ?? { small: 2, medium: 3, 
 const listRowClasses = computed(() => [
   'grid',
   'grid-cols-1',
-  'gap-6 lg:gap-8 xl:gap-12',
   `sm:grid-cols-${listGrid.value.small}`,
   `md:grid-cols-${listGrid.value.medium}`,
   `lg:grid-cols-${listGrid.value.large}`,
   `xl:grid-cols-${listGrid.value.xlarge}`,
 ])
+
+const listRowStyle = computed(() => ({
+  padding: `${$settings.layout.spacing?.group ?? '1.5rem'} 0`,
+  columnGap: $settings.layout.spacing?.listGapX ?? '1.5rem',
+  rowGap: $settings.layout.spacing?.listGapY ?? '0.5rem',
+}))
 
 const sections = computed<Section[]>(() => {
   const result: Section[] = []

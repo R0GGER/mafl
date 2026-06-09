@@ -47,7 +47,9 @@ const layoutSchema = z.object({
   list: layoutGridSchema.optional(),
   spacing: z.object({
     group: z.string().optional(),
-    item: z.string().optional(),
+    gridGap: z.string().optional(),
+    listGapX: z.string().optional(),
+    listGapY: z.string().optional(),
   }).optional(),
 }).optional()
 

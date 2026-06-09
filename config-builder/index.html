@@ -296,9 +296,11 @@
             <div><label class="text-xs text-gray-500">XLarge</label><input type="number" id="cfg-list-xlarge" min="1" max="12" value="5" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
           </div>
           <label class="block text-xs text-gray-400 mb-2 mt-3">Spacing</label>
-          <div class="grid grid-cols-2 gap-3">
-            <div><label class="text-xs text-gray-500">Group</label><input type="text" id="cfg-spacing-group" value="1.5rem" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
-            <div><label class="text-xs text-gray-500">Item</label><input type="text" id="cfg-spacing-item" value="0.25rem" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div><label class="text-xs text-gray-500">Between groups</label><input type="text" id="cfg-spacing-group" value="1.5rem" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
+            <div><label class="text-xs text-gray-500">Grid gap</label><input type="text" id="cfg-spacing-grid-gap" value="0.25rem" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
+            <div><label class="text-xs text-gray-500">List gap X</label><input type="text" id="cfg-spacing-list-gap-x" value="1.5rem" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
+            <div><label class="text-xs text-gray-500">List gap Y</label><input type="text" id="cfg-spacing-list-gap-y" value="0.5rem" class="w-full bg-surface border border-gray-600 rounded px-2 py-1 text-sm" oninput="generateYaml()"></div>
           </div>
         </div>
       </section>
@@ -933,7 +935,9 @@ function generateYaml() {
 
   const spacing = {};
   const sg = val('cfg-spacing-group'); if (sg) spacing.group = sg;
-  const si = val('cfg-spacing-item'); if (si) spacing.item = si;
+  const sgg = val('cfg-spacing-grid-gap'); if (sgg) spacing.gridGap = sgg;
+  const slx = val('cfg-spacing-list-gap-x'); if (slx) spacing.listGapX = slx;
+  const sly = val('cfg-spacing-list-gap-y'); if (sly) spacing.listGapY = sly;
   if (Object.keys(spacing).length) layout.spacing = spacing;
   if (Object.keys(layout).length) config.layout = layout;
 
@@ -1176,7 +1180,9 @@ function resetAll() {
   document.getElementById('cfg-list-large').value = '4';
   document.getElementById('cfg-list-xlarge').value = '5';
   document.getElementById('cfg-spacing-group').value = '1.5rem';
-  document.getElementById('cfg-spacing-item').value = '0.25rem';
+  document.getElementById('cfg-spacing-grid-gap').value = '0.25rem';
+  document.getElementById('cfg-spacing-list-gap-x').value = '1.5rem';
+  document.getElementById('cfg-spacing-list-gap-y').value = '0.5rem';
   document.getElementById('cfg-footer-text').value = '';
   document.getElementById('cfg-footer-html').value = '';
   document.querySelectorAll('[data-style]').forEach(el => { el.value = ''; });
@@ -1351,7 +1357,9 @@ function loadConfig(config) {
   }
   if (config.layout?.spacing) {
     if (config.layout.spacing.group) document.getElementById('cfg-spacing-group').value = config.layout.spacing.group;
-    if (config.layout.spacing.item) document.getElementById('cfg-spacing-item').value = config.layout.spacing.item;
+    if (config.layout.spacing.gridGap) document.getElementById('cfg-spacing-grid-gap').value = config.layout.spacing.gridGap;
+    if (config.layout.spacing.listGapX) document.getElementById('cfg-spacing-list-gap-x').value = config.layout.spacing.listGapX;
+    if (config.layout.spacing.listGapY) document.getElementById('cfg-spacing-list-gap-y').value = config.layout.spacing.listGapY;
   }
 
   // Styles
@@ -1493,7 +1501,9 @@ layout:
     xlarge: 5
   spacing:
     group: 1.5rem
-    item: 0.25rem
+    gridGap: 0.25rem
+    listGapX: 1.5rem
+    listGapY: 0.5rem
 styles:
   category:
     fontSize: 1.5rem

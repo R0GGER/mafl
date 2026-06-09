@@ -156,7 +156,9 @@ export interface BuilderState {
   listLarge: number | null
   listXlarge: number | null
   spacingGroup: string
-  spacingItem: string
+  spacingGridGap: string
+  spacingListGapX: string
+  spacingListGapY: string
   styles: {
     category: TextStyle
     title: TextStyle
@@ -216,7 +218,9 @@ function defaultState(): BuilderState {
     listLarge: 4,
     listXlarge: 5,
     spacingGroup: '1.5rem',
-    spacingItem: '0.25rem',
+    spacingGridGap: '0.25rem',
+    spacingListGapX: '1.5rem',
+    spacingListGapY: '0.5rem',
     styles: {
       category: emptyTextStyle(),
       title: emptyTextStyle(),
@@ -473,7 +477,9 @@ export function loadConfigFromYaml(state: BuilderState, yamlStr: string) {
   }
   if (config.layout?.spacing) {
     if (config.layout.spacing.group) state.spacingGroup = config.layout.spacing.group
-    if (config.layout.spacing.item) state.spacingItem = config.layout.spacing.item
+    if (config.layout.spacing.gridGap) state.spacingGridGap = config.layout.spacing.gridGap
+    if (config.layout.spacing.listGapX) state.spacingListGapX = config.layout.spacing.listGapX
+    if (config.layout.spacing.listGapY) state.spacingListGapY = config.layout.spacing.listGapY
   }
 
   if (config.styles) {
@@ -758,7 +764,9 @@ export function stateToYaml(state: BuilderState): string {
 
   const spacing: any = {}
   if (state.spacingGroup) spacing.group = state.spacingGroup
-  if (state.spacingItem) spacing.item = state.spacingItem
+  if (state.spacingGridGap) spacing.gridGap = state.spacingGridGap
+  if (state.spacingListGapX) spacing.listGapX = state.spacingListGapX
+  if (state.spacingListGapY) spacing.listGapY = state.spacingListGapY
   if (Object.keys(spacing).length) layout.spacing = spacing
   if (Object.keys(layout).length) config.layout = layout
 

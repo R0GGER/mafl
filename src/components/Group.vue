@@ -16,7 +16,7 @@
       <h2 v-if="title" class="text-2xl font-light py-2 px-4" :style="categoryStyle">
         {{ title }}
       </h2>
-      <div v-if="display === 'list'" :class="listGridClasses" :style="gridStyle">
+      <div v-if="display === 'list'" :class="listGridClasses" :style="listStyle">
         <template v-for="item in items" :key="item.id">
           <ListItem v-bind="item" />
         </template>
@@ -56,8 +56,10 @@ export interface Props {
 const props = defineProps<Props>()
 const { $settings } = useNuxtApp()
 
-const groupSpacing = computed(() => props.spacing?.group ?? '2.5rem')
-const itemSpacing = computed(() => props.spacing?.item ?? '0.5rem')
+const groupSpacing = computed(() => props.spacing?.group ?? '1.5rem')
+const gridGap = computed(() => props.spacing?.gridGap ?? '0.25rem')
+const listGapX = computed(() => props.spacing?.listGapX ?? '1.5rem')
+const listGapY = computed(() => props.spacing?.listGapY ?? '0.5rem')
 
 function toCSS(style?: TextStyle): Record<string, string | undefined> {
   if (!style) return {}
@@ -126,11 +128,12 @@ const cardBgStyle = computed(() => {
   return style
 })
 
-const gridStyle = computed(() => ({ gap: itemSpacing.value }))
+const gridStyle = computed(() => ({ gap: gridGap.value }))
+const listStyle = computed(() => ({ columnGap: listGapX.value, rowGap: listGapY.value }))
 
 function stackStyle(item: Service) {
   return {
-    gap: itemSpacing.value,
+    gap: gridGap.value,
     ...(item.span && item.span > 1 ? { gridColumn: `span ${item.span}` } : {}),
   }
 }

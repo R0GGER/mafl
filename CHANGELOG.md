@@ -1,6 +1,34 @@
 # Changelog
 
 
+## Layout — separate spacing for grid and list
+
+### 🚀 Enhancements
+
+- **layout:** Replaced single `spacing.item` with dedicated spacing properties: `spacing.gridGap`, `spacing.listGapX`, `spacing.listGapY`
+- **layout:** List row gaps are now configurable instead of hardcoded Tailwind classes (`gap-6 lg:gap-8 xl:gap-12`)
+- **layout:** `spacing.group` remains as vertical space between sections
+- **admin:** Layout section — Spacing now shows four fields: *Between groups*, *Grid gap*, *List gap X*, *List gap Y*
+- **config-builder:** Same fields in the standalone builder
+
+### ⚠️ Breaking
+
+- `layout.spacing.item` is removed — replace with `layout.spacing.gridGap` in existing configs
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/types/config.d.ts` | `LayoutSpacing` now has `gridGap`, `listGapX`, `listGapY` instead of `item` |
+| `src/server/validations/config.ts` | Zod schema updated for new spacing fields |
+| `src/composables/useConfigBuilder.ts` | BuilderState, defaults, import/export for new fields |
+| `src/components/admin/LayoutSettings.vue` | Four spacing inputs |
+| `src/components/Group.vue` | Separate `gridStyle` and `listStyle` using `gridGap` and `listGapX`/`listGapY` |
+| `src/pages/index.vue` | List-row style uses `listGapX`/`listGapY` from config |
+| `config-builder/index.html` | Updated spacing fields, reset, load, and example YAML |
+
+---
+
 ## Admin — remove Color field from favicon icon type
 
 ### 🐛 Fixes

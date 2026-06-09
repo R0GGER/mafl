@@ -29,7 +29,9 @@ export interface Behaviour {
 
 export interface LayoutSpacing {
   group?: string
-  item?: string
+  gridGap?: string
+  listGapX?: string
+  listGapY?: string
 }
 
 export interface LayoutGrid {

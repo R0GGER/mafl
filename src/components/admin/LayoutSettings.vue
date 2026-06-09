@@ -59,14 +59,22 @@
       </div>
 
       <p class="text-xs text-fg-dimmed mt-4 mb-2">Spacing</p>
-      <div class="grid grid-cols-2 gap-2">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <div>
-          <label class="admin-label">Group</label>
-          <input v-model="state.spacingGroup" type="text" class="admin-input w-full" placeholder="2.5rem">
+          <label class="admin-label">Between groups</label>
+          <input v-model="state.spacingGroup" type="text" class="admin-input w-full" placeholder="1.5rem">
         </div>
         <div>
-          <label class="admin-label">Item</label>
-          <input v-model="state.spacingItem" type="text" class="admin-input w-full" placeholder="0.5rem">
+          <label class="admin-label">Grid gap</label>
+          <input v-model="state.spacingGridGap" type="text" class="admin-input w-full" placeholder="0.25rem">
+        </div>
+        <div>
+          <label class="admin-label">List gap X</label>
+          <input v-model="state.spacingListGapX" type="text" class="admin-input w-full" placeholder="1.5rem">
+        </div>
+        <div>
+          <label class="admin-label">List gap Y</label>
+          <input v-model="state.spacingListGapY" type="text" class="admin-input w-full" placeholder="0.5rem">
         </div>
       </div>
     </div>
