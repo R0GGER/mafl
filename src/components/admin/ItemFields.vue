@@ -400,10 +400,6 @@
           <input v-model="item.iconFavicon" type="text" class="admin-input w-full" placeholder="example.com">
         </div>
         <div>
-          <label class="admin-label">Color</label>
-          <input v-model="item.iconColor" type="text" class="admin-input w-20" placeholder="#hex">
-        </div>
-        <div>
           <label class="admin-label">&nbsp;</label>
           <label class="inline-flex items-center gap-1 text-fg-dimmed admin-input cursor-pointer">
             <input v-model="item.iconWrap" type="checkbox" style="accent-color: #69a870"> wrap

@@ -808,7 +808,6 @@ function renderItem(ti, gi, ii, item) {
           ${item.iconType === 'favicon' ? `
             <div class="flex gap-2 items-end">
               <div class="flex-1"><label class="text-gray-500">Domain</label><input type="text" value="${escHtml(item.iconFavicon)}" placeholder="example.com" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].iconFavicon=this.value; generateYaml()"></div>
-              <div><label class="text-gray-500">Color</label><input type="text" value="${escHtml(item.iconColor)}" placeholder="#hex" class="w-20 bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].iconColor=this.value; generateYaml()"></div>
               <div><label class="text-gray-500">&nbsp;</label><label class="flex items-center gap-1 bg-surface border border-gray-600 rounded px-2 py-1 cursor-pointer"><input type="checkbox" ${item.iconWrap ? 'checked' : ''} onchange="state.tabs[${ti}].groups[${gi}].items[${ii}].iconWrap=this.checked; generateYaml()"> wrap</label></div>
             </div>
           ` : item.iconType === 'url' ? `

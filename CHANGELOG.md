@@ -1,6 +1,24 @@
 # Changelog
 
 
+## Admin — remove Color field from favicon icon type
+
+### 🐛 Fixes
+
+- **admin:** Removed the Color HEX field when icon type is `favicon` (CSS `color` has no effect on `<img>` elements)
+- **config-builder:** Same fix in the standalone config builder
+- **serializer:** No longer outputs `icon.color` for favicon entries in generated YAML
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/components/admin/ItemFields.vue` | Removed Color input from favicon icon section |
+| `config-builder/index.html` | Removed Color input from favicon icon section |
+| `src/composables/useConfigBuilder.ts` | Removed `icon.color` serialization for favicon type |
+
+---
+
 ## Layout — configurable grid icon size
 
 ### 🚀 Enhancements

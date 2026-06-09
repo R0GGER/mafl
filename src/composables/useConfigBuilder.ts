@@ -659,7 +659,6 @@ function serializeItem(item: BuilderItem): Record<string, any> | null {
   const icon: any = {}
   if (item.iconType === 'favicon' && item.iconFavicon) {
     icon.favicon = item.iconFavicon
-    if (item.iconColor) icon.color = item.iconColor
     if (item.iconWrap) icon.wrap = true
   }
   else if (item.iconType === 'url' && item.iconUrl) {
