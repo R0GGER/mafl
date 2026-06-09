@@ -94,6 +94,7 @@ export interface BuilderCardStyle {
 
 export interface BuilderGroup {
   name: string
+  hideTitle: boolean
   display: 'grid' | 'list'
   card: BuilderCardStyle
   items: BuilderItem[]
@@ -390,10 +391,11 @@ function parseServiceGroups(services: any): BuilderGroup[] {
   const groups: BuilderGroup[] = []
   if (typeof services === 'object' && !Array.isArray(services)) {
     for (const [groupName, groupData] of Object.entries(services)) {
-      const group: BuilderGroup = { name: groupName, display: 'list', card: emptyCardStyle(), items: [] }
+      const group: BuilderGroup = { name: groupName, hideTitle: false, display: 'list', card: emptyCardStyle(), items: [] }
       let items: any[] = []
       if (groupData && typeof groupData === 'object' && !Array.isArray(groupData)) {
         group.display = (groupData as any).display || 'list'
+        if ((groupData as any).hideTitle) group.hideTitle = true
         if ((groupData as any).card) group.card = parseCardStyle((groupData as any).card)
         items = (groupData as any).items || []
       }
@@ -405,7 +407,7 @@ function parseServiceGroups(services: any): BuilderGroup[] {
     }
   }
   else if (Array.isArray(services)) {
-    const group: BuilderGroup = { name: 'Services', display: 'list', card: emptyCardStyle(), items: [] }
+    const group: BuilderGroup = { name: 'Services', hideTitle: false, display: 'list', card: emptyCardStyle(), items: [] }
     group.items = services.map(parseRawItem)
     groups.push(group)
   }
@@ -803,6 +805,7 @@ export function stateToYaml(state: BuilderState): string {
       for (const group of tab.groups) {
         if (!group.name) continue
         const groupObj: any = { display: group.display, items: [] }
+        if (group.hideTitle) groupObj.hideTitle = true
         const groupCard = serializeCardStyle(group.card)
         if (groupCard) groupObj.card = groupCard
         for (const item of group.items) {
@@ -874,7 +877,7 @@ export function useConfigBuilder() {
   }
 
   function addGroup(tabIndex: number, name = '', display: 'grid' | 'list' = 'list') {
-    state.tabs[tabIndex].groups.push({ name, display, card: emptyCardStyle(), items: [] })
+    state.tabs[tabIndex].groups.push({ name, hideTitle: false, display, card: emptyCardStyle(), items: [] })
   }
 
   function removeGroup(tabIndex: number, groupIndex: number) {

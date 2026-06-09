@@ -13,6 +13,7 @@ export interface CardStyle {
 
 export interface ServicesGroup {
   title?: string
+  hideTitle?: boolean
   display?: 'grid' | 'list'
   card?: CardStyle
   items: Service[]

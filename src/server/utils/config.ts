@@ -103,10 +103,11 @@ function parseRawServices(raw: unknown, tags: TagMap): ServicesGroup[] {
           items: determineService(value as DraftService[], tags),
         })
       } else {
-        const group = value as { display?: 'grid' | 'list'; card?: any; items: DraftService[] }
+        const group = value as { display?: 'grid' | 'list'; hideTitle?: boolean; card?: any; items: DraftService[] }
         services.push({
           title,
           display: group.display,
+          ...(group.hideTitle ? { hideTitle: true } : {}),
           ...(group.card ? { card: group.card } : {}),
           items: determineService(group.items, tags),
         })

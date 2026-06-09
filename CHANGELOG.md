@@ -1,6 +1,42 @@
 # Changelog
 
 
+## Admin — logo settings in own accordion
+
+### 💅 Improvements
+
+- **admin:** Logo settings moved from Global Settings into a separate **Logo** accordion (Logo Type, image, text styling, preview)
+- **admin:** Global Settings now only contains general options (title, theme, search, background, favicon API, link target, overlay, footer)
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/components/admin/GlobalSettings.vue` | Logo fields extracted into dedicated accordion section |
+
+---
+
+## Groups — hide grid/list title
+
+### 🚀 Enhancements
+
+- **groups:** Added `hideTitle` per service group to hide the category heading on the front page while keeping the YAML group key for organisation
+- **admin:** Group header — title visibility toggle (T icon) next to display mode and card style
+- **config-builder:** `hideTitle` is imported from and exported to YAML
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/types/config.d.ts` | Added `hideTitle?: boolean` to `ServicesGroup` |
+| `src/server/validations/config.ts` | Zod schema for `hideTitle` |
+| `src/server/utils/config.ts` | Pass `hideTitle` when parsing service groups |
+| `src/components/Group.vue` | Hide `<h2>` when `hideTitle` is set |
+| `src/composables/useConfigBuilder.ts` | `BuilderGroup.hideTitle`, import/export, defaults |
+| `src/components/admin/TabsEditor.vue` | Title visibility toggle per group |
+
+---
+
 ## Layout — separate spacing for grid and list
 
 ### 🚀 Enhancements

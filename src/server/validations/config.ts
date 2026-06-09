@@ -55,6 +55,7 @@ const layoutSchema = z.object({
 
 const servicesGroupSchema = z.object({
   display: z.enum(['grid', 'list']).optional(),
+  hideTitle: z.boolean().optional(),
   card: cardStyleSchema,
   items: z.array(serviceSchema),
 })

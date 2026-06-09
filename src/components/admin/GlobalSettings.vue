@@ -64,15 +64,6 @@
           >
         </div>
         <div>
-          <label class="admin-label">Logo Type</label>
-          <select v-model="state.logoType" class="admin-input w-full">
-            <option value="none">None</option>
-            <option value="image">Image</option>
-            <option value="text">Text / Letter</option>
-            <option value="both">Image + Text</option>
-          </select>
-        </div>
-        <div>
           <label class="admin-label">Background (filename in data/)</label>
           <input v-model="state.background" type="text" class="admin-input w-full" placeholder="background.jpg">
         </div>
@@ -87,6 +78,52 @@
             <option value="_self">_self</option>
             <option value="_parent">_parent</option>
             <option value="_top">_top</option>
+          </select>
+        </div>
+      </div>
+
+      <div v-if="state.background" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="admin-label">Overlay Color</label>
+          <div class="flex gap-2 items-center">
+            <input v-model="state.overlayColor" type="color" class="w-8 h-8 rounded cursor-pointer border-0">
+            <input v-model="state.overlayColor" type="text" class="admin-input flex-1" placeholder="#000000">
+          </div>
+        </div>
+        <div>
+          <label class="admin-label">Overlay Opacity: {{ state.overlayOpacity }}</label>
+          <input v-model.number="state.overlayOpacity" type="range" min="0" max="1" step="0.05" class="w-full accent-brand-500">
+        </div>
+      </div>
+
+      <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="admin-label">Footer Text</label>
+          <input v-model="state.footerText" type="text" class="admin-input w-full" placeholder="Optional footer text">
+        </div>
+        <div>
+          <label class="admin-label">Footer HTML</label>
+          <input v-model="state.footerHtml" type="text" class="admin-input w-full" placeholder="Optional footer HTML">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Logo Settings accordion -->
+  <section class="admin-section">
+    <button class="admin-section-header" @click="openLogo = !openLogo">
+      <span class="font-semibold text-fg">Logo</span>
+      <span class="chevron" :class="{ rotated: openLogo }" />
+    </button>
+    <div v-show="openLogo" class="admin-section-body">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="admin-label">Logo Type</label>
+          <select v-model="state.logoType" class="admin-input w-full">
+            <option value="none">None</option>
+            <option value="image">Image</option>
+            <option value="text">Text / Letter</option>
+            <option value="both">Image + Text</option>
           </select>
         </div>
       </div>
@@ -169,31 +206,6 @@
           >{{ state.logoText }}</span>
         </div>
       </div>
-
-      <div v-if="state.background" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label class="admin-label">Overlay Color</label>
-          <div class="flex gap-2 items-center">
-            <input v-model="state.overlayColor" type="color" class="w-8 h-8 rounded cursor-pointer border-0">
-            <input v-model="state.overlayColor" type="text" class="admin-input flex-1" placeholder="#000000">
-          </div>
-        </div>
-        <div>
-          <label class="admin-label">Overlay Opacity: {{ state.overlayOpacity }}</label>
-          <input v-model.number="state.overlayOpacity" type="range" min="0" max="1" step="0.05" class="w-full accent-brand-500">
-        </div>
-      </div>
-
-      <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label class="admin-label">Footer Text</label>
-          <input v-model="state.footerText" type="text" class="admin-input w-full" placeholder="Optional footer text">
-        </div>
-        <div>
-          <label class="admin-label">Footer HTML</label>
-          <input v-model="state.footerHtml" type="text" class="admin-input w-full" placeholder="Optional footer HTML">
-        </div>
-      </div>
     </div>
   </section>
 </template>
@@ -203,4 +215,5 @@ import type { BuilderState } from '~/composables/useConfigBuilder'
 
 defineProps<{ state: BuilderState }>()
 const open = ref(true)
+const openLogo = ref(false)
 </script>

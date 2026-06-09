@@ -1,7 +1,7 @@
 <template>
   <div v-if="inline" class="flex flex-col" :class="{ 'group-card': hasCardStyle }" :style="cardWrapperStyle">
     <div v-if="hasCardStyle" class="group-card-bg" :style="cardBgStyle" />
-    <h2 v-if="title" class="text-sm font-semibold uppercase tracking-wide py-2 px-2" :style="categoryStyle">
+    <h2 v-if="title && !hideTitle" class="text-sm font-semibold uppercase tracking-wide py-2 px-2" :style="categoryStyle">
       {{ title }}
     </h2>
     <div class="flex flex-col">
@@ -13,7 +13,7 @@
   <div v-else :style="{ padding: `${groupSpacing} 0` }">
     <div :class="{ 'group-card': hasCardStyle }" :style="cardWrapperStyle">
       <div v-if="hasCardStyle" class="group-card-bg" :style="cardBgStyle" />
-      <h2 v-if="title" class="text-2xl font-light py-2 px-4" :style="categoryStyle">
+      <h2 v-if="title && !hideTitle" class="text-2xl font-light py-2 px-4" :style="categoryStyle">
         {{ title }}
       </h2>
       <div v-if="display === 'list'" :class="listGridClasses" :style="listStyle">
@@ -45,6 +45,7 @@ import type { CardStyle, Layout, Service, TextStyle } from '~/types'
 
 export interface Props {
   title?: string
+  hideTitle?: boolean
   display?: 'grid' | 'list'
   inline?: boolean
   card?: CardStyle
