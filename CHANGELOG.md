@@ -1,6 +1,28 @@
 # Changelog
 
 
+## Web radio — server-side stream proxy for Firefox compatibility
+
+### 🐛 Bug Fixes
+
+- **web-radio:** Fixed "Stream decode error" (`NS_ERROR_DOM_MEDIA_MEDIASINK_ERR`) in Firefox — all radio stations failed to play
+- **web-radio:** Added server-side stream proxy (`/api/radio-browser/stream/[uuid]`) so the browser receives a same-origin audio stream, avoiding mixed-content and cross-origin issues
+- **web-radio:** Proxy resolves multi-hop redirects (e.g. StreamTheWorld) server-side and upgrades HTTP to HTTPS for known streaming domains
+- **web-radio:** Disabled `Icy-MetaData` in upstream requests — metadata blocks embedded in the audio stream caused Firefox's decoder to fail
+- **web-radio:** Disabled chunked transfer encoding on proxy responses — Firefox's audio pipeline expects a raw bytestream like Icecast servers provide
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/server/api/radio-browser/stream/[uuid].get.ts` | New server-side stream proxy endpoint — fetches upstream audio, disables ICY metadata and chunked encoding, pipes raw bytes to the client |
+| `src/server/utils/resolveStreamUrl.ts` | New utility to follow redirect chains and clean/normalize stream URLs server-side |
+| `src/server/utils/radioBrowser.ts` | Station lookup resolves the final stream URL server-side before returning it; search results sorted by playability (MP3/HTTPS preferred) |
+| `src/composables/useWebRadioPlayer.ts` | Playback uses the server-side proxy URL instead of the direct stream URL |
+| `src/utils/radioStream.ts` | URL normalization and playability comparison helpers |
+
+---
+
 ## Console errors & missing background assets
 
 ### 🐛 Bug Fixes

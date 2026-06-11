@@ -8,6 +8,10 @@ export interface PlayableStation {
 let sharedAudio: HTMLAudioElement | null = null
 let audioListenersBound = false
 
+function getStreamProxyUrl(stationuuid: string): string {
+  return `/api/radio-browser/stream/${encodeURIComponent(stationuuid)}`
+}
+
 function getAudioErrorMessage(audio: HTMLAudioElement): string {
   if (!audio.error) {
     return 'Unable to play stream'
@@ -17,30 +21,12 @@ function getAudioErrorMessage(audio: HTMLAudioElement): string {
     case MediaError.MEDIA_ERR_NETWORK:
       return 'Network error — try again'
     case MediaError.MEDIA_ERR_DECODE:
-      return 'Stream decode error'
+      return 'Stream decode error — try an MP3 station'
     case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
       return 'Stream not supported'
     default:
       return 'Unable to play stream'
   }
-}
-
-async function resolveStreamUrl(station: PlayableStation): Promise<string> {
-  if (!station.urlResolved) {
-    throw new Error('Missing stream URL')
-  }
-
-  try {
-    const fresh = await $fetch<{ urlResolved: string }>(`/api/radio-browser/stations/${station.stationuuid}`)
-    if (fresh.urlResolved) {
-      return fresh.urlResolved
-    }
-  }
-  catch {
-    // fall back to provided URL
-  }
-
-  return station.urlResolved
 }
 
 export function useWebRadioPlayer() {
@@ -122,10 +108,10 @@ export function useWebRadioPlayer() {
     error.value = null
   }
 
-  async function startPlayback(audio: HTMLAudioElement, streamUrl: string, station: PlayableStation) {
+  async function startPlayback(audio: HTMLAudioElement, station: PlayableStation) {
     audio.pause()
     audio.volume = volume.value
-    audio.src = streamUrl
+    audio.src = getStreamProxyUrl(station.stationuuid)
 
     await audio.play()
     playing.value = true
@@ -163,15 +149,12 @@ export function useWebRadioPlayer() {
     loading.value = true
 
     try {
-      const streamUrl = await resolveStreamUrl(station)
-      await startPlayback(audio, streamUrl, station)
+      await startPlayback(audio, station)
     }
     catch {
       if (retry) {
         try {
-          const streamUrl = await $fetch<{ urlResolved: string }>(`/api/radio-browser/stations/${station.stationuuid}`)
-            .then(s => s.urlResolved)
-          await startPlayback(audio, streamUrl, station)
+          await startPlayback(audio, station)
           return
         }
         catch {
