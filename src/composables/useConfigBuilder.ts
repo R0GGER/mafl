@@ -170,6 +170,15 @@ export interface BuilderState {
   tabs: BuilderTab[]
   footerText: string
   footerHtml: string
+  metaDescription: string
+  metaKeywords: string
+  metaAuthor: string
+  metaRobots: string
+  metaOgTitle: string
+  metaOgDescription: string
+  metaOgImage: string
+  metaOgType: string
+  robotsTxt: boolean
 }
 
 export const TAG_COLORS = [
@@ -232,6 +241,15 @@ function defaultState(): BuilderState {
     tabs: [],
     footerText: '',
     footerHtml: '',
+    metaDescription: '',
+    metaKeywords: '',
+    metaAuthor: '',
+    metaRobots: 'noindex, nofollow',
+    metaOgTitle: '',
+    metaOgDescription: '',
+    metaOgImage: '',
+    metaOgType: '',
+    robotsTxt: true,
   }
 }
 
@@ -505,6 +523,21 @@ export function loadConfigFromYaml(state: BuilderState, yamlStr: string) {
     if (config.footer.text) state.footerText = config.footer.text
     if (config.footer.html) state.footerHtml = config.footer.html
   }
+
+  if (config.meta) {
+    if (config.meta.description) state.metaDescription = config.meta.description
+    if (config.meta.keywords) state.metaKeywords = config.meta.keywords
+    if (config.meta.author) state.metaAuthor = config.meta.author
+    if (config.meta.robots) state.metaRobots = config.meta.robots
+    if (config.meta.og) {
+      if (config.meta.og.title) state.metaOgTitle = config.meta.og.title
+      if (config.meta.og.description) state.metaOgDescription = config.meta.og.description
+      if (config.meta.og.image) state.metaOgImage = config.meta.og.image
+      if (config.meta.og.type) state.metaOgType = config.meta.og.type
+    }
+  }
+
+  if (config.robotsTxt != null) state.robotsTxt = config.robotsTxt
 
   state.tags = []
   if (config.tags && Array.isArray(config.tags)) {
@@ -826,6 +859,23 @@ export function stateToYaml(state: BuilderState): string {
     if (state.footerHtml) footer.html = state.footerHtml
     config.footer = footer
   }
+
+  const meta: any = {}
+  if (state.metaDescription) meta.description = state.metaDescription
+  if (state.metaKeywords) meta.keywords = state.metaKeywords
+  if (state.metaAuthor) meta.author = state.metaAuthor
+  if (state.metaRobots && state.metaRobots !== 'noindex, nofollow') meta.robots = state.metaRobots
+
+  const og: any = {}
+  if (state.metaOgTitle) og.title = state.metaOgTitle
+  if (state.metaOgDescription) og.description = state.metaOgDescription
+  if (state.metaOgImage) og.image = state.metaOgImage
+  if (state.metaOgType) og.type = state.metaOgType
+  if (Object.keys(og).length) meta.og = og
+
+  if (Object.keys(meta).length) config.meta = meta
+
+  if (!state.robotsTxt) config.robotsTxt = false
 
   return yaml.stringify(config, {
     indent: 2,

@@ -101,7 +101,7 @@
             @click="playRadioStation(station)"
           >
             <div class="flex-shrink-0 w-5 h-5 overflow-hidden rounded">
-              <img v-if="station.favicon" :src="station.favicon" alt="" class="w-full h-full object-cover">
+              <img v-if="station.favicon" :src="toCachedIconUrl(station.favicon)" alt="" class="w-full h-full object-cover">
               <Icon v-else name="mdi:radio" class="w-5 h-5 text-white/50" />
             </div>
             <div class="min-w-0 flex-1">

@@ -47,6 +47,17 @@ export default defineNuxtConfig({
             },
           },
         },
+        {
+          urlPattern: /^\/api\/icon-url/,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'icon-url-cache',
+            expiration: {
+              maxEntries: 200,
+              maxAgeSeconds: 7 * 24 * 60 * 60,
+            },
+          },
+        },
       ],
     },
     writePlugin: true,

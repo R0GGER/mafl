@@ -85,6 +85,7 @@ The admin panel provides a full visual config builder with the following capabil
 | **Modules** | Configure Time, DateTime Weather, Greeting, Custom HTML, IP API and OpenWeatherMap |
 | **Tags** | Add and manage global tags |
 | **Footer** | Configure footer text and/or HTML content |
+| **SEO & Meta** | Meta tags (description, Open Graph) and robots.txt toggle |
 | **Live preview** | Text logo preview updates in real-time as you type |
 
 ## Security

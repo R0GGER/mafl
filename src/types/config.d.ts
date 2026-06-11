@@ -115,6 +115,21 @@ export interface Footer {
   html?: string
 }
 
+export interface MetaOg {
+  title?: string
+  description?: string
+  image?: string
+  type?: string
+}
+
+export interface Meta {
+  description?: string
+  keywords?: string
+  author?: string
+  robots?: string
+  og?: MetaOg
+}
+
 export interface Config {
   title?: string
   lang?: 'en' | 'ru' | 'zh' | 'hi' | 'es' | 'ar' | 'pl' | 'fr' | 'de' | 'gr'
@@ -134,6 +149,8 @@ export interface Config {
   tabs?: Tab[]
   checkUpdates: boolean
   footer?: Footer
+  meta?: Meta
+  robotsTxt?: boolean
 }
 
 export type CompleteConfig = Required<Config> & {

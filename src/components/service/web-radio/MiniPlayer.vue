@@ -16,7 +16,7 @@
           <div class="flex-shrink-0 w-10 h-10 overflow-hidden rounded-lg bg-white/10">
             <img
               v-if="current.favicon"
-              :src="current.favicon"
+              :src="toCachedIconUrl(current.favicon)"
               alt=""
               class="w-full h-full object-cover"
             >

@@ -198,7 +198,7 @@
           v-model="wrSearchQuery"
           type="text"
           class="admin-input w-full"
-          placeholder="Search Radio Browser (NL)..."
+          :placeholder="`Search Radio Browser (${wrCountryCodeEffective})...`"
           @input="debouncedWrSearch"
         >
       </div>
@@ -539,6 +539,10 @@ watch(() => props.item.iconType, (newType) => {
   }
 })
 
+const wrCountryCodeEffective = computed(() =>
+  (props.item.wrCountryCode || 'NL').toUpperCase().slice(0, 2),
+)
+
 const wrSearchQuery = ref('')
 const wrSearchResults = ref<Array<{
   stationuuid: string
@@ -562,7 +566,7 @@ async function runWrSearch() {
   try {
     wrSearchResults.value = await searchStations(
       wrSearchQuery.value,
-      props.item.wrCountryCode || 'NL',
+      wrCountryCodeEffective.value,
       10,
     )
   }

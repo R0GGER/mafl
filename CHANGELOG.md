@@ -1,6 +1,61 @@
 # Changelog
 
 
+## SEO & Meta — configurable meta tags and robots.txt
+
+### 🚀 Enhancements
+
+- **seo:** Added `meta` section in `config.yml` for page meta tags: `description`, `keywords`, `author`, `robots`, and Open Graph (`og.title`, `og.description`, `og.image`, `og.type`)
+- **seo:** Default HTML meta robots directive is `noindex, nofollow` (applied even when omitted from config)
+- **seo:** Added `robotsTxt` toggle — when enabled (default), `/robots.txt` serves `Disallow: /`; when disabled, serves `Allow: /`
+- **seo:** `/robots.txt` is generated dynamically from config via a server route (no static file in `public/`)
+- **admin:** New **SEO & Meta** accordion with fields for meta tags, Open Graph, and the robots.txt crawler block toggle
+- **pwa:** `manifest.webmanifest` uses `meta.description` when configured, otherwise falls back to the page title
+- **docs:** Documented `meta` and `robotsTxt` in [configuration.md](docs/configuration.md) and [admin.md](docs/admin.md)
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/types/config.d.ts` | Added `Meta`, `MetaOg` interfaces; `meta` and `robotsTxt` on `Config` |
+| `src/server/validations/config.ts` | Zod schema for `meta` and `robotsTxt` |
+| `src/server/utils/config.ts` | Defaults: `robotsTxt: true`, `meta.robots: noindex, nofollow` |
+| `src/server/routes/robots.txt.get.ts` | New dynamic `/robots.txt` endpoint driven by `robotsTxt` |
+| `src/utils/pageMeta.ts` | Builds HTML `<head>` meta tags from config |
+| `src/app.vue` | Applies configurable meta tags via `useHead` |
+| `src/server/routes/manifest.webmanifest.get.ts` | Uses `meta.description` for PWA description |
+| `src/components/admin/SeoSettings.vue` | New admin accordion for SEO settings |
+| `src/pages/admin/index.vue` | Added `AdminSeoSettings` to config builder |
+| `src/composables/useConfigBuilder.ts` | Import/export for `meta` and `robotsTxt` |
+| `src/public/robots.txt` | Removed — replaced by dynamic server route |
+| `docs/configuration.md` | SEO & Meta section |
+| `docs/admin.md` | SEO & Meta feature listed |
+
+---
+
+## Icon URL proxy cache
+
+### 🚀 Enhancements
+
+- **icons:** External `icon.url` values (e.g. web-radio station logos on the RADIO tab) are proxied through `/api/icon-url` instead of loading third-party URLs directly in the browser
+- **icons:** Server-side disk cache (7 days) in `./data/.icon-url-cache/` — each remote URL is fetched at most once per week
+- **icons:** Browser receives `Cache-Control: public, max-age=604800` headers for local caching
+- **icons:** Added Workbox `CacheFirst` runtime caching for `/api/icon-url` so proxied icons also work offline via the Service Worker
+- **web-radio:** Mini player and search results use the cached icon proxy for station favicons
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/server/api/icon-url.get.ts` | New server-side proxy endpoint with disk cache in `./data/.icon-url-cache/` |
+| `src/utils/cachedIconUrl.ts` | Helper to route external URLs through the proxy (`data:` and local paths unchanged) |
+| `src/components/service/base/Icon.vue` | `icon.url` uses cached proxy for `http(s)` URLs |
+| `src/components/SearchBar.vue` | Radio search favicons via cached proxy |
+| `src/components/service/web-radio/MiniPlayer.vue` | Station favicon via cached proxy |
+| `nuxt.config.ts` | Added Workbox `runtimeCaching` rule for icon-url endpoint |
+
+---
+
 ## Admin — logo settings in own accordion
 
 ### 💅 Improvements

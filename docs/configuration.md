@@ -33,6 +33,7 @@ All settings live in a single `config.yml` file inside the data volume (`./mafl/
 - [Tags](#tags)
 - [Behaviour](#behaviour)
 - [Footer](#footer)
+- [SEO & Meta](#seo--meta)
 - [Check Updates](#check-updates-watchtower)
 - [Demo config.yml](#demo-configyml)
 
@@ -902,6 +903,39 @@ footer:
 |---|---|---|
 | `text` | `string` | Plain text displayed in the footer |
 | `html` | `string` | Custom HTML content rendered in the footer |
+
+---
+
+## SEO & Meta
+
+Configure HTML meta tags for search engines and social sharing, and control whether crawlers are blocked via `robots.txt`.
+
+```yaml
+meta:
+  description: "My personal homelab dashboard"
+  keywords: "homelab, dashboard, services"
+  author: "John Doe"
+  robots: "noindex, nofollow"
+  og:
+    title: "My Dashboard"
+    description: "All my self-hosted services in one place"
+    image: "https://example.com/og.png"
+    type: website
+
+robotsTxt: true
+```
+
+| Property | Type | Description |
+|---|---|---|
+| `meta.description` | `string` | Page description (also used in PWA manifest) |
+| `meta.keywords` | `string` | Comma-separated keywords |
+| `meta.author` | `string` | Content author |
+| `meta.robots` | `string` | HTML meta robots directive. Default: `noindex, nofollow` |
+| `meta.og.title` | `string` | Open Graph title (defaults to page title) |
+| `meta.og.description` | `string` | Open Graph description (defaults to `meta.description`) |
+| `meta.og.image` | `string` | Open Graph image URL |
+| `meta.og.type` | `string` | Open Graph type (e.g. `website`) |
+| `robotsTxt` | `boolean` | When `true` (default), serves `Disallow: /` to block all crawlers. Set to `false` to allow indexing. |
 
 ---
 

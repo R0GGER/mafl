@@ -80,6 +80,10 @@ export function getDefaultConfig(): CompleteConfig {
     },
     searchProvider: 'google',
     searchWebradio: false,
+    robotsTxt: true,
+    meta: {
+      robots: 'noindex, nofollow',
+    },
     tags: [],
     services: [],
     tabs: [],

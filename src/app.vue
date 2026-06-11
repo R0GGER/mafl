@@ -23,8 +23,11 @@ onMounted(() => {
   }
 })
 
+const headMeta = computed(() => buildHeadMeta($settings.meta, $settings.title))
+
 useHead({
   title: $settings.title,
+  meta: headMeta,
   htmlAttrs: {
     lang: i18nHead.value.htmlAttrs?.lang,
     dir: i18nHead.value.htmlAttrs?.dir,

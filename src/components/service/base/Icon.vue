@@ -2,7 +2,7 @@
   <div :class="wrapClasses" :style="wrapStyles">
     <Icon v-if="props?.name" :name="props.name" :class="iconClasses" />
     <img v-else-if="props?.favicon" :src="faviconUrl" alt="" :class="iconClasses">
-    <img v-else-if="props?.url" :src="props.url" alt="" :class="iconClasses">
+    <img v-else-if="props?.url" :src="iconUrl" alt="" :class="iconClasses">
   </div>
 </template>
 
@@ -18,6 +18,8 @@ const faviconUrl = computed(() => {
   const domain = props.favicon.replace(/^https?:\/\//, '').replace(/\/.*$/, '')
   return `/api/favicon/${domain}`
 })
+
+const iconUrl = computed(() => toCachedIconUrl(props.url))
 
 const wrapClasses = computed(() => ({
   'bg-fg/5 dark:bg-fg/10': props?.wrap && !props?.background,

@@ -105,6 +105,7 @@
       <!-- Left: Form -->
       <div class="space-y-4" @input.capture="schedulePreview" @change.capture="schedulePreview" @click.capture="schedulePreviewAfterClick">
         <AdminGlobalSettings :state="state" />
+        <AdminSeoSettings :state="state" />
         <AdminLayoutSettings :state="state" />
         <AdminStylesSettings :state="state" />
         <AdminTagsEditor :state="state" :add-tag="addTag" :remove-tag="removeTag" />

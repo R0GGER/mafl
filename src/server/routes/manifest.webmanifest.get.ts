@@ -1,6 +1,7 @@
 export default defineEventHandler(async (event) => {
   const config = await getConfig()
   const title = config?.title || 'Mafl'
+  const description = config?.meta?.description || title
 
   setResponseHeader(event, 'content-type', 'application/manifest+json')
 
@@ -11,7 +12,7 @@ export default defineEventHandler(async (event) => {
     display: 'standalone',
     name: title,
     short_name: title,
-    description: title,
+    description,
     theme_color: '#609966',
     background_color: '#1a1a2e',
     icons: [

@@ -77,6 +77,19 @@ const footerSchema = z.object({
   html: z.string().optional(),
 }).optional()
 
+const metaSchema = z.object({
+  description: z.string().optional(),
+  keywords: z.string().optional(),
+  author: z.string().optional(),
+  robots: z.string().optional(),
+  og: z.object({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    image: z.string().optional(),
+    type: z.string().optional(),
+  }).optional(),
+}).optional()
+
 export const configSchema = z.object({
   title: z.string().optional(),
   lang: z.string().optional(),
@@ -124,6 +137,8 @@ export const configSchema = z.object({
   tabs: z.array(tabSchema).optional(),
   services: servicesSchema.optional(),
   footer: footerSchema,
+  meta: metaSchema,
+  robotsTxt: z.boolean().optional(),
 }).refine(
   data => data.services || data.tabs,
   { message: 'Either "services" or "tabs" must be provided' },
