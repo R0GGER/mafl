@@ -26,12 +26,12 @@
   >{{ logoText.text }}</span>
   <div class="min-h-screen relative flex flex-col">
     <div
-      v-if="$settings.background"
+      v-if="showBackground"
       class="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat"
-      :style="{ backgroundImage: `url(/api/assets/${$settings.background})` }"
+      :style="{ backgroundImage: backgroundImageUrl }"
     />
     <div
-      v-if="$settings.background"
+      v-if="showBackground"
       class="fixed inset-0 -z-10"
       :style="{
         backgroundColor: overlay.color,
@@ -93,6 +93,12 @@ function selectTab(idx: number) {
   const slug = slugify(visibleTabs[idx].name)
   window.history.replaceState(null, '', `#${slug}`)
 }
+
+const showBackground = computed(() => Boolean($settings.background))
+
+const backgroundImageUrl = computed(() =>
+  showBackground.value ? `url(/api/assets/${$settings.background})` : undefined,
+)
 
 const overlay = computed(() => ({
   color: $settings.backgroundOverlay?.color ?? '#000000',

@@ -1,6 +1,26 @@
 # Changelog
 
 
+## Console errors & missing background assets
+
+### 🐛 Bug Fixes
+
+- **validation:** `isUrl()` no longer logs `Invalid URL` to the console for empty or non-HTTP links — fixes repeated console noise on tabs with web-radio items and other services without a `link`
+- **pwa:** Removed `navigateFallback: '/'` from Workbox config — fixes `non-precached-url` service worker errors on SSR pages (hash routes such as `/#radio` are unaffected)
+- **assets:** Missing `background` files in the data volume are stripped server-side before settings reach the frontend — prevents 404 requests for configured but absent images (e.g. `blossom1.jpg`)
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/utils/validation.ts` | `isUrl()` returns `false` silently for empty/invalid URLs |
+| `nuxt.config.ts` | Removed `navigateFallback` from `workbox` and `devOptions` |
+| `src/server/utils/assets.ts` | New helper `dataAssetExists()` to check data-volume asset paths |
+| `src/server/utils/config.ts` | `extractSafelyConfig()` clears `background` when the file is missing |
+| `src/layouts/default.vue` | Background layer only renders when a valid `background` path is set |
+
+---
+
 ## SEO & Meta — configurable meta tags and robots.txt
 
 ### 🚀 Enhancements

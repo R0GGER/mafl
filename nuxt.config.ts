@@ -33,7 +33,6 @@ export default defineNuxtConfig({
     workbox: {
       globPatterns: ['**/*.{js,css,html,txt,png,ico,svg}'],
       navigateFallbackDenylist: [/^\/api\//, /^\/admin/],
-      navigateFallback: '/',
       cleanupOutdatedCaches: true,
       runtimeCaching: [
         {
@@ -63,7 +62,6 @@ export default defineNuxtConfig({
     writePlugin: true,
     devOptions: {
       enabled: process.env.VITE_PLUGIN_PWA === 'true',
-      navigateFallback: '/',
     },
   },
   modules: [

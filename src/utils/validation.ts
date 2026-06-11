@@ -1,10 +1,13 @@
 export function isUrl(ur: string) {
-  try {
-    const _url = new URL(ur)
-    return true
-  } catch (_) {
-    console.error('Invalid URL:', _)
+  if (!ur) {
+    return false
   }
 
-  return false
+  try {
+    new URL(ur)
+    return true
+  }
+  catch {
+    return false
+  }
 }

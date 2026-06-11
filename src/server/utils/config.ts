@@ -3,6 +3,7 @@ import yaml from 'yaml'
 import defu from 'defu'
 import { ZodError } from 'zod'
 import type { CompleteConfig, Service, ServicesGroup, Tab, Tag } from '~/types'
+import { dataAssetExists } from '~/server/utils/assets'
 import { configSchema } from '~/server/validations'
 
 type DraftService = Omit<Service, 'id'>
@@ -210,9 +211,16 @@ export async function getConfig(): Promise<CompleteConfig | null> {
  * Omit "secrets" fields.
  */
 export function extractSafelyConfig(config: CompleteConfig) {
-  return JSON.parse(JSON.stringify(
+  const safe = JSON.parse(JSON.stringify(
     config, (key, val) => key === 'secrets' ? undefined : val,
-  ))
+  )) as CompleteConfig
+
+  if (safe.background && !dataAssetExists(safe.background)) {
+    logger.warn(`Background asset not found, skipping: ${safe.background}`)
+    safe.background = ''
+  }
+
+  return safe
 }
 
 /**
