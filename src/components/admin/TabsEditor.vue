@@ -46,6 +46,18 @@
               </svg>
             </button>
             <button
+              class="text-fg-dimmed hover:text-fg px-1"
+              :class="{ 'text-emerald-400 hover:text-emerald-300': true }"
+              title="Export this tab as .yml"
+              @click="doExportTab(ti)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+            </button>
+            <button
               v-if="!tab.locked"
               class="text-red-400 hover:text-red-300 px-1"
               @click="removeTab(ti)"
@@ -313,12 +325,24 @@
         </div>
       </div>
 
-      <button
-        class="mt-3 text-sm bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded transition-colors"
-        @click="addTab()"
-      >
-        + Add Tab
-      </button>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <button
+          class="text-sm bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded transition-colors"
+          @click="addTab()"
+        >
+          + Add Tab
+        </button>
+        <label class="cursor-pointer text-sm px-3 py-1.5 rounded border border-fg/20 bg-fg/[0.03] text-fg hover:bg-fg/[0.06] transition-colors">
+          Import Tab&hellip;
+          <input
+            ref="importInput"
+            type="file"
+            accept=".yml,.yaml"
+            class="hidden"
+            @change="doImportTab"
+          >
+        </label>
+      </div>
     </div>
   </section>
 </template>
@@ -326,7 +350,7 @@
 <script setup lang="ts">
 import type { BuilderCardStyle, BuilderGroup, BuilderItem, BuilderState, ServiceType } from '~/composables/useConfigBuilder'
 
-defineProps<{
+const props = defineProps<{
   state: BuilderState
   addTab: (name?: string, icon?: string) => void
   removeTab: (index: number) => void
@@ -342,10 +366,48 @@ defineProps<{
   addStackChild: (tabIndex: number, groupIndex: number, itemIndex: number, serviceType?: ServiceType) => void
   removeStackChild: (tabIndex: number, groupIndex: number, itemIndex: number, childIndex: number) => void
   moveStackChild: (tabIndex: number, groupIndex: number, itemIndex: number, childIndex: number, direction: -1 | 1) => void
+  exportTabYaml: (tabIndex: number) => string
+  importTabFromYaml: (yamlStr: string) => boolean
 }>()
 
 const open = ref(true)
 const openTabs = ref(new Set<number>())
+const importInput = ref<HTMLInputElement | null>(null)
+
+function slugify(s: string) {
+  return (s || 'tab').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'tab'
+}
+
+function doExportTab(ti: number) {
+  const yamlStr = props.exportTabYaml(ti)
+  if (!yamlStr) return
+  const tab = props.state.tabs[ti]
+  const filename = `mafl-tab-${slugify(tab?.name || '')}.yml`
+  const blob = new Blob([yamlStr], { type: 'text/yaml' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
+function doImportTab(e: Event) {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = (ev) => {
+    const text = ev.target?.result as string
+    if (!text) return
+    const ok = props.importTabFromYaml(text)
+    if (!ok) alert('Error importing tab: invalid file format')
+  }
+  reader.readAsText(file)
+  input.value = ''
+}
 const openEdits = ref(new Set<string>())
 const openCards = ref(new Set<string>())
 const openModulePanels = ref(new Set<string>())

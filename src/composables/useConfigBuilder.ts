@@ -991,6 +991,79 @@ export function useConfigBuilder() {
     children[newIndex] = temp
   }
 
+  function serializeTab(tab: BuilderTab): Record<string, any> {
+    const tabObj: any = {}
+    if (tab.name) tabObj.name = tab.name
+    if (tab.icon) tabObj.icon = tab.icon
+    if (tab.locked) tabObj.locked = true
+    if (tab.hidden) tabObj.hidden = true
+    const services: any = {}
+    for (const group of tab.groups) {
+      if (!group.name) continue
+      const groupObj: any = { display: group.display, items: [] }
+      if (group.hideTitle) groupObj.hideTitle = true
+      const groupCard = serializeCardStyle(group.card)
+      if (groupCard) groupObj.card = groupCard
+      for (const item of group.items) {
+        const serialized = serializeItem(item)
+        if (serialized) groupObj.items.push(serialized)
+      }
+      services[group.name] = groupObj
+    }
+    if (Object.keys(services).length) tabObj.services = services
+    return tabObj
+  }
+
+  function exportTabYaml(tabIndex: number): string {
+    const tab = state.tabs[tabIndex]
+    if (!tab) return ''
+    return yaml.stringify(serializeTab(tab), {
+      indent: 2,
+      lineWidth: 0,
+      defaultKeyType: 'PLAIN',
+      defaultStringType: 'PLAIN',
+    })
+  }
+
+  function importTabFromYaml(yamlStr: string): boolean {
+    try {
+      const data = yaml.parse(yamlStr)
+      if (!data || typeof data !== 'object') return false
+
+      let rawTabs: any[] = []
+      if (Array.isArray(data)) {
+        rawTabs = data
+      }
+      else if (Array.isArray(data.tabs)) {
+        rawTabs = data.tabs
+      }
+      else if (data.services || data.name || data.icon) {
+        rawTabs = [data]
+      }
+      else {
+        return false
+      }
+
+      let added = 0
+      for (const rawTab of rawTabs) {
+        if (rawTab && typeof rawTab === 'object') {
+          state.tabs.push({
+            name: rawTab.name || '',
+            icon: rawTab.icon || '',
+            locked: rawTab.locked || false,
+            hidden: rawTab.hidden || false,
+            groups: parseServiceGroups(rawTab.services),
+          })
+          added++
+        }
+      }
+      return added > 0
+    }
+    catch {
+      return false
+    }
+  }
+
   return {
     state,
     yamlOutput,
@@ -1012,5 +1085,7 @@ export function useConfigBuilder() {
     addStackChild,
     removeStackChild,
     moveStackChild,
+    exportTabYaml,
+    importTabFromYaml,
   }
 }

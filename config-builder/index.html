@@ -353,7 +353,11 @@
         </button>
         <div class="collapsible-content open px-4 pb-4">
           <div id="tabs-container" class="space-y-4"></div>
-          <button onclick="addTab()" class="mt-3 text-sm bg-accent hover:bg-accent-hover text-white px-3 py-1.5 rounded transition">+ Add Tab</button>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <button onclick="addTab()" class="text-sm bg-accent hover:bg-accent-hover text-white px-3 py-1.5 rounded transition">+ Add Tab</button>
+            <button onclick="triggerTabImport()" class="text-sm px-3 py-1.5 rounded border transition" style="background:var(--surface-lighter); border-color:var(--border);" title="Import a single-tab .yml file">Import Tab&hellip;</button>
+            <input type="file" id="file-import-tab" accept=".yml,.yaml" class="hidden">
+          </div>
         </div>
       </section>
     </div>
@@ -395,6 +399,7 @@ function init() {
   generateYaml();
   setupDragDrop();
   document.getElementById('file-import').addEventListener('change', handleFileImport);
+  document.getElementById('file-import-tab').addEventListener('change', handleTabImport);
 }
 
 function renderStyleFields() {
@@ -590,6 +595,7 @@ function renderTabs() {
         <input type="text" value="${escHtml(tab.icon)}" placeholder="Icon (mdi:home)" class="w-36 bg-surface border border-gray-600 rounded px-2 py-1.5 text-sm" oninput="state.tabs[${ti}].icon=this.value; generateYaml()">
         <button onclick="toggleTabHidden(${ti})" class="text-xs px-1.5 py-0.5 rounded transition ${tab.hidden ? 'bg-gray-600/20 text-gray-500' : 'bg-sky-400/20 text-sky-400'}" title="${tab.hidden ? 'Show on frontpage' : 'Hide from frontpage'}">${tab.hidden ? 'hidden' : 'visible'}</button>
         <button onclick="toggleTabLock(${ti})" class="text-xs px-1.5 py-0.5 rounded transition ${tab.locked ? 'bg-amber-400/20 text-amber-400' : 'bg-gray-600/20 text-gray-500'}" title="${tab.locked ? 'Unlock tab' : 'Lock tab'}">${tab.locked ? 'locked' : 'lock'}</button>
+        <button onclick="exportTab(${ti})" class="text-xs px-1.5 py-0.5 rounded bg-emerald-400/20 text-emerald-400 hover:bg-emerald-400/30 transition" title="Export this tab as .yml">export</button>
         ${tab.locked ? '' : `<button onclick="removeTab(${ti})" class="text-red-400 hover:text-red-300 text-lg px-2">&times;</button>`}
       </div>
       <div class="space-y-3 ml-2">
@@ -863,6 +869,117 @@ function updateItemLabel(input) {
   if (label) label.textContent = input.value || '(untitled)';
 }
 
+// --- Tab Serialization (single tab -> plain object) ---
+function serializeItem(item) {
+  const sType = item.serviceType || 'bookmark';
+  if (sType === 'bookmark' && !item.title && !item.link) return null;
+  if (sType === 'time' && !item.tzTimezone) return null;
+  if (sType === 'datetime-weather' && !item.dtwTimezone && !item.dtwLat) return null;
+  if (sType === 'greeting' && !item.greetText) return null;
+  if (sType === 'custom-html' && !item.customHtml) return null;
+
+  const it = {};
+  if (item.span && parseInt(item.span) > 1) it.span = parseInt(item.span);
+
+  if (sType === 'openweathermap') {
+    it.type = 'openweathermap';
+    const opts = {};
+    if (item.owmLat) opts.lat = parseFloat(item.owmLat) || item.owmLat;
+    if (item.owmLon) opts.lon = parseFloat(item.owmLon) || item.owmLon;
+    if (item.owmUnits && item.owmUnits !== 'metric') opts.units = item.owmUnits;
+    if (item.owmShowDescription === 'false') opts.showDescription = false;
+    if (Object.keys(opts).length) it.options = opts;
+    if (item.owmApiKey) it.secrets = { apiKey: item.owmApiKey };
+  } else if (sType === 'ip-api') {
+    it.type = 'ip-api';
+    const opts = {};
+    if (item.ipapiLocationName) opts.locationName = item.ipapiLocationName;
+    if (item.ipapiFlagIcon === 'false') opts.flagIcon = false;
+    if (Object.keys(opts).length) it.options = opts;
+  } else if (sType === 'time') {
+    it.type = 'time';
+    const opts = {};
+    if (item.tzTimezone) opts.timezone = item.tzTimezone;
+    if (item.tzLocationName) opts.locationName = item.tzLocationName;
+    if (item.tzCountry) opts.country = item.tzCountry;
+    if (item.tzTimeFormat && item.tzTimeFormat !== '24h') opts.timeFormat = item.tzTimeFormat;
+    if (item.tzDateFormat && item.tzDateFormat !== 'medium') opts.dateFormat = item.tzDateFormat;
+    if (Object.keys(opts).length) it.options = opts;
+  } else if (sType === 'datetime-weather') {
+    it.type = 'datetime-weather';
+    const opts = {};
+    if (item.dtwLat) opts.lat = parseFloat(item.dtwLat) || item.dtwLat;
+    if (item.dtwLon) opts.lon = parseFloat(item.dtwLon) || item.dtwLon;
+    if (item.dtwTimezone) opts.timezone = item.dtwTimezone;
+    if (item.dtwUnits && item.dtwUnits !== 'metric') opts.units = item.dtwUnits;
+    if (item.dtwTimeFormat && item.dtwTimeFormat !== '24h') opts.timeFormat = item.dtwTimeFormat;
+    if (item.dtwDateFormat && item.dtwDateFormat !== 'medium') opts.dateFormat = item.dtwDateFormat;
+    if (Object.keys(opts).length) it.options = opts;
+    if (item.dtwApiKey) it.secrets = { apiKey: item.dtwApiKey };
+  } else if (sType === 'greeting') {
+    it.type = 'greeting';
+    const opts = {};
+    if (item.greetText) opts.text = item.greetText;
+    if (item.greetSubtitle) opts.subtitle = item.greetSubtitle;
+    if (Object.keys(opts).length) it.options = opts;
+  } else if (sType === 'custom-html') {
+    it.type = 'custom-html';
+    const opts = {};
+    if (item.customHtml) opts.html = item.customHtml;
+    if (item.customHidden) opts.hidden = true;
+    if (Object.keys(opts).length) it.options = opts;
+  } else {
+    if (item.title) it.title = item.title;
+    if (item.description) it.description = item.description;
+    if (item.link) it.link = item.link;
+    if (item.target) it.target = item.target;
+  }
+
+  const icon = {};
+  if (item.iconType === 'favicon' && item.iconFavicon) {
+    icon.favicon = item.iconFavicon;
+    if (item.iconColor) icon.color = item.iconColor;
+    if (item.iconWrap) icon.wrap = true;
+  } else if (item.iconType === 'url' && item.iconUrl) {
+    icon.url = item.iconUrl;
+    if (item.iconWrap) icon.wrap = true;
+  } else if (item.iconType === 'name' && item.iconName) {
+    icon.name = item.iconName;
+    if (item.iconColor) icon.color = item.iconColor;
+    if (item.iconWrap) icon.wrap = true;
+  }
+  if (Object.keys(icon).length) it.icon = icon;
+
+  if (sType === 'bookmark') {
+    if (item.statusEnabled) it.status = { enabled: true };
+    if (item.tags && item.tags.length) it.tags = item.tags;
+  }
+
+  return it;
+}
+
+function serializeTab(tab) {
+  const tabObj = {};
+  if (tab.name) tabObj.name = tab.name;
+  if (tab.icon) tabObj.icon = tab.icon;
+  if (tab.locked) tabObj.locked = true;
+  if (tab.hidden) tabObj.hidden = true;
+  const services = {};
+  tab.groups.forEach(group => {
+    if (!group.name) return;
+    const groupObj = { display: group.display, items: [] };
+    const groupCard = serializeCardStyle(group.card || emptyCardStyle());
+    if (groupCard) groupObj.card = groupCard;
+    group.items.forEach(item => {
+      const it = serializeItem(item);
+      if (it) groupObj.items.push(it);
+    });
+    services[group.name] = groupObj;
+  });
+  if (Object.keys(services).length) tabObj.services = services;
+  return tabObj;
+}
+
 // --- YAML Generation ---
 function generateYaml() {
   const config = {};
@@ -966,112 +1083,7 @@ function generateYaml() {
 
   // Tabs
   if (state.tabs.length) {
-    config.tabs = state.tabs.map(tab => {
-      const tabObj = {};
-      if (tab.name) tabObj.name = tab.name;
-      if (tab.icon) tabObj.icon = tab.icon;
-      if (tab.locked) tabObj.locked = true;
-      if (tab.hidden) tabObj.hidden = true;
-      const services = {};
-      tab.groups.forEach(group => {
-        if (!group.name) return;
-        const groupObj = { display: group.display, items: [] };
-        const groupCard = serializeCardStyle(group.card || emptyCardStyle());
-        if (groupCard) groupObj.card = groupCard;
-        group.items.forEach(item => {
-          const sType = item.serviceType || 'bookmark';
-          if (sType === 'bookmark' && !item.title && !item.link) return;
-          if (sType === 'time' && !item.tzTimezone) return;
-          if (sType === 'datetime-weather' && !item.dtwTimezone && !item.dtwLat) return;
-          if (sType === 'greeting' && !item.greetText) return;
-          if (sType === 'custom-html' && !item.customHtml) return;
-
-          const it = {};
-
-          if (item.span && parseInt(item.span) > 1) it.span = parseInt(item.span);
-
-          if (sType === 'openweathermap') {
-            it.type = 'openweathermap';
-            const opts = {};
-            if (item.owmLat) opts.lat = parseFloat(item.owmLat) || item.owmLat;
-            if (item.owmLon) opts.lon = parseFloat(item.owmLon) || item.owmLon;
-            if (item.owmUnits && item.owmUnits !== 'metric') opts.units = item.owmUnits;
-            if (item.owmShowDescription === 'false') opts.showDescription = false;
-            if (Object.keys(opts).length) it.options = opts;
-            if (item.owmApiKey) it.secrets = { apiKey: item.owmApiKey };
-          } else if (sType === 'ip-api') {
-            it.type = 'ip-api';
-            const opts = {};
-            if (item.ipapiLocationName) opts.locationName = item.ipapiLocationName;
-            if (item.ipapiFlagIcon === 'false') opts.flagIcon = false;
-            if (Object.keys(opts).length) it.options = opts;
-          } else if (sType === 'time') {
-            it.type = 'time';
-            const opts = {};
-            if (item.tzTimezone) opts.timezone = item.tzTimezone;
-            if (item.tzLocationName) opts.locationName = item.tzLocationName;
-            if (item.tzCountry) opts.country = item.tzCountry;
-            if (item.tzTimeFormat && item.tzTimeFormat !== '24h') opts.timeFormat = item.tzTimeFormat;
-            if (item.tzDateFormat && item.tzDateFormat !== 'medium') opts.dateFormat = item.tzDateFormat;
-            if (Object.keys(opts).length) it.options = opts;
-          } else if (sType === 'datetime-weather') {
-            it.type = 'datetime-weather';
-            const opts = {};
-            if (item.dtwLat) opts.lat = parseFloat(item.dtwLat) || item.dtwLat;
-            if (item.dtwLon) opts.lon = parseFloat(item.dtwLon) || item.dtwLon;
-            if (item.dtwTimezone) opts.timezone = item.dtwTimezone;
-            if (item.dtwUnits && item.dtwUnits !== 'metric') opts.units = item.dtwUnits;
-            if (item.dtwTimeFormat && item.dtwTimeFormat !== '24h') opts.timeFormat = item.dtwTimeFormat;
-            if (item.dtwDateFormat && item.dtwDateFormat !== 'medium') opts.dateFormat = item.dtwDateFormat;
-            if (Object.keys(opts).length) it.options = opts;
-            if (item.dtwApiKey) it.secrets = { apiKey: item.dtwApiKey };
-          } else if (sType === 'greeting') {
-            it.type = 'greeting';
-            const opts = {};
-            if (item.greetText) opts.text = item.greetText;
-            if (item.greetSubtitle) opts.subtitle = item.greetSubtitle;
-            if (Object.keys(opts).length) it.options = opts;
-          } else if (sType === 'custom-html') {
-            it.type = 'custom-html';
-            const opts = {};
-            if (item.customHtml) opts.html = item.customHtml;
-            if (item.customHidden) opts.hidden = true;
-            if (Object.keys(opts).length) it.options = opts;
-          } else {
-            if (item.title) it.title = item.title;
-            if (item.description) it.description = item.description;
-            if (item.link) it.link = item.link;
-            if (item.target) it.target = item.target;
-          }
-
-          // Icon (shared across all types)
-          const icon = {};
-          if (item.iconType === 'favicon' && item.iconFavicon) {
-            icon.favicon = item.iconFavicon;
-            if (item.iconColor) icon.color = item.iconColor;
-            if (item.iconWrap) icon.wrap = true;
-          } else if (item.iconType === 'url' && item.iconUrl) {
-            icon.url = item.iconUrl;
-            if (item.iconWrap) icon.wrap = true;
-          } else if (item.iconType === 'name' && item.iconName) {
-            icon.name = item.iconName;
-            if (item.iconColor) icon.color = item.iconColor;
-            if (item.iconWrap) icon.wrap = true;
-          }
-          if (Object.keys(icon).length) it.icon = icon;
-
-          if (sType === 'bookmark') {
-            if (item.statusEnabled) it.status = { enabled: true };
-            if (item.tags && item.tags.length) it.tags = item.tags;
-          }
-
-          groupObj.items.push(it);
-        });
-        services[group.name] = groupObj;
-      });
-      if (Object.keys(services).length) tabObj.services = services;
-      return tabObj;
-    });
+    config.tabs = state.tabs.map(serializeTab);
   }
 
   // Footer
@@ -1239,6 +1251,115 @@ function importFile(file) {
   reader.readAsText(file);
 }
 
+// --- Per-tab Export / Import ---
+function downloadFile(filename, content, mime = 'text/yaml') {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+function slugify(s) {
+  return (s || 'tab')
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'tab';
+}
+
+function exportTab(ti) {
+  const tab = state.tabs[ti];
+  if (!tab) return;
+  const tabObj = serializeTab(tab);
+  const yamlStr = jsyaml.dump(tabObj, {
+    indent: 2,
+    lineWidth: -1,
+    noRefs: true,
+    quotingType: "'",
+    forceQuotes: false
+  });
+  const filename = `mafl-tab-${slugify(tab.name)}.yml`;
+  downloadFile(filename, yamlStr);
+}
+
+function triggerTabImport() {
+  document.getElementById('file-import-tab').click();
+}
+
+function handleTabImport(e) {
+  const file = e.target.files[0];
+  if (file) importTabFile(file);
+  e.target.value = '';
+}
+
+function importTabFile(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = jsyaml.load(e.target.result);
+      if (!data || typeof data !== 'object') throw new Error('Invalid YAML');
+
+      let rawTabs = [];
+      if (Array.isArray(data)) {
+        rawTabs = data;
+      } else if (Array.isArray(data.tabs)) {
+        rawTabs = data.tabs;
+      } else if (data.services || data.name || data.icon) {
+        rawTabs = [data];
+      } else {
+        throw new Error('No tab(s) found in file');
+      }
+
+      let added = 0;
+      rawTabs.forEach(rawTab => {
+        if (rawTab && typeof rawTab === 'object') {
+          state.tabs.push(parseTabConfig(rawTab));
+          added++;
+        }
+      });
+
+      if (!added) throw new Error('No valid tabs to import');
+      renderTabs();
+      generateYaml();
+    } catch (err) {
+      alert('Error importing tab: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function parseTabConfig(tab) {
+  const tabObj = {
+    name: tab.name || '',
+    icon: tab.icon || '',
+    locked: tab.locked || false,
+    hidden: tab.hidden || false,
+    groups: []
+  };
+  if (tab.services && typeof tab.services === 'object') {
+    Object.entries(tab.services).forEach(([groupName, groupData]) => {
+      const group = { name: groupName, display: 'list', card: emptyCardStyle(), items: [] };
+      let items = [];
+      if (groupData && typeof groupData === 'object' && !Array.isArray(groupData)) {
+        group.display = groupData.display || 'list';
+        if (groupData.card) group.card = parseCardStyle(groupData.card);
+        items = groupData.items || [];
+      } else if (Array.isArray(groupData)) {
+        items = groupData;
+      }
+      items.forEach(raw => group.items.push(parseRawItem(raw)));
+      tabObj.groups.push(group);
+    });
+  }
+  return tabObj;
+}
+
 function parseRawItem(raw) {
   const sType = raw.type === 'timezone' ? 'time' : (raw.type || 'bookmark');
   const item = newItem(sType);
@@ -1400,25 +1521,7 @@ function loadConfig(config) {
   // Tabs & services
   state.tabs = [];
   if (config.tabs && Array.isArray(config.tabs)) {
-    config.tabs.forEach(tab => {
-      const tabObj = { name: tab.name || '', icon: tab.icon || '', locked: tab.locked || false, hidden: tab.hidden || false, groups: [] };
-      if (tab.services && typeof tab.services === 'object') {
-        Object.entries(tab.services).forEach(([groupName, groupData]) => {
-          const group = { name: groupName, display: 'list', card: emptyCardStyle(), items: [] };
-          let items = [];
-          if (groupData && typeof groupData === 'object' && !Array.isArray(groupData)) {
-            group.display = groupData.display || 'list';
-            if (groupData.card) group.card = parseCardStyle(groupData.card);
-            items = groupData.items || [];
-          } else if (Array.isArray(groupData)) {
-            items = groupData;
-          }
-          items.forEach(raw => group.items.push(parseRawItem(raw)));
-          tabObj.groups.push(group);
-        });
-      }
-      state.tabs.push(tabObj);
-    });
+    config.tabs.forEach(tab => state.tabs.push(parseTabConfig(tab)));
   } else if (config.services) {
     const tabObj = { name: '', icon: '', locked: false, hidden: false, groups: [] };
     if (typeof config.services === 'object' && !Array.isArray(config.services)) {

@@ -125,6 +125,8 @@
           :add-stack-child="addStackChild"
           :remove-stack-child="removeStackChild"
           :move-stack-child="moveStackChild"
+          :export-tab-yaml="exportTabYaml"
+          :import-tab-from-yaml="importTabFromYaml"
         />
       </div>
 
@@ -232,6 +234,8 @@ const {
   addStackChild,
   removeStackChild,
   moveStackChild,
+  exportTabYaml,
+  importTabFromYaml,
 } = useConfigBuilder()
 
 function freshYaml() { return stateToYaml(state) }

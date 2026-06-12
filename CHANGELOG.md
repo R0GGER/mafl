@@ -1,6 +1,25 @@
 # Changelog
 
 
+## Per-tab export & import in Admin Config Builder
+
+### 🚀 Enhancements
+
+- **admin:** Added per-tab **Export** button (download icon) in the tab header — exports a single tab (with all its groups and services) as a standalone `.yml` file
+- **admin:** Added **Import Tab…** button next to "+ Add Tab" — imports a previously exported tab `.yml` and appends it to the current configuration without overwriting existing tabs
+- **config-builder:** Same export/import per tab functionality added to the standalone `config-builder/index.html`
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/composables/useConfigBuilder.ts` | Added `serializeTab()`, `exportTabYaml()`, and `importTabFromYaml()` functions |
+| `src/components/admin/TabsEditor.vue` | Added export button per tab, import file input + button, and corresponding handler functions |
+| `src/pages/admin/index.vue` | Wired new `exportTabYaml` and `importTabFromYaml` props to `AdminTabsEditor` |
+| `config-builder/index.html` | Added equivalent export/import per tab (standalone HTML version) |
+
+---
+
 ## Suppress Vue Router warnings from bot/scanner probes
 
 ### 🐛 Bug Fixes
