@@ -1,6 +1,26 @@
 # Changelog
 
 
+## Suppress Vue Router warnings from bot/scanner probes
+
+### 🐛 Bug Fixes
+
+- **server:** Eliminated `[Vue Router warn]: No match found for location with path "..."` spam in the server log caused by bot and vulnerability-scanner probes hitting paths like `/sitemap.xml`, `/bot-connect.js`, `/css/support_parent.css`, `/js/lkk_ch.js`, `/static/style/protect/index.js`, `/assets/js/qr_modal.js`, `/assets/js/auth.js`, `/assets/js/message.js`, etc. — requests that look like missing static assets now receive a fast 404 instead of being routed through the SSR renderer
+- **pwa:** Removed the broken `mask-icon` link to `/favicons/logo.svg` from `nuxt.config.ts` — that file is not shipped in `src/public/favicons/` (nor documented for the custom favicons volume mount), so browsers were requesting a non-existent asset on every page load and triggering the same Vue Router warning
+
+### 🚀 Enhancements
+
+- **server:** New Nitro middleware `static-404.ts` short-circuits requests that match a static-asset file extension (`.js`, `.css`, `.xml`, `.svg`, `.json`, fonts, images, archives, and common probe extensions like `.env`/`.sql`/`.php`) and fall outside Nuxt-served prefixes (`/_nuxt/`, `/_ipx/`, `/api/`, `/favicons/`, `/manifest.webmanifest`, `/sw.js`, `/workbox-`, `/registerSW.js`, `/robots.txt`) — saves a full SSR cycle per probe and keeps the log readable
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/server/middleware/static-404.ts` | New Nitro server middleware that returns a plain `404 Not Found` for requests that look like missing static assets, before the SSR renderer (and Vue Router) is invoked |
+| `nuxt.config.ts` | Removed the `mask-icon` `<link>` pointing to the non-existent `/favicons/logo.svg` |
+
+---
+
 ## Web radio — resilient Radio Browser API client
 
 ### 🐛 Bug Fixes
