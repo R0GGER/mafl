@@ -127,6 +127,13 @@
           :move-stack-child="moveStackChild"
           :export-tab-yaml="exportTabYaml"
           :import-tab-from-yaml="importTabFromYaml"
+          :clipboard="clipboard"
+          :copy-item="copyItem"
+          :copy-group="copyGroup"
+          :paste-item-into="pasteItemInto"
+          :paste-group-into="pasteGroupInto"
+          :move-item-to="moveItemTo"
+          :move-group-to="moveGroupTo"
         />
       </div>
 
@@ -282,6 +289,13 @@ const {
   moveStackChild,
   exportTabYaml,
   importTabFromYaml,
+  clipboard,
+  copyItem,
+  copyGroup,
+  pasteItemInto,
+  pasteGroupInto,
+  moveItemTo,
+  moveGroupTo,
 } = useConfigBuilder()
 
 function freshYaml() { return stateToYaml(state) }

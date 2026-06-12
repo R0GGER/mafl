@@ -240,7 +240,7 @@ const props = defineProps<{ state: BuilderState }>()
 const emit = defineEmits<{
   (e: 'toast', payload: { message: string; type: 'success' | 'error' }): void
 }>()
-const open = ref(true)
+const open = ref(false)
 const openLogo = ref(false)
 
 // Mirror what the server wrote to config.yml back into the reactive form

@@ -1,6 +1,41 @@
 # Changelog
 
 
+## Drag-and-drop + in-app copy/paste for items and groups
+
+### 🚀 Enhancements
+
+- **admin / config-builder:** Bookmarks, widgets and whole groups (categories) can now be **dragged** between groups and across tabs. Drop on an item to insert before/after based on cursor Y, drop on the body of a group to append, drop on a tab to append the dragged group at the end of that tab. In the Vue admin, hovering an item over a collapsed tab automatically expands it so you can drop into its groups
+- **admin / config-builder:** Each item, stack and group header now has an orange **copy** button that snapshots a deep clone into an in-memory clipboard slot. A matching orange **Paste item** / **Paste group** button appears next to **+ Bookmark** / **+ Add Group** while the clipboard holds a payload of the right kind — the deep clone means you can paste the same item/group repeatedly
+- **admin / config-builder:** Drag handles (≡) on item and group rows make it discoverable that the row is draggable; the source row dims to `opacity: 0.45` during drag and the active drop target gets a brand-coloured ring with a top/bottom border indicating which side the item/group will be inserted
+- **admin / config-builder:** **Locked tabs** stay protected against destructive operations — drag-and-drop moves, arrow re-ordering, copy from a locked tab, and delete are all blocked. **Paste into** a locked tab is allowed (explicit user-initiated insert), so you can still seed a locked tab from an unlocked one
+- **admin:** Stale "edit", "card style" and "modules" panels are automatically collapsed after every move so their `tab-group-item` indexes don't leak onto a different item after re-ordering
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/composables/useConfigBuilder.ts` | Added `clipboard` ref + `deepClone` helper; new `copyItem` / `copyGroup` / `pasteItemInto` / `pasteGroupInto` / `moveItemTo` / `moveGroupTo` exported from the composable. Move helpers refuse when either source or destination tab is locked and use a "splice then re-insert" pattern that handles same-group, cross-group and cross-tab cases consistently |
+| `src/pages/admin/index.vue` | Destructure the new helpers from `useConfigBuilder()` and pass them as props to `<AdminTabsEditor>` |
+| `src/components/admin/TabsEditor.vue` | Tab outer div, group container and item card became drop targets with `@dragstart` / `@dragover` / `@drop` / `@dragend` handlers using a `dragState` ref + `dataTransfer` JSON payload; added drag handles, orange `copy` buttons (hidden on locked tabs) and orange `Paste item` / `Paste group` buttons (always visible). Inputs in group headers get `@mousedown.stop` so they don't initiate a drag. `closeOpenEdits()` clears `openEdits` / `openCards` / `openModulePanels` after every move |
+| `config-builder/index.html` | Added global `clipboard` + `cloneObj` + `moveItemTo` / `moveGroupTo` / `copyItem` / `copyGroup` / `pasteItemInto` / `pasteGroupInto`; new `setupTabsDnd()` registers a single delegated `dragstart` / `dragover` / `dragleave` / `drop` listener on `#tabs-container` and reads `data-kind` / `data-ti` / `data-gi` / `data-ii` / `data-tabheader` from the closest matching ancestor; `renderTabs` / `renderGroup` / `renderItem` now emit those data attributes plus `draggable="true"`, the drag handle, orange copy buttons (hidden on locked tabs) and conditional orange paste buttons. Existing file-drop overlay (`setupDragDrop`) filters on `dataTransfer.types.includes('Files')` so internal item/group drags no longer trigger the "Drop config.yml here" overlay. New CSS classes `.tabs-dnd-dragging` (dim source), `.tabs-dnd-over` (ring), `.tabs-dnd-before` / `.tabs-dnd-after` (insert indicator) added to the `<style>` block. `closeAllEditPanels()` hides every `[id^="item-edit-"]` / `[id^="group-card-"]` before re-rendering so the old open-panel restore logic in `renderTabs` can't reopen stale panels |
+
+---
+
+## Global Settings accordion collapsed by default
+
+### 🚀 Enhancements
+
+- **admin:** The **Global Settings** accordion in `/admin` now starts collapsed by default, matching the **Logo & Favicon** accordion — reduces visual noise on page load and keeps focus on the tab/group/service editor below
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/components/admin/GlobalSettings.vue` | Changed `const open = ref(true)` to `const open = ref(false)` so the Global Settings section is collapsed on initial render |
+
+---
+
 ## "Use as site logo" — sync admin form state after the patch
 
 ### 🐛 Bug Fixes

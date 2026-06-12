@@ -1,4 +1,4 @@
-import { reactive, computed } from 'vue'
+import { reactive, computed, ref } from 'vue'
 import yaml from 'yaml'
 
 // --- Types ---
@@ -991,6 +991,109 @@ export function useConfigBuilder() {
     children[newIndex] = temp
   }
 
+  // --- Clipboard, drag-and-drop, copy/paste ---
+
+  const clipboard = ref<{ kind: 'item' | 'group'; payload: BuilderItem | BuilderGroup } | null>(null)
+
+  function deepClone<T>(value: T): T {
+    if (typeof structuredClone === 'function') {
+      try { return structuredClone(value) } catch {}
+    }
+    return JSON.parse(JSON.stringify(value)) as T
+  }
+
+  function isLocked(ti: number): boolean {
+    return !!state.tabs[ti]?.locked
+  }
+
+  function copyItem(tabIndex: number, groupIndex: number, itemIndex: number) {
+    const item = state.tabs[tabIndex]?.groups[groupIndex]?.items[itemIndex]
+    if (!item) return
+    clipboard.value = { kind: 'item', payload: deepClone(item) }
+  }
+
+  function copyGroup(tabIndex: number, groupIndex: number) {
+    const group = state.tabs[tabIndex]?.groups[groupIndex]
+    if (!group) return
+    clipboard.value = { kind: 'group', payload: deepClone(group) }
+  }
+
+  function pasteItemInto(tabIndex: number, groupIndex: number, atIndex?: number) {
+    if (!clipboard.value || clipboard.value.kind !== 'item') return
+    const group = state.tabs[tabIndex]?.groups[groupIndex]
+    if (!group) return
+    const clone = deepClone(clipboard.value.payload) as BuilderItem
+    const insertAt = (typeof atIndex === 'number' && atIndex >= 0 && atIndex <= group.items.length)
+      ? atIndex
+      : group.items.length
+    group.items.splice(insertAt, 0, clone)
+  }
+
+  function pasteGroupInto(tabIndex: number, atIndex?: number) {
+    if (!clipboard.value || clipboard.value.kind !== 'group') return
+    const tab = state.tabs[tabIndex]
+    if (!tab) return
+    const clone = deepClone(clipboard.value.payload) as BuilderGroup
+    const insertAt = (typeof atIndex === 'number' && atIndex >= 0 && atIndex <= tab.groups.length)
+      ? atIndex
+      : tab.groups.length
+    tab.groups.splice(insertAt, 0, clone)
+  }
+
+  function moveItemTo(
+    from: { ti: number; gi: number; ii: number },
+    to: { ti: number; gi: number; index?: number },
+  ) {
+    if (isLocked(from.ti) || isLocked(to.ti)) return
+    const srcGroup = state.tabs[from.ti]?.groups[from.gi]
+    const dstGroup = state.tabs[to.ti]?.groups[to.gi]
+    if (!srcGroup || !dstGroup) return
+    if (from.ti === to.ti && from.gi === to.gi) {
+      const items = srcGroup.items
+      let target = (typeof to.index === 'number') ? to.index : items.length
+      if (target < 0) target = 0
+      if (target > items.length) target = items.length
+      if (target === from.ii || target === from.ii + 1) return
+      const [moved] = items.splice(from.ii, 1)
+      if (target > from.ii) target--
+      items.splice(target, 0, moved)
+      return
+    }
+    const [moved] = srcGroup.items.splice(from.ii, 1)
+    if (!moved) return
+    let target = (typeof to.index === 'number') ? to.index : dstGroup.items.length
+    if (target < 0) target = 0
+    if (target > dstGroup.items.length) target = dstGroup.items.length
+    dstGroup.items.splice(target, 0, moved)
+  }
+
+  function moveGroupTo(
+    from: { ti: number; gi: number },
+    to: { ti: number; index?: number },
+  ) {
+    if (isLocked(from.ti) || isLocked(to.ti)) return
+    const srcTab = state.tabs[from.ti]
+    const dstTab = state.tabs[to.ti]
+    if (!srcTab || !dstTab) return
+    if (from.ti === to.ti) {
+      const groups = srcTab.groups
+      let target = (typeof to.index === 'number') ? to.index : groups.length
+      if (target < 0) target = 0
+      if (target > groups.length) target = groups.length
+      if (target === from.gi || target === from.gi + 1) return
+      const [moved] = groups.splice(from.gi, 1)
+      if (target > from.gi) target--
+      groups.splice(target, 0, moved)
+      return
+    }
+    const [moved] = srcTab.groups.splice(from.gi, 1)
+    if (!moved) return
+    let target = (typeof to.index === 'number') ? to.index : dstTab.groups.length
+    if (target < 0) target = 0
+    if (target > dstTab.groups.length) target = dstTab.groups.length
+    dstTab.groups.splice(target, 0, moved)
+  }
+
   function serializeTab(tab: BuilderTab): Record<string, any> {
     const tabObj: any = {}
     if (tab.name) tabObj.name = tab.name
@@ -1087,5 +1190,12 @@ export function useConfigBuilder() {
     moveStackChild,
     exportTabYaml,
     importTabFromYaml,
+    clipboard,
+    copyItem,
+    copyGroup,
+    pasteItemInto,
+    pasteGroupInto,
+    moveItemTo,
+    moveGroupTo,
   }
 }

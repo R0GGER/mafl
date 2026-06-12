@@ -44,6 +44,11 @@
     .chevron { transition: transform 0.2s; }
     .chevron.rotated { transform: rotate(90deg); }
     .drop-zone.drag-over { border-color: #7c3aed; background: rgba(124, 58, 237, 0.1); }
+    .tabs-dnd-item, .tabs-dnd-group, .tabs-dnd-tab { transition: box-shadow 0.12s, border-color 0.12s; }
+    .tabs-dnd-dragging { opacity: 0.45; }
+    .tabs-dnd-over { border-color: #7c3aed !important; box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.35); }
+    .tabs-dnd-before { box-shadow: inset 0 3px 0 0 #7c3aed, 0 0 0 2px rgba(124, 58, 237, 0.35); }
+    .tabs-dnd-after  { box-shadow: inset 0 -3px 0 0 #7c3aed, 0 0 0 2px rgba(124, 58, 237, 0.35); }
     input[type="color"] { -webkit-appearance: none; border: none; cursor: pointer; }
     input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
     input[type="color"]::-webkit-color-swatch { border: 1px solid var(--border); border-radius: 4px; }
@@ -448,6 +453,7 @@ function init() {
   renderCardStyleFields();
   generateYaml();
   setupDragDrop();
+  setupTabsDnd();
   document.getElementById('file-import').addEventListener('change', handleFileImport);
   document.getElementById('file-import-tab').addEventListener('change', handleTabImport);
 }
@@ -632,14 +638,334 @@ function moveGroup(tabIndex, groupIndex, direction) {
   generateYaml();
 }
 
+// --- Clipboard / drag-and-drop / copy-paste ---
+
+let clipboard = null; // { kind: 'item'|'group', payload: object }
+let dragState = null; // { kind, from }
+let dragOverKey = ''; // visual hint key, e.g. 'i-0-1-2-a' or 'g-0-1-b' or 't-0'
+
+function cloneObj(o) {
+  if (typeof structuredClone === 'function') {
+    try { return structuredClone(o); } catch (_) {}
+  }
+  return JSON.parse(JSON.stringify(o));
+}
+
+function isTabLocked(ti) {
+  return !!state.tabs[ti]?.locked;
+}
+
+function copyItem(ti, gi, ii) {
+  const item = state.tabs[ti]?.groups[gi]?.items[ii];
+  if (!item) return;
+  clipboard = { kind: 'item', payload: cloneObj(item) };
+  renderTabs();
+  showToast('Item copied');
+}
+
+function copyGroup(ti, gi) {
+  const group = state.tabs[ti]?.groups[gi];
+  if (!group) return;
+  clipboard = { kind: 'group', payload: cloneObj(group) };
+  renderTabs();
+  showToast('Group copied');
+}
+
+function closeAllEditPanels() {
+  document.querySelectorAll('#tabs-container [id^="item-edit-"], #tabs-container [id^="group-card-"]').forEach(el => el.classList.add('hidden'));
+}
+
+function pasteItemInto(ti, gi, atIndex) {
+  if (!clipboard || clipboard.kind !== 'item') return;
+  const group = state.tabs[ti]?.groups[gi];
+  if (!group) return;
+  const clone = cloneObj(clipboard.payload);
+  const idx = (typeof atIndex === 'number' && atIndex >= 0 && atIndex <= group.items.length) ? atIndex : group.items.length;
+  group.items.splice(idx, 0, clone);
+  closeAllEditPanels();
+  renderTabs();
+  generateYaml();
+}
+
+function pasteGroupInto(ti, atIndex) {
+  if (!clipboard || clipboard.kind !== 'group') return;
+  const tab = state.tabs[ti];
+  if (!tab) return;
+  const clone = cloneObj(clipboard.payload);
+  const idx = (typeof atIndex === 'number' && atIndex >= 0 && atIndex <= tab.groups.length) ? atIndex : tab.groups.length;
+  tab.groups.splice(idx, 0, clone);
+  closeAllEditPanels();
+  renderTabs();
+  generateYaml();
+}
+
+function moveItemTo(from, to) {
+  if (isTabLocked(from.ti) || isTabLocked(to.ti)) return;
+  const srcGroup = state.tabs[from.ti]?.groups[from.gi];
+  const dstGroup = state.tabs[to.ti]?.groups[to.gi];
+  if (!srcGroup || !dstGroup) return;
+  if (from.ti === to.ti && from.gi === to.gi) {
+    const items = srcGroup.items;
+    let target = (typeof to.index === 'number') ? to.index : items.length;
+    if (target < 0) target = 0;
+    if (target > items.length) target = items.length;
+    if (target === from.ii || target === from.ii + 1) return;
+    const [moved] = items.splice(from.ii, 1);
+    if (target > from.ii) target--;
+    items.splice(target, 0, moved);
+    closeAllEditPanels();
+    renderTabs();
+    generateYaml();
+    return;
+  }
+  const [moved] = srcGroup.items.splice(from.ii, 1);
+  if (!moved) return;
+  let target = (typeof to.index === 'number') ? to.index : dstGroup.items.length;
+  if (target < 0) target = 0;
+  if (target > dstGroup.items.length) target = dstGroup.items.length;
+  dstGroup.items.splice(target, 0, moved);
+  closeAllEditPanels();
+  renderTabs();
+  generateYaml();
+}
+
+function moveGroupTo(from, to) {
+  if (isTabLocked(from.ti) || isTabLocked(to.ti)) return;
+  const srcTab = state.tabs[from.ti];
+  const dstTab = state.tabs[to.ti];
+  if (!srcTab || !dstTab) return;
+  if (from.ti === to.ti) {
+    const groups = srcTab.groups;
+    let target = (typeof to.index === 'number') ? to.index : groups.length;
+    if (target < 0) target = 0;
+    if (target > groups.length) target = groups.length;
+    if (target === from.gi || target === from.gi + 1) return;
+    const [moved] = groups.splice(from.gi, 1);
+    if (target > from.gi) target--;
+    groups.splice(target, 0, moved);
+    closeAllEditPanels();
+    renderTabs();
+    generateYaml();
+    return;
+  }
+  const [moved] = srcTab.groups.splice(from.gi, 1);
+  if (!moved) return;
+  let target = (typeof to.index === 'number') ? to.index : dstTab.groups.length;
+  if (target < 0) target = 0;
+  if (target > dstTab.groups.length) target = dstTab.groups.length;
+  dstTab.groups.splice(target, 0, moved);
+  closeAllEditPanels();
+  renderTabs();
+  generateYaml();
+}
+
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+  const inner = toast.querySelector('div');
+  if (inner) inner.textContent = message;
+  toast.classList.remove('hidden');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => {
+    toast.classList.add('hidden');
+    if (inner) inner.textContent = 'Copied to clipboard!';
+  }, 2000);
+}
+
+function clearDragHighlights() {
+  document.querySelectorAll('.tabs-dnd-over, .tabs-dnd-before, .tabs-dnd-after, .tabs-dnd-dragging').forEach(el => {
+    el.classList.remove('tabs-dnd-over', 'tabs-dnd-before', 'tabs-dnd-after', 'tabs-dnd-dragging');
+  });
+}
+
+function setHighlight(el, mode) {
+  clearDragHighlights();
+  if (!el) return;
+  el.classList.add('tabs-dnd-over');
+  if (mode === 'before') el.classList.add('tabs-dnd-before');
+  else if (mode === 'after') el.classList.add('tabs-dnd-after');
+  if (dragState) {
+    const src = findDragSourceEl();
+    if (src) src.classList.add('tabs-dnd-dragging');
+  }
+}
+
+function findDragSourceEl() {
+  if (!dragState) return null;
+  const { kind, from } = dragState;
+  const root = document.getElementById('tabs-container');
+  if (!root) return null;
+  if (kind === 'item') {
+    return root.querySelector(`[data-kind="item"][data-ti="${from.ti}"][data-gi="${from.gi}"][data-ii="${from.ii}"]`);
+  }
+  if (kind === 'group') {
+    return root.querySelector(`[data-kind="group"][data-ti="${from.ti}"][data-gi="${from.gi}"]`);
+  }
+  return null;
+}
+
+function openTabContent(tabHeaderEl) {
+  if (!tabHeaderEl) return;
+  const content = tabHeaderEl.querySelector(':scope > .tab-content');
+  if (content && !content.classList.contains('open')) content.classList.add('open');
+}
+
+let _tabsDndInitialized = false;
+function setupTabsDnd() {
+  if (_tabsDndInitialized) return;
+  _tabsDndInitialized = true;
+  const root = document.getElementById('tabs-container');
+  if (!root) return;
+
+  root.addEventListener('dragstart', e => {
+    const handle = e.target.closest('[data-kind]');
+    if (!handle || !root.contains(handle)) return;
+    const kind = handle.getAttribute('data-kind');
+    const ti = parseInt(handle.getAttribute('data-ti'));
+    const gi = handle.hasAttribute('data-gi') ? parseInt(handle.getAttribute('data-gi')) : undefined;
+    const ii = handle.hasAttribute('data-ii') ? parseInt(handle.getAttribute('data-ii')) : undefined;
+    if (isTabLocked(ti)) { e.preventDefault(); return; }
+    if (kind === 'item') {
+      dragState = { kind: 'item', from: { ti, gi, ii } };
+    } else if (kind === 'group') {
+      dragState = { kind: 'group', from: { ti, gi } };
+    } else {
+      return;
+    }
+    try {
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', JSON.stringify(dragState));
+      e.dataTransfer.setData('application/x-mafl-dnd', JSON.stringify(dragState));
+    } catch (_) {}
+    e.stopPropagation();
+    setTimeout(() => {
+      const src = findDragSourceEl();
+      if (src) src.classList.add('tabs-dnd-dragging');
+    }, 0);
+  });
+
+  root.addEventListener('dragend', () => {
+    dragState = null;
+    dragOverKey = '';
+    clearDragHighlights();
+  });
+
+  root.addEventListener('dragover', e => {
+    if (!dragState) return;
+    const itemEl = e.target.closest('[data-kind="item"]');
+    const groupEl = e.target.closest('[data-kind="group"]');
+    const tabEl = e.target.closest('[data-tabheader]');
+    if (dragState.kind === 'item') {
+      if (itemEl) {
+        const targetTi = parseInt(itemEl.getAttribute('data-ti'));
+        if (isTabLocked(targetTi)) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const rect = itemEl.getBoundingClientRect();
+        const after = (e.clientY - rect.top) > rect.height / 2;
+        setHighlight(itemEl, after ? 'after' : 'before');
+        return;
+      }
+      if (groupEl) {
+        const targetTi = parseInt(groupEl.getAttribute('data-ti'));
+        if (isTabLocked(targetTi)) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        setHighlight(groupEl, 'inside');
+        return;
+      }
+      if (tabEl) {
+        const targetTi = parseInt(tabEl.getAttribute('data-tabheader'));
+        if (!isTabLocked(targetTi)) openTabContent(tabEl);
+        return;
+      }
+    } else if (dragState.kind === 'group') {
+      if (groupEl) {
+        const targetTi = parseInt(groupEl.getAttribute('data-ti'));
+        if (isTabLocked(targetTi)) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const rect = groupEl.getBoundingClientRect();
+        const after = (e.clientY - rect.top) > rect.height / 2;
+        setHighlight(groupEl, after ? 'after' : 'before');
+        return;
+      }
+      if (tabEl) {
+        const targetTi = parseInt(tabEl.getAttribute('data-tabheader'));
+        if (isTabLocked(targetTi)) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        openTabContent(tabEl);
+        setHighlight(tabEl, 'inside');
+        return;
+      }
+    }
+  });
+
+  root.addEventListener('dragleave', e => {
+    if (!dragState) return;
+    if (!root.contains(e.relatedTarget)) {
+      clearDragHighlights();
+      if (dragState) {
+        const src = findDragSourceEl();
+        if (src) src.classList.add('tabs-dnd-dragging');
+      }
+    }
+  });
+
+  root.addEventListener('drop', e => {
+    if (!dragState) return;
+    const itemEl = e.target.closest('[data-kind="item"]');
+    const groupEl = e.target.closest('[data-kind="group"]');
+    const tabEl = e.target.closest('[data-tabheader]');
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (dragState.kind === 'item') {
+      if (itemEl) {
+        const ti = parseInt(itemEl.getAttribute('data-ti'));
+        const gi = parseInt(itemEl.getAttribute('data-gi'));
+        const ii = parseInt(itemEl.getAttribute('data-ii'));
+        if (isTabLocked(ti)) { dragState = null; clearDragHighlights(); return; }
+        const rect = itemEl.getBoundingClientRect();
+        const after = (e.clientY - rect.top) > rect.height / 2;
+        moveItemTo(dragState.from, { ti, gi, index: ii + (after ? 1 : 0) });
+      } else if (groupEl) {
+        const ti = parseInt(groupEl.getAttribute('data-ti'));
+        const gi = parseInt(groupEl.getAttribute('data-gi'));
+        if (isTabLocked(ti)) { dragState = null; clearDragHighlights(); return; }
+        moveItemTo(dragState.from, { ti, gi });
+      }
+    } else if (dragState.kind === 'group') {
+      if (groupEl) {
+        const ti = parseInt(groupEl.getAttribute('data-ti'));
+        const gi = parseInt(groupEl.getAttribute('data-gi'));
+        if (isTabLocked(ti)) { dragState = null; clearDragHighlights(); return; }
+        const rect = groupEl.getBoundingClientRect();
+        const after = (e.clientY - rect.top) > rect.height / 2;
+        moveGroupTo(dragState.from, { ti, index: gi + (after ? 1 : 0) });
+      } else if (tabEl) {
+        const ti = parseInt(tabEl.getAttribute('data-tabheader'));
+        if (isTabLocked(ti)) { dragState = null; clearDragHighlights(); return; }
+        moveGroupTo(dragState.from, { ti });
+      }
+    }
+    dragState = null;
+    clearDragHighlights();
+  });
+}
+
 function renderTabs() {
   const container = document.getElementById('tabs-container');
   const openPanels = new Set();
   container.querySelectorAll('[id^="item-edit-"], [id^="group-card-"]').forEach(el => {
     if (!el.classList.contains('hidden')) openPanels.add(el.id);
   });
+  const pasteGroupBtn = (clipboard && clipboard.kind === 'group')
+    ? (ti) => `<button onclick="pasteGroupInto(${ti})" class="text-xs text-orange-400 hover:text-orange-300 ml-2" title="Paste copied group into this tab">&#x2398; Paste group</button>`
+    : () => '';
   container.innerHTML = state.tabs.map((tab, ti) => `
-    <div class="border border-gray-600 rounded-lg p-3">
+    <div class="tabs-dnd-tab border border-gray-600 rounded-lg p-3" data-tabheader="${ti}">
       <div class="flex items-center gap-2 mb-3">
         <input type="text" value="${escHtml(tab.name)}" placeholder="Tab name" class="flex-1 bg-surface border border-gray-600 rounded px-2 py-1.5 text-sm font-medium" oninput="state.tabs[${ti}].name=this.value; generateYaml()">
         <input type="text" value="${escHtml(tab.icon)}" placeholder="Icon (mdi:home)" class="w-36 bg-surface border border-gray-600 rounded px-2 py-1.5 text-sm" oninput="state.tabs[${ti}].icon=this.value; generateYaml()">
@@ -651,7 +977,10 @@ function renderTabs() {
       <div class="space-y-3 ml-2">
         ${tab.groups.map((group, gi) => renderGroup(ti, gi, group)).join('')}
       </div>
-      <button onclick="addGroup(${ti})" class="mt-2 ml-2 text-xs text-accent hover:text-accent-hover">+ Add Group</button>
+      <div class="mt-2 ml-2 flex items-center">
+        <button onclick="addGroup(${ti})" class="text-xs text-accent hover:text-accent-hover">+ Add Group</button>
+        ${pasteGroupBtn(ti)}
+      </div>
     </div>
   `).join('');
   openPanels.forEach(id => {
@@ -693,24 +1022,27 @@ function renderGroupCardPanel(ti, gi, card) {
 
 function renderGroup(ti, gi, group) {
   const tab = state.tabs[ti];
+  const dragHandle = tab.locked ? '' : `<span class="text-gray-500 px-1 select-none" style="cursor: grab;" title="Drag to move group">&#x2630;</span>`;
   return `
-    <div class="border border-gray-700 rounded p-2 bg-surface">
+    <div class="tabs-dnd-group border border-gray-700 rounded p-2 bg-surface" data-kind="group" data-ti="${ti}" data-gi="${gi}" draggable="${tab.locked ? 'false' : 'true'}">
       <div class="flex items-center gap-2 mb-2">
+        ${dragHandle}
         <button onclick="moveGroup(${ti},${gi},-1)" class="text-gray-400 hover:text-white px-1" title="Move up">&#9650;</button>
         <button onclick="moveGroup(${ti},${gi},1)" class="text-gray-400 hover:text-white px-1" title="Move down">&#9660;</button>
-        <input type="text" value="${escHtml(group.name)}" placeholder="Group name" class="flex-1 bg-surface-light border border-gray-600 rounded px-2 py-1 text-sm" oninput="state.tabs[${ti}].groups[${gi}].name=this.value; generateYaml()">
-        <select class="bg-surface-light border border-gray-600 rounded px-2 py-1 text-xs" onchange="state.tabs[${ti}].groups[${gi}].display=this.value; renderTabs(); generateYaml()">
+        <input type="text" value="${escHtml(group.name)}" placeholder="Group name" class="flex-1 bg-surface-light border border-gray-600 rounded px-2 py-1 text-sm" oninput="state.tabs[${ti}].groups[${gi}].name=this.value; generateYaml()" draggable="false" onmousedown="event.stopPropagation()">
+        <select class="bg-surface-light border border-gray-600 rounded px-2 py-1 text-xs" onchange="state.tabs[${ti}].groups[${gi}].display=this.value; renderTabs(); generateYaml()" onmousedown="event.stopPropagation()">
           <option value="list" ${group.display === 'list' ? 'selected' : ''}>list</option>
           <option value="grid" ${group.display === 'grid' ? 'selected' : ''}>grid</option>
         </select>
         <button onclick="toggleGroupCard('group-card-${ti}-${gi}')" class="text-xs text-accent hover:text-accent-hover px-1" title="Card style override">card</button>
+        ${tab.locked ? '' : `<button onclick="copyGroup(${ti},${gi})" class="text-xs text-orange-400 hover:text-orange-300 px-1" title="Copy group">copy</button>`}
         ${tab.locked ? '' : `<button onclick="removeGroup(${ti},${gi})" class="text-red-400 hover:text-red-300 px-1">&times;</button>`}
       </div>
       ${renderGroupCardPanel(ti, gi, group.card || emptyCardStyle())}
       <div class="space-y-1">
         ${group.items.map((item, ii) => renderItem(ti, gi, ii, item)).join('')}
       </div>
-      <div class="flex flex-wrap gap-1 mt-1">
+      <div class="flex flex-wrap gap-1 mt-1 items-center">
         <button onclick="addItem(${ti},${gi},'bookmark')" class="text-xs text-accent hover:text-accent-hover">+ Bookmark</button>
         ${group.display === 'grid' ? `
         <span class="text-xs text-gray-500">|</span>
@@ -726,6 +1058,9 @@ function renderGroup(ti, gi, group) {
         <span class="text-xs text-gray-500">|</span>
         <button onclick="addItem(${ti},${gi},'custom-html')" class="text-xs text-accent hover:text-accent-hover">+ Custom HTML</button>
         ` : ''}
+        ${(clipboard && clipboard.kind === 'item') ? `
+        <span class="text-xs text-gray-500">|</span>
+        <button onclick="pasteItemInto(${ti},${gi})" class="text-xs text-orange-400 hover:text-orange-300" title="Paste copied item at end of this group">&#x2398; Paste item</button>` : ''}
       </div>
     </div>
   `;
@@ -890,15 +1225,19 @@ function renderItem(ti, gi, ii, item) {
           <div><label class="text-gray-500">Tags (comma separated)</label><input type="text" value="${escHtml((item.tags||[]).join(', '))}" placeholder="tag1, tag2" class="w-full bg-surface border border-gray-600 rounded px-2 py-1" oninput="state.tabs[${ti}].groups[${gi}].items[${ii}].tags=this.value.split(',').map(s=>s.trim()).filter(Boolean); generateYaml()"></div>
         </div>` : '';
 
+  const lockedTab = !!state.tabs[ti]?.locked;
+  const dragHandle = lockedTab ? '' : `<span class="text-gray-500 px-1 select-none" style="cursor: grab;" title="Drag to move">&#x2630;</span>`;
   return `
-    <div class="border border-gray-700 rounded p-2 bg-surface-lighter text-xs">
+    <div class="tabs-dnd-item border border-gray-700 rounded p-2 bg-surface-lighter text-xs" data-kind="item" data-ti="${ti}" data-gi="${gi}" data-ii="${ii}" draggable="${lockedTab ? 'false' : 'true'}">
       <div class="flex items-center gap-1 mb-1">
+        ${dragHandle}
         <button onclick="moveItem(${ti},${gi},${ii},-1)" class="text-gray-400 hover:text-white px-1" title="Move up">&#9650;</button>
         <button onclick="moveItem(${ti},${gi},${ii},1)" class="text-gray-400 hover:text-white px-1" title="Move down">&#9660;</button>
         ${typeBadge}
         <span class="flex-1 font-medium text-gray-200 truncate">${displayTitle}</span>
+        ${lockedTab ? '' : `<button onclick="copyItem(${ti},${gi},${ii})" class="text-orange-400 hover:text-orange-300 px-1 text-xs" title="Copy item">copy</button>`}
         <button onclick="toggleItemEdit('item-edit-${uid}')" class="text-blue-400 hover:text-blue-300 px-1 text-xs">edit</button>
-        ${state.tabs[ti]?.locked ? '' : `<button onclick="removeItem(${ti},${gi},${ii})" class="text-red-400 hover:text-red-300 px-1">&times;</button>`}
+        ${lockedTab ? '' : `<button onclick="removeItem(${ti},${gi},${ii})" class="text-red-400 hover:text-red-300 px-1">&times;</button>`}
       </div>
       <div id="item-edit-${uid}" class="hidden mt-2 space-y-2">
         ${typeFields}
@@ -1408,22 +1747,36 @@ function resetAll() {
 }
 
 // --- Import ---
+function isFileDrag(e) {
+  const types = e.dataTransfer && e.dataTransfer.types;
+  if (!types) return false;
+  for (let i = 0; i < types.length; i++) {
+    if (types[i] === 'Files') return true;
+  }
+  return false;
+}
+
 function setupDragDrop() {
   let dragCounter = 0;
   const overlay = document.getElementById('drop-overlay');
-  
+
   document.addEventListener('dragenter', e => {
+    if (!isFileDrag(e)) return;
     e.preventDefault();
     dragCounter++;
     overlay.classList.remove('hidden');
     overlay.classList.add('flex');
   });
   document.addEventListener('dragleave', e => {
+    if (!isFileDrag(e)) return;
     dragCounter--;
     if (dragCounter === 0) { overlay.classList.add('hidden'); overlay.classList.remove('flex'); }
   });
-  document.addEventListener('dragover', e => e.preventDefault());
+  document.addEventListener('dragover', e => {
+    if (isFileDrag(e)) e.preventDefault();
+  });
   document.addEventListener('drop', e => {
+    if (!isFileDrag(e)) return;
     e.preventDefault();
     dragCounter = 0;
     overlay.classList.add('hidden');

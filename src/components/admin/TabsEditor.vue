@@ -6,7 +6,17 @@
     </button>
     <div v-show="open" class="admin-section-body">
       <div class="space-y-4">
-        <div v-for="(tab, ti) in state.tabs" :key="ti" class="border border-fg/10 rounded-lg p-3">
+        <div
+          v-for="(tab, ti) in state.tabs"
+          :key="ti"
+          class="border rounded-lg p-3 transition-shadow"
+          :class="[
+            isTabDragOver(ti) ? 'border-brand-500/60 ring-2 ring-brand-500/40' : 'border-fg/10',
+          ]"
+          @dragenter="onTabDragEnter($event, ti)"
+          @dragover="onTabDragOver($event, ti)"
+          @drop="onTabDrop($event, ti)"
+        >
           <!-- Tab header -->
           <div class="flex items-center gap-2">
             <button class="text-fg-dimmed hover:text-fg px-1" :title="isTabOpen(ti) ? 'Collapse' : 'Expand'" @click="toggleTab(ti)">
@@ -70,13 +80,34 @@
           <div v-show="isTabOpen(ti)" class="mt-3">
             <!-- Groups -->
             <div class="space-y-3 ml-2">
-              <div v-for="(group, gi) in tab.groups" :key="gi" class="border border-fg/10 rounded p-2 bg-fg/[0.02]">
+              <div
+                v-for="(group, gi) in tab.groups"
+                :key="gi"
+                class="border rounded p-2 bg-fg/[0.02] transition-shadow"
+                :class="[
+                  isGroupDragOver(ti, gi) ? 'border-brand-500/60 ring-2 ring-brand-500/40' : 'border-fg/10',
+                  isDraggingGroup(ti, gi) ? 'opacity-50' : '',
+                  isGroupDropBefore(ti, gi) ? 'border-t-2 border-t-brand-500' : '',
+                  isGroupDropAfter(ti, gi) ? 'border-b-2 border-b-brand-500' : '',
+                ]"
+                :draggable="!tab.locked"
+                @dragstart="onGroupDragStart($event, ti, gi)"
+                @dragover="onGroupDragOver($event, ti, gi)"
+                @drop="onGroupDrop($event, ti, gi)"
+                @dragend="onDragEnd"
+              >
                 <!-- Group header -->
                 <div class="flex items-center gap-2 mb-2">
+                  <span
+                    v-if="!tab.locked"
+                    class="text-fg-dimmed/60 px-1 select-none"
+                    style="cursor: grab;"
+                    title="Drag to move group"
+                  >&#x2630;</span>
                   <button class="text-fg-dimmed hover:text-fg px-1" title="Move up" @click="moveGroup(ti, gi, -1)">&#9650;</button>
                   <button class="text-fg-dimmed hover:text-fg px-1" title="Move down" @click="moveGroup(ti, gi, 1)">&#9660;</button>
-                  <input v-model="group.name" type="text" class="admin-input flex-1" placeholder="Group name">
-                  <select v-model="group.display" class="admin-input text-xs">
+                  <input v-model="group.name" type="text" class="admin-input flex-1" placeholder="Group name" draggable="false" @mousedown.stop>
+                  <select v-model="group.display" class="admin-input text-xs" @mousedown.stop>
                     <option value="list">list</option>
                     <option value="grid">grid</option>
                   </select>
@@ -99,6 +130,12 @@
                     title="Card style override"
                     @click="toggleCard(ti, gi)"
                   >card</button>
+                  <button
+                    v-if="!tab.locked"
+                    class="text-orange-400 hover:text-orange-300 px-1 text-xs"
+                    title="Copy group"
+                    @click="copyGroup(ti, gi)"
+                  >copy</button>
                   <button v-if="!tab.locked" class="text-red-400 hover:text-red-300 px-1" @click="removeGroup(ti, gi)">&times;</button>
                 </div>
 
@@ -189,16 +226,34 @@
                   <div
                     v-for="(item, ii) in group.items"
                     :key="ii"
-                    class="border border-fg/10 rounded p-2 bg-fg/[0.03] text-xs"
+                    class="border rounded p-2 bg-fg/[0.03] text-xs transition-shadow"
+                    :class="[
+                      isItemDragOver(ti, gi, ii) ? 'border-brand-500/60' : 'border-fg/10',
+                      isDraggingItem(ti, gi, ii) ? 'opacity-50' : '',
+                      isItemDropBefore(ti, gi, ii) ? 'border-t-2 border-t-brand-500' : '',
+                      isItemDropAfter(ti, gi, ii) ? 'border-b-2 border-b-brand-500' : '',
+                    ]"
+                    :draggable="!tab.locked"
+                    @dragstart="onItemDragStart($event, ti, gi, ii)"
+                    @dragover="onItemDragOver($event, ti, gi, ii)"
+                    @drop="onItemDrop($event, ti, gi, ii)"
+                    @dragend="onDragEnd"
                   >
                     <!-- Stack item -->
                     <template v-if="item.stack">
                       <div class="flex items-center gap-1 mb-1">
+                        <span
+                          v-if="!tab.locked"
+                          class="text-fg-dimmed/60 px-1 select-none"
+                          style="cursor: grab;"
+                          title="Drag to move"
+                        >&#x2630;</span>
                         <button class="text-fg-dimmed hover:text-fg px-1" title="Move up" @click="moveItem(ti, gi, ii, -1)">&#9650;</button>
                         <button class="text-fg-dimmed hover:text-fg px-1" title="Move down" @click="moveItem(ti, gi, ii, 1)">&#9660;</button>
                         <span class="text-[10px] px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-400">Stack</span>
                         <span v-if="item.span && parseInt(item.span) > 1" class="text-[10px] px-1.5 py-0.5 rounded bg-fg/10 text-fg-dimmed">span {{ item.span }}</span>
                         <span class="flex-1 font-medium text-fg truncate">{{ item.stack.length }} {{ item.stack.length === 1 ? 'item' : 'items' }}</span>
+                        <button v-if="!tab.locked" class="text-orange-400 hover:text-orange-300 px-1 text-xs" title="Copy stack" @click="copyItem(ti, gi, ii)">copy</button>
                         <button class="text-brand-500 hover:text-brand-400 px-1 text-xs" @click="toggleEdit(ti, gi, ii)">
                           {{ isEditing(ti, gi, ii) ? 'close' : 'edit' }}
                         </button>
@@ -253,12 +308,19 @@
                     <!-- Regular item -->
                     <template v-else>
                       <div class="flex items-center gap-1 mb-1">
+                        <span
+                          v-if="!tab.locked"
+                          class="text-fg-dimmed/60 px-1 select-none"
+                          style="cursor: grab;"
+                          title="Drag to move"
+                        >&#x2630;</span>
                         <button class="text-fg-dimmed hover:text-fg px-1" title="Move up" @click="moveItem(ti, gi, ii, -1)">&#9650;</button>
                         <button class="text-fg-dimmed hover:text-fg px-1" title="Move down" @click="moveItem(ti, gi, ii, 1)">&#9660;</button>
                         <span v-if="item.serviceType !== 'bookmark'" class="text-[10px] px-1.5 py-0.5 rounded bg-brand-500/20 text-brand-500">
                           {{ typeLabel(item.serviceType) }}
                         </span>
                         <span class="flex-1 font-medium text-fg truncate">{{ itemTitle(item) }}</span>
+                        <button v-if="!tab.locked" class="text-orange-400 hover:text-orange-300 px-1 text-xs" title="Copy item" @click="copyItem(ti, gi, ii)">copy</button>
                         <button class="text-brand-500 hover:text-brand-400 px-1 text-xs" @click="toggleEdit(ti, gi, ii)">
                           {{ isEditing(ti, gi, ii) ? 'close' : 'edit' }}
                         </button>
@@ -272,11 +334,17 @@
                 </div>
 
                 <!-- Add bookmark -->
-                <div class="mt-2">
+                <div class="mt-2 flex items-center gap-2">
                   <button
                     class="text-xs text-brand-500 hover:text-brand-400"
                     @click="addItem(ti, gi, 'bookmark')"
                   >+ Bookmark</button>
+                  <button
+                    v-if="clipboard?.kind === 'item'"
+                    class="text-xs text-orange-400 hover:text-orange-300"
+                    title="Paste copied item at end of this group"
+                    @click="pasteItemInto(ti, gi)"
+                  >&#x2398; Paste item</button>
                 </div>
 
                 <!-- Add module accordion -->
@@ -315,12 +383,20 @@
                 </template>
               </div>
             </div>
-            <button
-              class="mt-2 ml-2 text-xs text-brand-500 hover:text-brand-400"
-              @click="addGroup(ti)"
-            >
-              + Add Group
-            </button>
+            <div class="mt-2 ml-2 flex items-center gap-2">
+              <button
+                class="text-xs text-brand-500 hover:text-brand-400"
+                @click="addGroup(ti)"
+              >
+                + Add Group
+              </button>
+              <button
+                v-if="clipboard?.kind === 'group'"
+                class="text-xs text-orange-400 hover:text-orange-300"
+                title="Paste copied group into this tab"
+                @click="pasteGroupInto(ti)"
+              >&#x2398; Paste group</button>
+            </div>
           </div>
         </div>
       </div>
@@ -368,6 +444,13 @@ const props = defineProps<{
   moveStackChild: (tabIndex: number, groupIndex: number, itemIndex: number, childIndex: number, direction: -1 | 1) => void
   exportTabYaml: (tabIndex: number) => string
   importTabFromYaml: (yamlStr: string) => boolean
+  clipboard: { kind: 'item' | 'group'; payload: BuilderItem | BuilderGroup } | null
+  copyItem: (tabIndex: number, groupIndex: number, itemIndex: number) => void
+  copyGroup: (tabIndex: number, groupIndex: number) => void
+  pasteItemInto: (tabIndex: number, groupIndex: number, atIndex?: number) => void
+  pasteGroupInto: (tabIndex: number, atIndex?: number) => void
+  moveItemTo: (from: { ti: number; gi: number; ii: number }, to: { ti: number; gi: number; index?: number }) => void
+  moveGroupTo: (from: { ti: number; gi: number }, to: { ti: number; index?: number }) => void
 }>()
 
 const open = ref(true)
@@ -563,5 +646,192 @@ function itemTitle(item: BuilderItem) {
   if (item.serviceType === 'web-radio' && item.wrStationUuid) return typeLabel(item.serviceType) || item.serviceType
   if (item.serviceType !== 'bookmark') return typeLabel(item.serviceType) || item.serviceType
   return '(untitled)'
+}
+
+// --- Drag & drop ---
+
+type ItemFrom = { ti: number; gi: number; ii: number }
+type GroupFrom = { ti: number; gi: number }
+type DragPayload = { kind: 'item'; from: ItemFrom } | { kind: 'group'; from: GroupFrom }
+
+const dragState = ref<DragPayload | null>(null)
+const dragOverKey = ref<string>('')
+const dragInsertAfter = ref<boolean>(false)
+
+function isTabLocked(ti: number): boolean {
+  return !!props.state.tabs[ti]?.locked
+}
+
+function onItemDragStart(e: DragEvent, ti: number, gi: number, ii: number) {
+  e.stopPropagation()
+  if (isTabLocked(ti)) {
+    e.preventDefault()
+    return
+  }
+  dragState.value = { kind: 'item', from: { ti, gi, ii } }
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'move'
+    try { e.dataTransfer.setData('text/plain', JSON.stringify(dragState.value)) }
+    catch {}
+  }
+}
+
+function onGroupDragStart(e: DragEvent, ti: number, gi: number) {
+  if (isTabLocked(ti)) {
+    e.preventDefault()
+    return
+  }
+  dragState.value = { kind: 'group', from: { ti, gi } }
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'move'
+    try { e.dataTransfer.setData('text/plain', JSON.stringify(dragState.value)) }
+    catch {}
+  }
+}
+
+function onDragEnd() {
+  dragState.value = null
+  dragOverKey.value = ''
+}
+
+function onItemDragOver(e: DragEvent, ti: number, gi: number, ii: number) {
+  const d = dragState.value
+  if (!d || d.kind !== 'item') return
+  if (isTabLocked(ti)) return
+  e.preventDefault()
+  e.stopPropagation()
+  if (e.dataTransfer) e.dataTransfer.dropEffect = 'move'
+  const el = e.currentTarget as HTMLElement
+  const rect = el.getBoundingClientRect()
+  dragInsertAfter.value = (e.clientY - rect.top) > rect.height / 2
+  dragOverKey.value = `i-${ti}-${gi}-${ii}-${dragInsertAfter.value ? 'a' : 'b'}`
+}
+
+function onItemDrop(e: DragEvent, ti: number, gi: number, ii: number) {
+  const d = dragState.value
+  if (!d || d.kind !== 'item') return
+  if (isTabLocked(ti)) return
+  e.preventDefault()
+  e.stopPropagation()
+  const el = e.currentTarget as HTMLElement
+  const rect = el.getBoundingClientRect()
+  const insertAfter = (e.clientY - rect.top) > rect.height / 2
+  const dst = ii + (insertAfter ? 1 : 0)
+  props.moveItemTo(d.from, { ti, gi, index: dst })
+  closeOpenEdits()
+  onDragEnd()
+}
+
+function onGroupDragOver(e: DragEvent, ti: number, gi: number) {
+  const d = dragState.value
+  if (!d) return
+  if (isTabLocked(ti)) return
+  if (d.kind === 'item') {
+    e.preventDefault()
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move'
+    if (!dragOverKey.value.startsWith(`i-${ti}-${gi}-`)) {
+      dragOverKey.value = `g-${ti}-${gi}`
+    }
+  }
+  else if (d.kind === 'group') {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move'
+    const el = e.currentTarget as HTMLElement
+    const rect = el.getBoundingClientRect()
+    dragInsertAfter.value = (e.clientY - rect.top) > rect.height / 2
+    dragOverKey.value = `g-${ti}-${gi}-${dragInsertAfter.value ? 'a' : 'b'}`
+  }
+}
+
+function onGroupDrop(e: DragEvent, ti: number, gi: number) {
+  const d = dragState.value
+  if (!d) return
+  if (isTabLocked(ti)) return
+  e.preventDefault()
+  e.stopPropagation()
+  if (d.kind === 'item') {
+    props.moveItemTo(d.from, { ti, gi })
+  }
+  else if (d.kind === 'group') {
+    const el = e.currentTarget as HTMLElement
+    const rect = el.getBoundingClientRect()
+    const insertAfter = (e.clientY - rect.top) > rect.height / 2
+    const dst = gi + (insertAfter ? 1 : 0)
+    props.moveGroupTo(d.from, { ti, index: dst })
+  }
+  closeOpenEdits()
+  onDragEnd()
+}
+
+function onTabDragEnter(_e: DragEvent, ti: number) {
+  const d = dragState.value
+  if (!d) return
+  if (d.kind === 'item' && !isTabOpen(ti)) {
+    openTabs.value.add(ti)
+  }
+}
+
+function onTabDragOver(e: DragEvent, ti: number) {
+  const d = dragState.value
+  if (!d) return
+  if (isTabLocked(ti)) return
+  if (d.kind === 'group') {
+    e.preventDefault()
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move'
+    if (!dragOverKey.value.startsWith(`g-${ti}-`)) {
+      dragOverKey.value = `t-${ti}`
+    }
+  }
+}
+
+function onTabDrop(e: DragEvent, ti: number) {
+  const d = dragState.value
+  if (!d) return
+  if (isTabLocked(ti)) return
+  if (d.kind === 'group') {
+    e.preventDefault()
+    e.stopPropagation()
+    props.moveGroupTo(d.from, { ti })
+    closeOpenEdits()
+    onDragEnd()
+  }
+}
+
+function closeOpenEdits() {
+  openEdits.value.clear()
+  openCards.value.clear()
+  openModulePanels.value.clear()
+}
+
+function isItemDragOver(ti: number, gi: number, ii: number) {
+  return dragOverKey.value.startsWith(`i-${ti}-${gi}-${ii}-`)
+}
+function isItemDropBefore(ti: number, gi: number, ii: number) {
+  return dragOverKey.value === `i-${ti}-${gi}-${ii}-b`
+}
+function isItemDropAfter(ti: number, gi: number, ii: number) {
+  return dragOverKey.value === `i-${ti}-${gi}-${ii}-a`
+}
+function isGroupDragOver(ti: number, gi: number) {
+  return dragOverKey.value === `g-${ti}-${gi}` || dragOverKey.value.startsWith(`g-${ti}-${gi}-`)
+}
+function isGroupDropBefore(ti: number, gi: number) {
+  return dragOverKey.value === `g-${ti}-${gi}-b`
+}
+function isGroupDropAfter(ti: number, gi: number) {
+  return dragOverKey.value === `g-${ti}-${gi}-a`
+}
+function isTabDragOver(ti: number) {
+  return dragOverKey.value === `t-${ti}`
+}
+
+function isDraggingItem(ti: number, gi: number, ii: number) {
+  const d = dragState.value
+  return !!(d && d.kind === 'item' && d.from.ti === ti && d.from.gi === gi && d.from.ii === ii)
+}
+function isDraggingGroup(ti: number, gi: number) {
+  const d = dragState.value
+  return !!(d && d.kind === 'group' && d.from.ti === ti && d.from.gi === gi)
 }
 </script>
