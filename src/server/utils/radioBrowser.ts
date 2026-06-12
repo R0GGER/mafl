@@ -9,8 +9,9 @@ const SERVERS = [
 
 const USER_AGENT = 'MaflPlus/0.15.4'
 
-const RESOLVE_CACHE_TTL_MS = 15 * 60 * 1000
+const CACHE_TTL_MS = 15 * 60 * 1000
 const resolvedUrlCache = new Map<string, { url: string, expiresAt: number }>()
+const stationCache = new Map<string, { station: RadioBrowserStation, expiresAt: number }>()
 
 async function resolveStationPlaybackUrl(uuid: string, url: string): Promise<string> {
   const cached = resolvedUrlCache.get(uuid)
@@ -21,7 +22,7 @@ async function resolveStationPlaybackUrl(uuid: string, url: string): Promise<str
   const resolved = await resolveFinalStreamUrl(url)
   resolvedUrlCache.set(uuid, {
     url: resolved,
-    expiresAt: Date.now() + RESOLVE_CACHE_TTL_MS,
+    expiresAt: Date.now() + CACHE_TTL_MS,
   })
 
   return resolved
@@ -118,6 +119,11 @@ export async function searchStations(params: {
 }
 
 export async function getStationByUuid(uuid: string): Promise<RadioBrowserStation | null> {
+  const cached = stationCache.get(uuid)
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.station
+  }
+
   const response = await fetchRadioBrowser(`/json/stations/byuuid/${encodeURIComponent(uuid)}`)
   const data = await response.json() as RadioBrowserStationRaw[]
   if (!data.length) {
@@ -126,6 +132,12 @@ export async function getStationByUuid(uuid: string): Promise<RadioBrowserStatio
 
   const station = normalizeStation(data[0])
   station.urlResolved = await resolveStationPlaybackUrl(station.stationuuid, station.urlResolved)
+
+  stationCache.set(uuid, {
+    station,
+    expiresAt: Date.now() + CACHE_TTL_MS,
+  })
+
   return station
 }
 

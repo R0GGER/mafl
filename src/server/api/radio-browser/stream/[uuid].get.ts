@@ -73,6 +73,38 @@ export default defineEventHandler(async (event) => {
     || guessContentType(station.codec)
   const icyName = upstream.headers.get('icy-name') || station.name
 
+  const reader = upstream.body.getReader()
+
+  // Buffer initial audio data before sending response headers so the browser
+  // receives actual decodable bytes together with the Content-Type. Without
+  // this, slow upstreams cause the browser to fire MEDIA_ERR_DECODE on the
+  // empty response body before the first chunk arrives.
+  const initialChunks: Uint8Array[] = []
+  let initialBytes = 0
+  const MIN_INITIAL_BYTES = 8192
+
+  try {
+    while (initialBytes < MIN_INITIAL_BYTES) {
+      const { done, value } = await reader.read()
+      if (done || !value?.length) {
+        break
+      }
+      initialChunks.push(value)
+      initialBytes += value.length
+    }
+  }
+  catch {
+    reader.releaseLock()
+    controller.abort()
+    throw createError({ statusCode: 502, statusMessage: 'Stream produced no data' })
+  }
+
+  if (initialBytes === 0) {
+    reader.releaseLock()
+    controller.abort()
+    throw createError({ statusCode: 502, statusMessage: 'Stream produced no data' })
+  }
+
   // Disable chunked encoding — Firefox's audio pipeline expects a raw byte
   // stream like Icecast serves (HTTP/1.0-style, connection-close).
   res.chunkedEncoding = false
@@ -87,7 +119,9 @@ export default defineEventHandler(async (event) => {
     'icy-name': icyName,
   })
 
-  const reader = upstream.body.getReader()
+  for (const chunk of initialChunks) {
+    res.write(chunk)
+  }
 
   try {
     while (true) {

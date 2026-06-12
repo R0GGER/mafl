@@ -1,6 +1,33 @@
 # Changelog
 
 
+## Web radio — first-click playback reliability across all browsers
+
+### 🐛 Bug Fixes
+
+- **web-radio:** Fixed "Stream decode error — try an MP3 station" appearing on the first click of a station — playback now starts reliably the first time
+- **web-radio:** Browser-specific playback path — Chrome/Edge/Safari connect directly to the resolved stream URL for instant playback (RadioMii-style); Firefox routes through the server-side proxy because it cannot reliably decode raw Icecast streams (`NS_ERROR_DOM_MEDIA_MEDIASINK_ERR`)
+- **web-radio:** Wait for the browser `canplay` event before calling `audio.play()` when using the proxy — prevents `MEDIA_ERR_DECODE` triggered by calling `play()` on a stream that has not yet received decodable data
+- **web-radio:** Server-side stream proxy now buffers at least 8 KB of upstream audio before sending response headers — the browser receives `Content-Type` together with actual decodable bytes, eliminating empty-response decode errors on slow streams
+- **web-radio:** Suppressed transient `error` events fired during the startup handshake and after playback has already begun — prevents the error banner from flashing while the stream is connecting
+- **pwa:** Added `skipWaiting: true` and `clientsClaim: true` to Workbox config — new builds activate immediately on the next page load instead of waiting for every tab to close, so fixes deployed to the container reach the browser without manual service-worker unregistration
+
+### 🚀 Enhancements
+
+- **web-radio:** Added in-memory station cache (15-minute TTL) in `getStationByUuid()` — eliminates a Radio Browser API round-trip on repeat clicks and reduces first-click latency for stations the page has already resolved
+- **web-radio:** Centralized retry/error handling in the player composable — guarantees the audio element is in a clean state between attempts and reports a single, accurate error message when playback ultimately fails
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/composables/useWebRadioPlayer.ts` | Firefox detection via user agent; direct stream URL for other browsers; `canplay` await + `audio.load()` in the proxy path; `startingPlayback` flag and `playing.value` guard suppress spurious error events during startup |
+| `src/server/api/radio-browser/stream/[uuid].get.ts` | Buffer ≥ 8 KB of upstream data before writing response headers; 502 if upstream produced no data |
+| `src/server/utils/radioBrowser.ts` | Added `stationCache` (15-minute TTL) keyed by station UUID; renamed cache constant to `CACHE_TTL_MS` |
+| `nuxt.config.ts` | PWA `workbox`: `skipWaiting: true` + `clientsClaim: true` so service worker updates apply immediately |
+
+---
+
 ## Web radio — server-side stream proxy for Firefox compatibility
 
 ### 🐛 Bug Fixes

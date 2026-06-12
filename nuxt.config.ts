@@ -34,6 +34,8 @@ export default defineNuxtConfig({
       globPatterns: ['**/*.{js,css,html,txt,png,ico,svg}'],
       navigateFallbackDenylist: [/^\/api\//, /^\/admin/],
       cleanupOutdatedCaches: true,
+      skipWaiting: true,
+      clientsClaim: true,
       runtimeCaching: [
         {
           urlPattern: /^\/api\/favicon\/.+/,
