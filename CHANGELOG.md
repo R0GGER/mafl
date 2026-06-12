@@ -1,6 +1,28 @@
 # Changelog
 
 
+## Web radio — resilient Radio Browser API client
+
+### 🐛 Bug Fixes
+
+- **web-radio:** Suppressed noisy `Radio Browser request failed TypeError: fetch failed ... ECONNRESET` stack traces when the upstream API is briefly unreachable — replaced with a single one-line warning rate-limited to once per minute
+- **web-radio:** Click tracking failures are now silently ignored — `trackStationClick()` is best-effort analytics and should never surface as a server error
+- **web-radio:** `getStationByUuid()` falls back to stale cached data (up to 24 hours) when the Radio Browser API is unreachable — playback continues working during transient upstream outages
+
+### 🚀 Enhancements
+
+- **web-radio:** Added `all.api.radio-browser.info` as a fourth fallback endpoint (round-robin DNS) — increases the chance of at least one server being reachable
+- **web-radio:** Reduced per-server timeout from 10s to 8s and added a small jittered backoff (100–300 ms) between fallback attempts — faster failover without retry storms
+- **web-radio:** Cleaner error summaries — surfaces the underlying network code (`ECONNRESET`, `ETIMEDOUT`, `HTTP 5xx`) instead of the full undici stack
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/server/utils/radioBrowser.ts` | Rate-limited concise error logging; added stale-while-error cache fallback (24 h); jittered backoff between server attempts; added `all.api.radio-browser.info` to the server list; silenced `trackStationClick` failures |
+
+---
+
 ## Web radio — first-click playback reliability across all browsers
 
 ### 🐛 Bug Fixes

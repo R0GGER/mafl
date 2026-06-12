@@ -15,10 +15,6 @@ export default defineNuxtConfig({
           sizes: '180x180',
         },
         {
-          rel: 'mask-icon',
-          href: '/favicons/logo.svg',
-        },
-        {
           rel: 'manifest',
           href: '/manifest.webmanifest',
         },
