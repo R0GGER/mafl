@@ -354,15 +354,31 @@ async function resetFavicon() {
   }
 }
 
+interface AppliedLogo {
+  type: 'image' | 'both'
+  image: string
+  text?: string
+  fontSize?: string
+  fontWeight?: string | number
+  fontFamily?: string
+  color?: string
+  backgroundColor?: string
+  borderRadius?: string
+  padding?: string
+}
+
 async function useAsLogo() {
   if (busy.value || applyingAsLogo.value) return
   applyingAsLogo.value = true
   uploadError.value = ''
   try {
-    const res = await $fetch<{ ok: true; image: string }>('/api/admin/favicon-use-as-logo', { method: 'POST' })
+    const res = await $fetch<{ ok: true; image: string; logo: AppliedLogo }>('/api/admin/favicon-use-as-logo', { method: 'POST' })
     await loadStatus()
+    // Let the parent sync the in-memory builder state so the Logo Image input
+    // (and the YAML preview) immediately reflect the new favicon-backed logo.
+    emit('logo-applied', res.logo)
     emit('toast', {
-      message: `Site logo set to ${res.image}. Reload the page to see it on the homepage.`,
+      message: `Site logo set to ${res.image}.`,
       type: 'success',
     })
   }
@@ -378,6 +394,7 @@ async function useAsLogo() {
 
 const emit = defineEmits<{
   (e: 'toast', payload: { message: string; type: 'success' | 'error' }): void
+  (e: 'logo-applied', logo: AppliedLogo): void
 }>()
 
 onMounted(() => {

@@ -210,7 +210,11 @@
       <!-- App favicon (embedded; shares the same Logo & Favicon accordion) -->
       <div class="mt-6 pt-4 border-t border-fg/10">
         <div class="font-semibold text-fg text-sm mb-3">App Favicon</div>
-        <AdminFaviconSettings inline @toast="(p) => emit('toast', p)" />
+        <AdminFaviconSettings
+          inline
+          @toast="(p) => emit('toast', p)"
+          @logo-applied="onFaviconAppliedAsLogo"
+        />
       </div>
     </div>
   </section>
@@ -219,10 +223,41 @@
 <script setup lang="ts">
 import type { BuilderState } from '~/composables/useConfigBuilder'
 
-defineProps<{ state: BuilderState }>()
+interface AppliedLogo {
+  type: 'image' | 'both'
+  image: string
+  text?: string
+  fontSize?: string
+  fontWeight?: string | number
+  fontFamily?: string
+  color?: string
+  backgroundColor?: string
+  borderRadius?: string
+  padding?: string
+}
+
+const props = defineProps<{ state: BuilderState }>()
 const emit = defineEmits<{
   (e: 'toast', payload: { message: string; type: 'success' | 'error' }): void
 }>()
 const open = ref(true)
 const openLogo = ref(false)
+
+// Mirror what the server wrote to config.yml back into the reactive form
+// state so the Logo Image input + YAML preview update without a reload.
+function onFaviconAppliedAsLogo(logo: AppliedLogo) {
+  const s = props.state
+  s.logoType = logo.type
+  s.logoImage = logo.image
+  if (logo.type === 'both') {
+    if (logo.text !== undefined) s.logoText = logo.text
+    if (logo.fontSize !== undefined) s.logoFontSize = logo.fontSize
+    if (logo.fontWeight !== undefined) s.logoFontWeight = String(logo.fontWeight)
+    if (logo.fontFamily !== undefined) s.logoFontFamily = logo.fontFamily
+    if (logo.color !== undefined) s.logoColor = logo.color
+    if (logo.backgroundColor !== undefined) s.logoBackgroundColor = logo.backgroundColor
+    if (logo.borderRadius !== undefined) s.logoBorderRadius = logo.borderRadius
+    if (logo.padding !== undefined) s.logoPadding = logo.padding
+  }
+}
 </script>

@@ -1,6 +1,22 @@
 # Changelog
 
 
+## "Use as site logo" — sync admin form state after the patch
+
+### 🐛 Bug Fixes
+
+- **admin:** Clicking **Use as site logo** wrote the new `logo` block to `config.yml` on disk but the in-memory builder state was never updated, so the **Logo Image** input stayed empty, the **Logo Type** dropdown didn't switch, and the YAML preview kept showing the old value until a full page reload
+- **admin:** `FaviconSettings.vue` now emits a new `logo-applied` event with the full logo object returned by the server (including any preserved `text` / `fontSize` / `color` / etc. from an upgraded `type: text` → `type: both`); `GlobalSettings.vue` consumes it and patches the `state.logoType` / `state.logoImage` / `state.logoText` / styling fields directly — using the exact same mapping as `loadConfigFromYaml()` so behaviour stays consistent
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/components/admin/FaviconSettings.vue` | Added `AppliedLogo` type + `logo-applied` emit; `useAsLogo()` now forwards the server's `res.logo` to the parent |
+| `src/components/admin/GlobalSettings.vue` | Added `onFaviconAppliedAsLogo()` handler wired to `@logo-applied`; mutates the reactive `state` so the Logo Image input, Logo Type dropdown, and YAML preview update immediately |
+
+---
+
 ## Admin favicon upload — auto-generates all variants and can become the site logo
 
 ### 🚀 Enhancements
