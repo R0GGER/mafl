@@ -1,6 +1,53 @@
 # Changelog
 
 
+## Admin favicon upload — auto-generates all variants and can become the site logo
+
+### 🚀 Enhancements
+
+- **admin:** New **App Favicon** section in `/admin` — drag-and-drop (or pick) a single PNG/SVG and the server generates the complete favicon set: `favicon.ico` (multi-resolution 16/32/48), `favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png` (180×180), `pwa-192x192.png`, `pwa-512x512.png`, `android-chrome-192x192.png`, `android-chrome-512x512.png` — all written atomically to `./data/favicons/` so a half-failed render never leaves the directory in a mixed state
+- **admin:** **Live preview grid** of all eight generated variants, with cache-busted `?v=<timestamp>` URLs, opacity dimming for any variant that fails to load (with auto-recovery on the next successful load), and a status header showing source filename, size, MIME, and generation timestamp
+- **admin:** **Reset to default** button restores the bundled defaults that ship with the Docker image
+- **admin:** **Use as site logo** button (with **Re-apply as logo** when already active) — points the `logo` config field at `favicons/source.<png|svg>`, preserves any existing logo text by upgrading a `type: text` logo to `type: both`, and uses `yaml.parseDocument` so manual comments and formatting in `config.yml` are preserved
+- **admin:** **Logo & Favicon** are now grouped into one accordion in `GlobalSettings.vue` — the favicon UI is embedded inline below the logo form (no more separate accordion section)
+- **server:** New Nitro middleware `server/middleware/favicons.ts` serves runtime uploads from `./data/favicons/` with the bundled defaults (snapshotted to `./server/favicons-defaults/`) as fallback — sends correct MIME type, `Cache-Control: public, max-age=300, must-revalidate`, weak ETag, 304 Not Modified support, and an `X-Favicon-Source: runtime|bundled` header for diagnostics
+- **server:** `getFaviconVersion()` powers cache-busting — `<link>` tags injected via `src/plugins/favicons.ts` and the PWA `manifest.webmanifest` both append `?v=<timestamp>` so browsers fetch new icons immediately after an upload
+- **server:** New endpoints — `GET /api/admin/favicon` (status + source asset path + "used as logo" flag), `POST /api/admin/favicon` (multipart upload + generation, max 5 MB, PNG/SVG only), `DELETE /api/admin/favicon` (reset), `POST /api/admin/favicon-use-as-logo` (patches `config.yml`), and `GET /api/favicon-version` (public cache-bust value)
+- **deps:** Added `sharp` (^0.35.1) for image rasterization/resizing and `png-to-ico` (^3.0.1) for multi-resolution `.ico` assembly
+
+### 🐛 Bug Fixes
+
+- **docker:** Fixed `[500] Could not load the "sharp" module using the linuxmusl-x64 runtime` — Nitro's tree-shaker did not follow Sharp's platform-specific optional deps (`@img/sharp-linuxmusl-x64`, `@img/sharp-libvips-linuxmusl-x64`) into `.output/`, so the Dockerfile now explicitly copies `node_modules/@img/sharp-*` into `.output/server/node_modules/@img/` for the build platform
+- **server:** Fixed "only 4 of the 8 favicon variants get replaced" — Nitro's static asset handler (`_wFwA8T`) is registered as the very first middleware in the handler chain (before our `/favicons` middleware) and short-circuits any URL present in the build-time public-assets manifest, so the 4 bundled defaults (`favicon.ico`, `apple-touch-icon.png`, `pwa-192x192.png`, `pwa-512x512.png`) were always served instead of the upload. The Dockerfile now (1) snapshots the bundled defaults to `.output/server/favicons-defaults/` and removes the originals from `.output/public/favicons/`, and (2) runs a Node-snippet that strips all `"/favicons/*"` keys from the public-assets manifest inside `nitro.mjs` so requests fall through to our middleware
+- **admin:** Preview thumbnails that failed to load the first time stayed dimmed forever — added `missingVariants` reactive Set with `@load` / `@error` handlers and a `refreshPreview()` helper that resets the set after every upload/reset, so previews correctly recover when files become available
+
+### 💥 Breaking Changes
+
+- **server:** Bundled favicons no longer live at `.output/public/favicons/` in the production image. They are snapshotted to `.output/server/favicons-defaults/` during the Docker build and served via the new `/favicons/*` middleware. Bind-mounting `./mafl/favicons:/app/public/favicons` (previously commented out in `docker-compose.yml`) no longer has any effect — use the `/admin` upload flow instead, which writes to `./data/favicons/` via the existing `./mafl:/app/data` mount
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `package.json` | Added `sharp ^0.35.1` and `png-to-ico ^3.0.1` |
+| `Dockerfile` | Copy Sharp's platform-specific native binaries into `.output/server/node_modules/@img/`; snapshot `.output/public/favicons/` to `.output/server/favicons-defaults/` and delete the originals; strip `/favicons/*` keys from the Nitro public-assets manifest in `nitro.mjs` so the dynamic middleware takes over |
+| `src/server/utils/favicons.ts` | New utility — `FAVICONS_RUNTIME_DIR`, `FAVICONS_PUBLIC_DIR`, `FAVICON_PNG_VARIANTS`, `FAVICON_ICO_SIZES`, `mimeForFile`, `getFaviconMeta`, `getFaviconVersion`, `generateFavicons` (renders all buffers in memory first, then atomically clears + writes the runtime dir), `clearRuntimeDir`, `removeFavicons`, `listFaviconNames`, `findFaviconSourceAsset` |
+| `src/server/middleware/favicons.ts` | New middleware — serves `/favicons/<name>` from `./data/favicons/` (runtime) then `./server/favicons-defaults/` (bundled), with sanitized filename check, MIME detection, weak ETag, 304 handling, and `X-Favicon-Source` debug header |
+| `src/server/api/admin/favicon.get.ts` | New endpoint returning custom/bundled status, version, source meta, generated timestamp, expected variants list, source asset path, and a `usedAsLogo` flag based on the current `config.yml` |
+| `src/server/api/admin/favicon.post.ts` | New multipart upload endpoint — admin-gated, validates PNG/SVG, ≤ 5 MB, calls `generateFavicons` |
+| `src/server/api/admin/favicon.delete.ts` | New endpoint — admin-gated reset that clears the runtime dir |
+| `src/server/api/admin/favicon-use-as-logo.post.ts` | New endpoint — patches `config.yml` via `yaml.parseDocument` (preserves comments), upgrades `type: text` logos to `type: both`, validates the patched config with the existing zod schema |
+| `src/server/api/favicon-version.get.ts` | New public endpoint returning the current favicon version for client-side cache-busting |
+| `src/plugins/favicons.ts` | New Nuxt plugin — injects `<link>` tags for `favicon.ico`, `favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png` with `?v=<version>` query strings |
+| `src/server/routes/manifest.webmanifest.get.ts` | Append `?v=<faviconVersion>` to the PWA manifest's icon `src` values |
+| `nuxt.config.ts` | Removed static favicon `<link>` tags (now injected by the plugin); manifest link retained |
+| `src/components/admin/FaviconSettings.vue` | New admin component — accordion (or inline) with drop zone, file picker, status header, warnings/errors, Upload & Generate, Reset to default, Use as site logo / Re-apply as logo, live 8-variant preview grid with cache-busting + missing-variant tracking; `inline` prop renders without its own accordion wrapper |
+| `src/components/admin/GlobalSettings.vue` | Renamed "Logo" accordion to **"Logo & Favicon"**; embedded `<AdminFaviconSettings inline />` inside it with a divider; added `toast` event relay |
+| `src/pages/admin/index.vue` | Removed the standalone `<AdminFaviconSettings>` mount; wired `@toast="onChildToast"` to `<AdminGlobalSettings>` instead |
+| `docs/favicons.md` | Documented the new `/admin` upload workflow alongside the existing volume-mount approach |
+
+---
+
 ## Editable YAML output with live syntax highlighting
 
 ### 🚀 Enhancements

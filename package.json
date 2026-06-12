@@ -19,7 +19,9 @@
     "consola": "^3.4.2",
     "defu": "^6.1.7",
     "leaflet": "^1.9.4",
+    "png-to-ico": "^3.0.1",
     "rollup": "npm:@rollup/wasm-node",
+    "sharp": "^0.35.1",
     "yaml": "^2.8.4",
     "zod": "^3.23.8"
   },

@@ -1,7 +1,12 @@
+import { getFaviconVersion } from '~/server/utils/favicons'
+
 export default defineEventHandler(async (event) => {
   const config = await getConfig()
   const title = config?.title || 'Mafl'
   const description = config?.meta?.description || title
+
+  const version = await getFaviconVersion()
+  const q = version > 0 ? `?v=${version}` : ''
 
   setResponseHeader(event, 'content-type', 'application/manifest+json')
 
@@ -18,12 +23,12 @@ export default defineEventHandler(async (event) => {
     icons: [
       {
         sizes: '192x192',
-        src: '/favicons/pwa-192x192.png',
+        src: `/favicons/pwa-192x192.png${q}`,
         type: 'image/png',
       },
       {
         sizes: '512x512',
-        src: '/favicons/pwa-512x512.png',
+        src: `/favicons/pwa-512x512.png${q}`,
         type: 'image/png',
       },
     ],

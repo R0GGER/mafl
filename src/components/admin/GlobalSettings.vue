@@ -109,10 +109,10 @@
     </div>
   </section>
 
-  <!-- Logo Settings accordion -->
+  <!-- Logo & Favicon accordion -->
   <section class="admin-section">
     <button class="admin-section-header" @click="openLogo = !openLogo">
-      <span class="font-semibold text-fg">Logo</span>
+      <span class="font-semibold text-fg">Logo &amp; Favicon</span>
       <span class="chevron" :class="{ rotated: openLogo }" />
     </button>
     <div v-show="openLogo" class="admin-section-body">
@@ -206,6 +206,12 @@
           >{{ state.logoText }}</span>
         </div>
       </div>
+
+      <!-- App favicon (embedded; shares the same Logo & Favicon accordion) -->
+      <div class="mt-6 pt-4 border-t border-fg/10">
+        <div class="font-semibold text-fg text-sm mb-3">App Favicon</div>
+        <AdminFaviconSettings inline @toast="(p) => emit('toast', p)" />
+      </div>
     </div>
   </section>
 </template>
@@ -214,6 +220,9 @@
 import type { BuilderState } from '~/composables/useConfigBuilder'
 
 defineProps<{ state: BuilderState }>()
+const emit = defineEmits<{
+  (e: 'toast', payload: { message: string; type: 'success' | 'error' }): void
+}>()
 const open = ref(true)
 const openLogo = ref(false)
 </script>

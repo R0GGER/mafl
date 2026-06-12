@@ -5,15 +5,9 @@ export default defineNuxtConfig({
   app: {
     head: {
       link: [
-        {
-          rel: 'icon',
-          href: '/favicons/favicon.ico',
-        },
-        {
-          rel: 'apple-touch-icon',
-          href: '/favicons/apple-touch-icon.png',
-          sizes: '180x180',
-        },
+        // Favicon links are injected at runtime via src/plugins/favicons.ts so
+        // they can include a cache-busting ?v=<version> derived from the
+        // currently uploaded custom favicon (managed via /admin).
         {
           rel: 'manifest',
           href: '/manifest.webmanifest',

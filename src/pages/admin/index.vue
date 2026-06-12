@@ -104,7 +104,7 @@
     <main class="max-w-screen-2xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Left: Form -->
       <div class="space-y-4" @input.capture="schedulePreview" @change.capture="schedulePreview" @click.capture="schedulePreviewAfterClick">
-        <AdminGlobalSettings :state="state" />
+        <AdminGlobalSettings :state="state" @toast="onChildToast" />
         <AdminSeoSettings :state="state" />
         <AdminLayoutSettings :state="state" />
         <AdminStylesSettings :state="state" />
@@ -400,6 +400,10 @@ function showToast(message: string, type: 'success' | 'error' = 'success') {
   if (toastTimeout) clearTimeout(toastTimeout)
   toast.value = { message, type }
   toastTimeout = setTimeout(() => { toast.value = null }, 3000)
+}
+
+function onChildToast(payload: { message: string; type: 'success' | 'error' }) {
+  showToast(payload.message, payload.type)
 }
 
 async function loadCurrentConfig() {

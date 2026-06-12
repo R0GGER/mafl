@@ -13,6 +13,30 @@ COPY . /app
 
 RUN yarn run build
 
+# Sharp ships its native binaries as platform-specific optional deps
+# (@img/sharp-linuxmusl-x64, @img/sharp-libvips-linuxmusl-x64, ...). Nitro's
+# tree-shaker does not follow them into .output/, so copy them across for the
+# current build platform so the runtime image has the matching native binary.
+RUN mkdir -p /app/.output/server/node_modules/@img && \
+    cp -r /app/node_modules/@img/sharp-* /app/.output/server/node_modules/@img/ 2>/dev/null || true
+
+# 1. Snapshot the bundled favicon defaults to a parallel folder so our
+#    /favicons/* middleware can use them as fallback when no custom favicon
+#    has been uploaded via /admin.
+# 2. Strip the bundled /favicons/* entries from Nitro's public-assets manifest
+#    inside nitro.mjs. Nitro's static asset handler is registered as the very
+#    first middleware in the handler chain (before our /favicons middleware),
+#    so without this patch it would always answer manifest-matched URLs (like
+#    /favicons/favicon.ico) and 500 once we remove the underlying files. By
+#    removing those manifest keys we let the request fall through to our
+#    middleware, which then serves either the runtime upload or the snapshot.
+RUN if [ -d /app/.output/public/favicons ]; then \
+      mkdir -p /app/.output/server/favicons-defaults && \
+      cp -r /app/.output/public/favicons/. /app/.output/server/favicons-defaults/ && \
+      rm -rf /app/.output/public/favicons; \
+    fi && \
+    node -e "const fs=require('node:fs');const f='/app/.output/server/chunks/nitro/nitro.mjs';if(fs.existsSync(f)){let c=fs.readFileSync(f,'utf-8');const before=c.length;c=c.replace(/\s+\"\/favicons\/[^\"]+\":\s*\{[^{}]*\},?/g,'');fs.writeFileSync(f,c);console.log('nitro.mjs: stripped',before-c.length,'bytes of /favicons/* manifest entries')}"
+
 FROM $NODE
 
 LABEL org.opencontainers.image.title="Mafl" \

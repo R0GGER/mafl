@@ -8,6 +8,7 @@
   - [Self-hosted Favicon API](#self-hosted-favicon-api)
   - [Server-side proxy cache](#server-side-proxy-cache)
 - [Custom App Favicons (PWA)](#custom-app-favicons-pwa)
+  - [Upload via /admin (recommended)](#upload-via-admin-recommended)
   - [Logo creation](#logo-creation)
   - [Mount the favicons volume](#mount-the-favicons-volume)
 
@@ -109,11 +110,35 @@ The cache is stored in `./data/.favicon-cache/` inside the container.
 
 ## Custom App Favicons (PWA)
 
-If you want to personalize the app icon (shown in browser tabs and when installed as a PWA), you can mount a custom favicons folder.
+You can personalize the app icon (shown in browser tabs and when installed as a PWA) in two ways: upload one source image via the admin panel (recommended), or pre-generate a favicon package and mount it as a volume.
+
+### Upload via /admin (recommended)
+
+The admin panel has an **App Favicon** section that accepts a single PNG or SVG and automatically generates every variant the app needs:
+
+| Generated file | Size | Purpose |
+|----------------|------|---------|
+| `favicon.ico` | 16, 32, 48 (multi-res) | Classic browser tab icon |
+| `favicon-16x16.png`, `favicon-32x32.png` | 16, 32 | Modern browsers |
+| `apple-touch-icon.png` | 180x180 | iOS home screen |
+| `pwa-192x192.png`, `pwa-512x512.png` | 192, 512 | PWA manifest icons |
+| `android-chrome-192x192.png`, `android-chrome-512x512.png` | 192, 512 | Android home screen |
+
+Tips for the source image:
+
+- **SVG** gives the cleanest result because every variant is rasterized at its target size.
+- **PNG** should be square and at least **512&times;512** to avoid upscaling artifacts. Non-square images are letterboxed onto a transparent canvas.
+- Max upload size: **5 MB**.
+
+Generated files are written to `./data/favicons/` inside the container (the same volume that already holds your `config.yml`), so no extra Docker mount is needed. The server serves these files at `/favicons/<name>`; if none has been uploaded yet, it falls back to the legacy `/app/public/favicons/` mount described below.
+
+A cache-busting `?v=<timestamp>` query is automatically appended to all favicon links in the HTML head and the web manifest, so browsers pick up the new icons after a save.
+
+Use the **Reset to default** button in the same section to delete the uploaded favicons and revert to the bundled / mounted defaults.
 
 ### Logo creation
 
-Create an SVG or PNG icon (at the highest possible resolution) and use [Favicon Generator](https://realfavicongenerator.net/) to create a favicon package.
+If you prefer to generate the favicons yourself (instead of using `/admin`), create an SVG or PNG icon (at the highest possible resolution) and use [Favicon Generator](https://realfavicongenerator.net/) to create a favicon package.
 
 Once generated, download the ZIP and use the `android-*` icons for `pwa-*`:
 * `android-chrome-192x192.png` → `pwa-192x192.png`
