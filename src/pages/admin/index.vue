@@ -130,7 +130,7 @@
         />
       </div>
 
-      <!-- Right: YAML Preview -->
+      <!-- Right: YAML Preview / Editor -->
       <div class="lg:sticky lg:top-16 lg:self-start">
         <div class="border border-fg/10 rounded-lg bg-fg/[0.02]">
           <div class="flex items-center justify-between p-4 border-b border-fg/10">
@@ -138,27 +138,73 @@
               <span class="font-semibold text-fg">YAML Output</span>
               <button
                 class="p-1 rounded border transition-colors"
+                :class="yamlEditing
+                  ? 'border-amber-500/40 text-amber-500 bg-amber-500/10'
+                  : 'border-fg/10 text-fg-dimmed hover:bg-fg/5'"
+                :title="yamlEditing ? 'Switch to read-only preview' : 'Edit YAML directly'"
+                @click="toggleYamlEdit"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+              </button>
+              <button
+                class="p-1 rounded border transition-colors"
                 :class="syntaxHighlight
                   ? 'border-brand-500/40 text-brand-500 bg-brand-500/10'
                   : 'border-fg/10 text-fg-dimmed hover:bg-fg/5'"
-                title="Syntax highlighting (may cause slight input delay on large configs)"
+                title="Syntax highlighting"
                 @click="toggleHighlight"
               >
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
               </button>
-              <span v-if="syntaxHighlight" class="text-[10px] text-fg-dimmed italic">may slow input</span>
+              <span v-if="yamlEditing && yamlDirty" class="text-[10px] text-amber-400 italic">edited</span>
             </div>
-            <button
-              class="text-sm px-3 py-1.5 rounded bg-brand-600 hover:bg-brand-700 text-white transition-colors"
-              @click="copyYaml"
-            >
-              Copy to Clipboard
-            </button>
+            <div class="flex items-center gap-2">
+              <button
+                v-if="yamlEditing && yamlDirty"
+                class="text-sm px-3 py-1.5 rounded bg-amber-600 hover:bg-amber-700 text-white transition-colors"
+                @click="applyYamlToForm"
+              >
+                Apply to Form
+              </button>
+              <button
+                class="text-sm px-3 py-1.5 rounded bg-brand-600 hover:bg-brand-700 text-white transition-colors"
+                @click="copyYaml"
+              >
+                Copy
+              </button>
+            </div>
           </div>
-          <div class="p-4 max-h-[80vh] overflow-auto">
-            <pre v-if="syntaxHighlight" class="yaml-hl text-xs font-mono leading-relaxed whitespace-pre" v-html="highlightedYaml" />
+          <div ref="yamlScrollContainer" class="p-4 max-h-[80vh] overflow-auto" @scroll="syncEditorScroll">
+            <div v-if="yamlEditing" class="yaml-editor-wrap">
+              <pre
+                v-if="syntaxHighlight"
+                class="yaml-editor-backdrop yaml-hl text-xs font-mono leading-relaxed whitespace-pre"
+                v-html="editHighlightedYaml + '\n'"
+                aria-hidden="true"
+              />
+              <pre
+                v-else
+                class="yaml-editor-backdrop text-xs font-mono leading-relaxed whitespace-pre text-fg"
+                aria-hidden="true"
+              >{{ yamlEditText + '\n' }}</pre>
+              <textarea
+                ref="yamlTextarea"
+                v-model="yamlEditText"
+                class="yaml-editor-input text-xs font-mono leading-relaxed whitespace-pre"
+                spellcheck="false"
+                @input="onYamlEditInput"
+                @scroll="syncBackdropScroll"
+              />
+            </div>
+            <pre v-else-if="syntaxHighlight" class="yaml-hl text-xs font-mono leading-relaxed whitespace-pre" v-html="highlightedYaml" />
             <pre v-else class="text-xs font-mono leading-relaxed whitespace-pre text-fg">{{ plainYaml }}</pre>
           </div>
+        </div>
+
+        <!-- YAML parse error -->
+        <div v-if="yamlParseError" class="mt-4 border border-amber-400/30 rounded-lg p-4 bg-amber-400/5">
+          <h3 class="text-sm font-semibold text-amber-400 mb-2">YAML Syntax Error</h3>
+          <pre class="text-xs text-amber-300 whitespace-pre-wrap font-mono">{{ yamlParseError }}</pre>
         </div>
 
         <!-- Validation errors -->
@@ -245,11 +291,24 @@ const highlightedYaml = ref('')
 const plainYaml = ref('')
 let _previewTimer: ReturnType<typeof setTimeout> | null = null
 
+const yamlEditing = ref(false)
+const yamlEditText = ref('')
+const yamlDirty = ref(false)
+const yamlParseError = ref('')
+const yamlTextarea = ref<HTMLTextAreaElement | null>(null)
+const yamlScrollContainer = ref<HTMLElement | null>(null)
+const editHighlightedYaml = ref('')
+let _editHighlightTimer: ReturnType<typeof setTimeout> | null = null
+
 function updatePreview() {
   if (_previewTimer) clearTimeout(_previewTimer)
   _previewTimer = null
   const yml = freshYaml()
   plainYaml.value = yml
+  if (yamlEditing.value && !yamlDirty.value) {
+    yamlEditText.value = yml
+    if (syntaxHighlight.value) editHighlightedYaml.value = highlightYaml(yml)
+  }
   if (syntaxHighlight.value) {
     highlightedYaml.value = highlightYaml(yml)
   }
@@ -260,6 +319,65 @@ function toggleHighlight() {
   localStorage.setItem('mafl-admin-highlight', String(syntaxHighlight.value))
   if (syntaxHighlight.value) {
     highlightedYaml.value = highlightYaml(plainYaml.value)
+    if (yamlEditing.value) editHighlightedYaml.value = highlightYaml(yamlEditText.value)
+  }
+}
+
+function toggleYamlEdit() {
+  yamlEditing.value = !yamlEditing.value
+  if (yamlEditing.value) {
+    yamlEditText.value = plainYaml.value
+    yamlDirty.value = false
+    yamlParseError.value = ''
+    if (syntaxHighlight.value) editHighlightedYaml.value = highlightYaml(yamlEditText.value)
+  }
+  else {
+    if (yamlDirty.value) {
+      updatePreview()
+    }
+    yamlDirty.value = false
+    yamlParseError.value = ''
+  }
+}
+
+function scheduleEditHighlight() {
+  if (_editHighlightTimer) clearTimeout(_editHighlightTimer)
+  _editHighlightTimer = setTimeout(() => {
+    editHighlightedYaml.value = highlightYaml(yamlEditText.value)
+  }, 150)
+}
+
+function onYamlEditInput() {
+  yamlDirty.value = true
+  yamlParseError.value = ''
+  if (syntaxHighlight.value) scheduleEditHighlight()
+}
+
+function syncBackdropScroll() {
+  const ta = yamlTextarea.value
+  const container = yamlScrollContainer.value
+  if (!ta || !container) return
+  const backdrop = container.querySelector('.yaml-editor-backdrop') as HTMLElement
+  if (backdrop) {
+    backdrop.scrollTop = ta.scrollTop
+    backdrop.scrollLeft = ta.scrollLeft
+  }
+}
+
+function syncEditorScroll() {
+  // no-op, scroll handled by container
+}
+
+function applyYamlToForm() {
+  try {
+    loadFromYaml(yamlEditText.value)
+    yamlDirty.value = false
+    yamlParseError.value = ''
+    updatePreview()
+    showToast('YAML applied to form')
+  }
+  catch (e: any) {
+    yamlParseError.value = e.message || 'Failed to parse YAML'
   }
 }
 
@@ -304,10 +422,16 @@ async function saveConfig() {
   saving.value = true
   validationError.value = ''
   try {
+    const yamlContent = (yamlEditing.value && yamlDirty.value) ? yamlEditText.value : freshYaml()
     await $fetch('/api/admin/config', {
       method: 'POST',
-      body: { yaml: freshYaml() },
+      body: { yaml: yamlContent },
     })
+    if (yamlEditing.value && yamlDirty.value) {
+      loadFromYaml(yamlContent)
+      yamlDirty.value = false
+      updatePreview()
+    }
     showToast('Config saved & applied!')
   }
   catch (e: any) {
@@ -356,7 +480,8 @@ async function logout() {
 }
 
 function copyYaml() {
-  navigator.clipboard.writeText(freshYaml()).then(() => {
+  const text = yamlEditing.value ? yamlEditText.value : freshYaml()
+  navigator.clipboard.writeText(text).then(() => {
     showToast('Copied to clipboard')
   })
 }
@@ -397,7 +522,7 @@ function handleImport(event: Event) {
 }
 
 function exportConfig() {
-  const content = freshYaml()
+  const content = yamlEditing.value ? yamlEditText.value : freshYaml()
   if (!content) {
     showToast('Nothing to export', 'error')
     return
@@ -437,5 +562,41 @@ onMounted(() => {
 @keyframes shrink-bar {
   from { width: 100%; }
   to { width: 0%; }
+}
+
+.yaml-editor-wrap {
+  position: relative;
+  min-height: 60vh;
+}
+.yaml-editor-backdrop {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  pointer-events: none;
+  white-space: pre;
+  word-wrap: normal;
+}
+.yaml-editor-input {
+  position: relative;
+  width: 100%;
+  min-height: 60vh;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--color-fg, #e4e4e4);
+  border: none;
+  outline: none;
+  resize: vertical;
+  overflow: auto;
+  white-space: pre;
+  word-wrap: normal;
+  -webkit-text-fill-color: transparent;
+}
+.yaml-editor-input::selection {
+  background: rgba(124, 58, 237, 0.3);
+  -webkit-text-fill-color: transparent;
 }
 </style>

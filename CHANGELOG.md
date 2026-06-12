@@ -1,6 +1,26 @@
 # Changelog
 
 
+## Editable YAML output with live syntax highlighting
+
+### 🚀 Enhancements
+
+- **admin:** YAML output panel now has an **Edit** toggle (pencil icon) — switch to a full textarea to edit the YAML directly, then click **Apply to Form** to parse it back into the form fields
+- **admin:** **Syntax highlighting** now works in edit mode — uses a transparent textarea overlay on top of a highlighted `<pre>`, so you see colored YAML while typing
+- **admin:** **Save & Apply** uses the edited YAML directly when in edit mode with unsaved changes, then syncs the form state to match
+- **admin:** **Copy** and **Export** also respect manually edited YAML content
+- **config-builder:** Same editable YAML + live syntax highlighting added to the standalone `config-builder/index.html`
+- **config-builder:** New **syntax highlighting toggle** button (palette icon) — works in both read-only preview and edit mode
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/pages/admin/index.vue` | Added YAML edit mode with overlay editor (transparent textarea + highlighted backdrop), `toggleYamlEdit`, `applyYamlToForm`, `syncBackdropScroll`, debounced edit highlighting; updated `saveConfig`, `copyYaml`, `exportConfig` to use edited YAML; added `.yaml-editor-wrap` / `.yaml-editor-backdrop` / `.yaml-editor-input` scoped styles |
+| `config-builder/index.html` | Added overlay editor HTML structure, `highlightYamlStr()` function, `toggleYamlEdit`, `toggleYamlHighlight`, `applyYamlToForm`, `syncYamlEditorScroll`, debounced backdrop updates; added `.yaml-editor-*` and `.yaml-hl` CSS styles |
+
+---
+
 ## Per-tab export & import in Admin Config Builder
 
 ### 🚀 Enhancements

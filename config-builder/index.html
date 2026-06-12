@@ -77,6 +77,36 @@
     select:focus, input[type="text"]:focus, input[type="number"]:focus { outline: 2px solid #7c3aed; outline-offset: -1px; }
     input[type="range"] { accent-color: #7c3aed; }
     pre#yaml-output { color: var(--text) !important; }
+    #yaml-edit-toggle.active { border-color: rgba(245,158,11,0.4) !important; color: #f59e0b !important; background: rgba(245,158,11,0.1); }
+    #yaml-hl-toggle.active { border-color: rgba(124,58,237,0.4) !important; color: #7c3aed !important; background: rgba(124,58,237,0.1); }
+    .yaml-editor-wrap { position: relative; min-height: 60vh; }
+    .yaml-editor-backdrop { position: absolute; inset: 0; margin: 0; padding: 0; overflow: hidden; pointer-events: none; white-space: pre; word-wrap: normal; }
+    .yaml-editor-input { position: relative; width: 100%; min-height: 60vh; margin: 0; padding: 0; background: transparent; color: transparent; caret-color: var(--text); border: none; outline: none; resize: vertical; overflow: auto; white-space: pre; word-wrap: normal; tab-size: 2; -webkit-text-fill-color: transparent; }
+    .yaml-editor-input::selection { background: rgba(124, 58, 237, 0.3); -webkit-text-fill-color: transparent; }
+    .yaml-hl .yl-key { color: #79b8ff; }
+    .yaml-hl .yl-str { color: #85e89d; }
+    .yaml-hl .yl-num { color: #ffab70; }
+    .yaml-hl .yl-bool { color: #f97583; }
+    .yaml-hl .yl-null { color: #f97583; font-style: italic; }
+    .yaml-hl .yl-comment { color: #6a737d; font-style: italic; }
+    .yaml-hl .yl-punct { color: #6a737d; }
+    .yaml-hl { color: #e1e4e8; }
+    :root .yaml-hl { color: #24292e; }
+    :root .yaml-hl .yl-key { color: #005cc5; }
+    :root .yaml-hl .yl-str { color: #22863a; }
+    :root .yaml-hl .yl-num { color: #e36209; }
+    :root .yaml-hl .yl-bool { color: #d73a49; }
+    :root .yaml-hl .yl-null { color: #d73a49; font-style: italic; }
+    :root .yaml-hl .yl-comment { color: #6a737d; font-style: italic; }
+    :root .yaml-hl .yl-punct { color: #6a737d; }
+    .dark .yaml-hl { color: #e1e4e8; }
+    .dark .yaml-hl .yl-key { color: #79b8ff; }
+    .dark .yaml-hl .yl-str { color: #85e89d; }
+    .dark .yaml-hl .yl-num { color: #ffab70; }
+    .dark .yaml-hl .yl-bool { color: #f97583; }
+    .dark .yaml-hl .yl-null { color: #f97583; font-style: italic; }
+    .dark .yaml-hl .yl-comment { color: #6a737d; font-style: italic; }
+    .dark .yaml-hl .yl-punct { color: #6a737d; }
   </style>
 </head>
 <body class="min-h-screen">
@@ -362,16 +392,36 @@
       </section>
     </div>
 
-    <!-- Right: YAML Output -->
+    <!-- Right: YAML Output / Editor -->
     <div class="lg:sticky lg:top-16 lg:self-start">
       <div class="bg-surface-light rounded-lg border border-gray-700">
         <div class="flex items-center justify-between p-4 border-b border-gray-700">
-          <span class="font-semibold text-white">YAML Output</span>
-          <button onclick="copyYaml()" class="bg-accent hover:bg-accent-hover text-white text-sm px-3 py-1.5 rounded transition">Copy to Clipboard</button>
+          <div class="flex items-center gap-2">
+            <span class="font-semibold text-white">YAML Output</span>
+            <button onclick="toggleYamlEdit()" id="yaml-edit-toggle" class="p-1 rounded border transition" style="border-color: var(--border); color: var(--text-muted);" title="Edit YAML directly">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+            </button>
+            <button onclick="toggleYamlHighlight()" id="yaml-hl-toggle" class="p-1 rounded border transition" style="border-color: var(--border); color: var(--text-muted);" title="Syntax highlighting">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
+            </button>
+            <span id="yaml-dirty-badge" class="text-xs italic hidden" style="color: #f59e0b;">edited</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="applyYamlToForm()" id="yaml-apply-btn" class="hidden text-white text-sm px-3 py-1.5 rounded transition" style="background:#d97706;">Apply to Form</button>
+            <button onclick="copyYaml()" class="bg-accent hover:bg-accent-hover text-white text-sm px-3 py-1.5 rounded transition">Copy</button>
+          </div>
         </div>
         <div class="p-4 max-h-[80vh] overflow-auto">
-          <pre id="yaml-output" class="text-xs text-gray-300 whitespace-pre font-mono leading-relaxed"></pre>
+          <pre id="yaml-output" class="text-xs whitespace-pre font-mono leading-relaxed" style="color: var(--text);"></pre>
+          <div id="yaml-editor-wrap" class="yaml-editor-wrap hidden">
+            <pre id="yaml-editor-backdrop" class="yaml-editor-backdrop text-xs font-mono leading-relaxed whitespace-pre" style="color: var(--text);" aria-hidden="true"></pre>
+            <textarea id="yaml-editor" class="yaml-editor-input text-xs font-mono leading-relaxed whitespace-pre" spellcheck="false" oninput="onYamlEditorInput()" onscroll="syncYamlEditorScroll()"></textarea>
+          </div>
         </div>
+      </div>
+      <div id="yaml-parse-error" class="mt-4 rounded-lg p-4 hidden" style="border:1px solid rgba(245,158,11,0.3); background:rgba(245,158,11,0.05);">
+        <h3 class="text-sm font-semibold mb-2" style="color:#f59e0b;">YAML Syntax Error</h3>
+        <pre id="yaml-parse-error-text" class="text-xs whitespace-pre-wrap font-mono" style="color:#fbbf24;"></pre>
       </div>
     </div>
   </main>
@@ -1103,7 +1153,18 @@ function generateYaml() {
     forceQuotes: false
   });
 
-  document.getElementById('yaml-output').textContent = yamlStr;
+  var pre = document.getElementById('yaml-output');
+  if (yamlHighlightOn && !yamlEditMode) {
+    pre.innerHTML = highlightYamlStr(yamlStr);
+    pre.classList.add('yaml-hl');
+  } else {
+    pre.textContent = yamlStr;
+    pre.classList.remove('yaml-hl');
+  }
+  if (yamlEditMode && !yamlEditDirty) {
+    document.getElementById('yaml-editor').value = yamlStr;
+    updateEditorBackdrop();
+  }
 }
 
 // --- Helpers ---
@@ -1145,9 +1206,150 @@ function toggleSection(btn) {
   chevron.classList.toggle('rotated');
 }
 
+// --- YAML Syntax Highlighting ---
+function escHl(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function hlValue(v) {
+  const t = v.trim();
+  if (!t) return escHl(v);
+  if (/^["'].*["']$/.test(t)) return '<span class="yl-str">' + escHl(v) + '</span>';
+  if (/^(true|false)$/i.test(t)) return '<span class="yl-bool">' + escHl(v) + '</span>';
+  if (/^(null|~)$/i.test(t)) return '<span class="yl-null">' + escHl(v) + '</span>';
+  if (/^-?(\d+\.?\d*|\.\d+)$/.test(t)) return '<span class="yl-num">' + escHl(v) + '</span>';
+  return '<span class="yl-str">' + escHl(v) + '</span>';
+}
+function highlightYamlStr(yaml) {
+  return yaml.split('\n').map(function(line) {
+    if (!line.trim()) return '';
+    if (/^\s*#/.test(line)) { var m = line.match(/^(\s*)(#.*)$/); return m[1] + '<span class="yl-comment">' + escHl(m[2]) + '</span>'; }
+    var kv = line.match(/^(\s*)(- )?(\S[^:]*?)(:)(?: (.*))?$/);
+    if (kv) { var out = escHl(kv[1]); if (kv[2]) out += '<span class="yl-punct">' + escHl(kv[2]) + '</span>'; out += '<span class="yl-key">' + escHl(kv[3]) + '</span><span class="yl-punct">' + kv[4] + '</span>'; if (kv[5] !== undefined) out += ' ' + hlValue(kv[5]); return out; }
+    var list = line.match(/^(\s*)(- )(.+)$/);
+    if (list) return escHl(list[1]) + '<span class="yl-punct">' + escHl(list[2]) + '</span>' + hlValue(list[3]);
+    var dashOnly = line.match(/^(\s*)(-)(\s*)$/);
+    if (dashOnly) return escHl(dashOnly[1]) + '<span class="yl-punct">-</span>' + dashOnly[3];
+    return escHl(line);
+  }).join('\n');
+}
+
+// --- YAML Edit Mode ---
+let yamlEditMode = false;
+let yamlEditDirty = false;
+let yamlHighlightOn = false;
+let _editHlTimer = null;
+
+function updateEditorBackdrop() {
+  const editor = document.getElementById('yaml-editor');
+  const backdrop = document.getElementById('yaml-editor-backdrop');
+  if (yamlHighlightOn) {
+    backdrop.innerHTML = highlightYamlStr(editor.value) + '\n';
+    backdrop.classList.add('yaml-hl');
+  } else {
+    backdrop.textContent = editor.value + '\n';
+    backdrop.classList.remove('yaml-hl');
+    backdrop.style.color = 'var(--text)';
+  }
+}
+
+function toggleYamlHighlight() {
+  yamlHighlightOn = !yamlHighlightOn;
+  const toggle = document.getElementById('yaml-hl-toggle');
+  toggle.classList.toggle('active', yamlHighlightOn);
+  if (yamlEditMode) updateEditorBackdrop();
+  // Also re-render preview with highlighting
+  var pre = document.getElementById('yaml-output');
+  if (!yamlEditMode) {
+    if (yamlHighlightOn) {
+      pre.innerHTML = highlightYamlStr(pre.textContent);
+      pre.classList.add('yaml-hl');
+    } else {
+      var text = pre.textContent;
+      pre.textContent = text;
+      pre.classList.remove('yaml-hl');
+    }
+  }
+}
+
+function toggleYamlEdit() {
+  yamlEditMode = !yamlEditMode;
+  const pre = document.getElementById('yaml-output');
+  const wrap = document.getElementById('yaml-editor-wrap');
+  const editor = document.getElementById('yaml-editor');
+  const toggle = document.getElementById('yaml-edit-toggle');
+  const dirtyBadge = document.getElementById('yaml-dirty-badge');
+  const applyBtn = document.getElementById('yaml-apply-btn');
+  const errorBox = document.getElementById('yaml-parse-error');
+
+  if (yamlEditMode) {
+    editor.value = pre.textContent;
+    pre.classList.add('hidden');
+    wrap.classList.remove('hidden');
+    toggle.classList.add('active');
+    toggle.title = 'Switch to read-only preview';
+    yamlEditDirty = false;
+    dirtyBadge.classList.add('hidden');
+    applyBtn.classList.add('hidden');
+    errorBox.classList.add('hidden');
+    updateEditorBackdrop();
+  } else {
+    pre.classList.remove('hidden');
+    wrap.classList.add('hidden');
+    toggle.classList.remove('active');
+    toggle.title = 'Edit YAML directly';
+    if (yamlEditDirty) generateYaml();
+    yamlEditDirty = false;
+    dirtyBadge.classList.add('hidden');
+    applyBtn.classList.add('hidden');
+    errorBox.classList.add('hidden');
+  }
+}
+
+function onYamlEditorInput() {
+  yamlEditDirty = true;
+  document.getElementById('yaml-dirty-badge').classList.remove('hidden');
+  document.getElementById('yaml-apply-btn').classList.remove('hidden');
+  document.getElementById('yaml-parse-error').classList.add('hidden');
+  if (yamlHighlightOn) {
+    if (_editHlTimer) clearTimeout(_editHlTimer);
+    _editHlTimer = setTimeout(updateEditorBackdrop, 150);
+  } else {
+    document.getElementById('yaml-editor-backdrop').textContent = document.getElementById('yaml-editor').value + '\n';
+  }
+}
+
+function syncYamlEditorScroll() {
+  const editor = document.getElementById('yaml-editor');
+  const backdrop = document.getElementById('yaml-editor-backdrop');
+  backdrop.scrollTop = editor.scrollTop;
+  backdrop.scrollLeft = editor.scrollLeft;
+}
+
+function applyYamlToForm() {
+  const editor = document.getElementById('yaml-editor');
+  const errorBox = document.getElementById('yaml-parse-error');
+  const errorText = document.getElementById('yaml-parse-error-text');
+  try {
+    const config = jsyaml.load(editor.value);
+    if (!config || typeof config !== 'object') throw new Error('YAML must be an object');
+    loadConfig(config);
+    yamlEditDirty = false;
+    document.getElementById('yaml-dirty-badge').classList.add('hidden');
+    document.getElementById('yaml-apply-btn').classList.add('hidden');
+    errorBox.classList.add('hidden');
+    const toast = document.getElementById('toast');
+    toast.querySelector('div').textContent = 'YAML applied to form!';
+    toast.classList.remove('hidden');
+    setTimeout(() => { toast.classList.add('hidden'); toast.querySelector('div').textContent = 'Copied to clipboard!'; }, 2500);
+  } catch (err) {
+    errorText.textContent = err.message || 'Failed to parse YAML';
+    errorBox.classList.remove('hidden');
+  }
+}
+
 // --- Copy ---
 function copyYaml() {
-  const text = document.getElementById('yaml-output').textContent;
+  const text = yamlEditMode
+    ? document.getElementById('yaml-editor').value
+    : document.getElementById('yaml-output').textContent;
   navigator.clipboard.writeText(text).then(() => {
     const toast = document.getElementById('toast');
     toast.classList.remove('hidden');
