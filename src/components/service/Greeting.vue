@@ -28,12 +28,15 @@ const iconProps = computed(() => {
 
 <style>
 /* Allow the greeting to render multi-line HTML by removing the default
-   line-clamp on the parent title (h3) and description (p) elements. */
+   line-clamp on the parent title (h3) and description (p) elements,
+   and drop the default semibold weight so the greeting text follows
+   whatever the user typed (plain by default, <b>/<strong> still bold). */
 h3:has(> .greeting-text) {
   display: block;
   -webkit-line-clamp: unset;
   -webkit-box-orient: unset;
   overflow: visible;
+  font-weight: normal;
 }
 p:has(> .greeting-subtitle) {
   display: block;
@@ -45,6 +48,7 @@ p:has(> .greeting-subtitle) {
 .greeting-subtitle {
   white-space: normal;
   word-break: break-word;
+  font-weight: normal;
 }
 .greeting-text a,
 .greeting-subtitle a {
