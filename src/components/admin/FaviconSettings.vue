@@ -20,6 +20,15 @@
         (16/32/48), apple-touch-icon (180x180), PWA icons (192x192 + 512x512) and Android icons.
         For the best result, use an SVG or a PNG that is at least 512&times;512.
       </p>
+      <p class="text-xs text-fg-dimmed">
+        Need a favicon? Generate one at
+        <a
+          href="https://favicon.maflplus.eu"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-brand-300 hover:text-brand-200 underline underline-offset-2"
+        >favicon.maflplus.eu</a>.
+      </p>
 
       <!-- Status -->
       <div class="border border-fg/10 rounded-md p-3 flex items-center justify-between gap-3 bg-background">
