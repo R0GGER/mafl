@@ -14,7 +14,7 @@ services:
     environment:
       # Admin panel: generate hash with: 
       # docker run --rm -e generate=password_hash --pull=always ghcr.io/r0gger/maflpass <your_password>
-      - NUXT_ADMIN_PASSWORD_HASH=5464decafe70eb4d9752917d19e57479:a2ae12416892a072cfd888362667dc19777b2ab955f8a5d928afe9932fb46bf41b3cf8b320dbddb9a3561585856045172712e2a9955757fa2344bdebe670886f
+      - NUXT_ADMIN_PASSWORD_HASH=
       # Session encryption key (min 32 chars, random string)
       # docker run --rm -e generate=session_password --pull=always ghcr.io/r0gger/maflpass
-      - NUXT_SESSION_PASSWORD=40f686186adb910bdf5cb9f6dafa62df806f6d1317637f0e8839cdd4d4cdd623
+      - NUXT_SESSION_PASSWORD=

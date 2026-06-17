@@ -164,15 +164,13 @@
 
     <!-- Greeting -->
     <template v-if="item.serviceType === 'greeting'">
-      <div class="grid grid-cols-2 gap-2">
-        <div>
-          <label class="admin-label">Text</label>
-          <input v-model="item.greetText" type="text" class="admin-input w-full" placeholder="Hello!">
-        </div>
-        <div>
-          <label class="admin-label">Subtitle</label>
-          <input v-model="item.greetSubtitle" type="text" class="admin-input w-full" placeholder="Welcome to your dashboard">
-        </div>
+      <div>
+        <label class="admin-label">Text</label>
+        <AdminHtmlEditor v-model="item.greetText" placeholder="Hello!" :min-height="72" />
+      </div>
+      <div>
+        <label class="admin-label">Subtitle</label>
+        <AdminHtmlEditor v-model="item.greetSubtitle" placeholder="Welcome to your dashboard" :min-height="56" />
       </div>
     </template>
 

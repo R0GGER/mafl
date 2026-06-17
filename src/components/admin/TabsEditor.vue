@@ -90,7 +90,7 @@
                   isGroupDropBefore(ti, gi) ? 'border-t-2 border-t-brand-500' : '',
                   isGroupDropAfter(ti, gi) ? 'border-b-2 border-b-brand-500' : '',
                 ]"
-                :draggable="!tab.locked"
+                :draggable="!tab.locked && !isGroupBeingEdited(ti, gi)"
                 @dragstart="onGroupDragStart($event, ti, gi)"
                 @dragover="onGroupDragOver($event, ti, gi)"
                 @drop="onGroupDrop($event, ti, gi)"
@@ -99,7 +99,7 @@
                 <!-- Group header -->
                 <div class="flex items-center gap-2 mb-2">
                   <span
-                    v-if="!tab.locked"
+                    v-if="!tab.locked && !isGroupBeingEdited(ti, gi)"
                     class="text-fg-dimmed/60 px-1 select-none"
                     style="cursor: grab;"
                     title="Drag to move group"
@@ -233,7 +233,7 @@
                       isItemDropBefore(ti, gi, ii) ? 'border-t-2 border-t-brand-500' : '',
                       isItemDropAfter(ti, gi, ii) ? 'border-b-2 border-b-brand-500' : '',
                     ]"
-                    :draggable="!tab.locked"
+                    :draggable="!tab.locked && !isItemBeingEdited(ti, gi, ii)"
                     @dragstart="onItemDragStart($event, ti, gi, ii)"
                     @dragover="onItemDragOver($event, ti, gi, ii)"
                     @drop="onItemDrop($event, ti, gi, ii)"
@@ -243,7 +243,7 @@
                     <template v-if="item.stack">
                       <div class="flex items-center gap-1 mb-1">
                         <span
-                          v-if="!tab.locked"
+                          v-if="!tab.locked && !isItemBeingEdited(ti, gi, ii)"
                           class="text-fg-dimmed/60 px-1 select-none"
                           style="cursor: grab;"
                           title="Drag to move"
@@ -309,7 +309,7 @@
                     <template v-else>
                       <div class="flex items-center gap-1 mb-1">
                         <span
-                          v-if="!tab.locked"
+                          v-if="!tab.locked && !isItemBeingEdited(ti, gi, ii)"
                           class="text-fg-dimmed/60 px-1 select-none"
                           style="cursor: grab;"
                           title="Drag to move"
@@ -550,6 +550,22 @@ function editKey(ti: number, gi: number, ii: number, ci?: number) {
 
 function isEditing(ti: number, gi: number, ii: number, ci?: number) {
   return openEdits.value.has(editKey(ti, gi, ii, ci))
+}
+
+function isItemBeingEdited(ti: number, gi: number, ii: number) {
+  const prefix = `${ti}-${gi}-${ii}`
+  for (const key of openEdits.value) {
+    if (key === prefix || key.startsWith(`${prefix}-`)) return true
+  }
+  return false
+}
+
+function isGroupBeingEdited(ti: number, gi: number) {
+  const prefix = `${ti}-${gi}-`
+  for (const key of openEdits.value) {
+    if (key.startsWith(prefix)) return true
+  }
+  return false
 }
 
 function toggleEdit(ti: number, gi: number, ii: number, ci?: number) {

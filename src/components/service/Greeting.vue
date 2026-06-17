@@ -4,10 +4,10 @@
       <ServiceBaseIcon name="mdi:hand-wave-outline" v-bind="iconProps" />
     </template>
     <template #title="{ service }">
-      {{ service?.data?.text || '' }}
+      <span v-if="service?.data?.text" class="greeting-text" v-html="service.data.text" />
     </template>
     <template #description="{ service }">
-      {{ service?.data?.subtitle || '' }}
+      <span v-if="service?.data?.subtitle" class="greeting-subtitle" v-html="service.data.subtitle" />
     </template>
   </ServiceBase>
 </template>
@@ -25,3 +25,30 @@ const iconProps = computed(() => {
   return p
 })
 </script>
+
+<style>
+/* Allow the greeting to render multi-line HTML by removing the default
+   line-clamp on the parent title (h3) and description (p) elements. */
+h3:has(> .greeting-text) {
+  display: block;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: unset;
+  overflow: visible;
+}
+p:has(> .greeting-subtitle) {
+  display: block;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: unset;
+  overflow: visible;
+}
+.greeting-text,
+.greeting-subtitle {
+  white-space: normal;
+  word-break: break-word;
+}
+.greeting-text a,
+.greeting-subtitle a {
+  color: inherit;
+  text-decoration: underline;
+}
+</style>

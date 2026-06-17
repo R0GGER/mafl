@@ -1,6 +1,47 @@
 # Changelog
 
 
+## Greeting service — multiline HTML editor in admin
+
+### 🚀 Enhancements
+
+- **admin:** The **Text** and **Subtitle** fields of the **Greeting** service are no longer single-line plain text inputs — they're now full **multiline HTML editors** with a toolbar (bold, italic, underline, strikethrough, link / unlink, text color picker, manual `<br>` insert, clear formatting, and a source-view toggle). Each field stacks vertically (no longer side-by-side) so longer messages have room to breathe
+- **admin:** Editor uses a native `contenteditable` div with `document.execCommand`, so there's **no new runtime dependency** — the toolbar buttons reflect the active formatting state (bold/italic/underline/strikethrough are highlighted when the caret sits inside that formatting), the color picker pre-fills from the current selection's `foreColor`, and the source-view toggle lets advanced users hand-edit the raw HTML in a monospace textarea
+- **admin:** Enter inserts a `<br>` instead of a paragraph break so the height stays predictable, Shift+Enter keeps that behaviour, and pastes are sanitised to plain text (no foreign fonts/colors smuggled in from Word/Notion)
+- **client:** `ServiceGreeting` now renders both `text` and `subtitle` via `v-html` so the inline formatting actually shows up on the dashboard — kept consistent with how `ServiceCustomHtml` already injects user-authored HTML
+- **client:** A `:has()` selector on the parent `<h3>` / `<p>` removes the default `line-clamp-2` / `line-clamp-1` for the Greeting card only, so multi-line greetings with `<br>` aren't truncated; other services keep their existing truncation behaviour
+- **client:** Anchor tags inside the greeting inherit the surrounding text color and pick up an underline so links blend with the site's chosen theme
+
+### Compatibility
+
+- **data:** The `options.text` / `options.subtitle` schema is unchanged — strings on disk, just allowed to contain HTML now. Existing plain-text greetings keep rendering identically (no HTML, no behaviour change), and the YAML output from the builder is unaffected
+- **security:** Same trust model as the existing `custom-html` service — admin-authored content is rendered as-is. Acceptable for a self-hosted single-tenant dashboard, but worth noting since the previous `{{ }}` interpolation auto-escaped HTML
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/components/admin/HtmlEditor.vue` | New reusable component (auto-imported as `<AdminHtmlEditor>`) — `v-model`-compatible WYSIWYG editor with toolbar (bold / italic / underline / strikeThrough / createLink / unlink / foreColor / insert `<br>` / removeFormat / source toggle), `contenteditable` editing surface styled via the existing `admin-input` class, active-state tracking through `document.queryCommandState`, saved-selection restoration so toolbar clicks don't drop the caret, plain-text paste sanitisation, and a fallback `<textarea>` source view bound to the same `modelValue` |
+| `src/components/admin/ItemFields.vue` | Replaced the two single-line `<input>`s for Greeting `Text` and `Subtitle` with stacked `<AdminHtmlEditor>` instances (`:min-height="72"` for Text, `56` for Subtitle); kept `placeholder` strings the same |
+| `src/components/service/Greeting.vue` | Switched the `title` / `description` slots from `{{ ... }}` to `v-html` on a `.greeting-text` / `.greeting-subtitle` `<span>`; added an unscoped `<style>` block that targets `h3:has(> .greeting-text)` / `p:has(> .greeting-subtitle)` to disable the parent `-webkit-line-clamp` and let multi-line HTML render. Anchor tags inherit `color: inherit` and `text-decoration: underline` |
+
+---
+
+## Disable drag-to-move while an edit panel is open
+
+### 🚀 Enhancements
+
+- **admin / config-builder:** Items, stacks and groups can no longer be **dragged** while their edit panel (or any nested stack-child edit panel) is open — previously a stray drag on a row with an active editor would silently close the editor via `closeOpenEdits()` after the drop, throwing away unsaved field focus. The HTML5 `draggable` attribute is now flipped off for that exact row, so the drag never starts in the first place and the editor stays put. Move up / move down arrow buttons remain available since they are explicit, predictable clicks
+- **admin / config-builder:** The drag handle (`☰`) on item, stack and group rows is hidden while that row's edit panel is open, making it visually clear that drag is unavailable for the currently-edited row. Locked-tab handling is unchanged — locked tabs still hide every drag handle regardless of edit state
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/components/admin/TabsEditor.vue` | Added two helpers next to `isEditing()`: `isItemBeingEdited(ti, gi, ii)` returns `true` when the item itself or any of its stack children is in `openEdits` (matches `${ti}-${gi}-${ii}` exactly or the `${ti}-${gi}-${ii}-` prefix); `isGroupBeingEdited(ti, gi)` returns `true` when any edit key starts with `${ti}-${gi}-`. The item-row `:draggable` is now `!tab.locked && !isItemBeingEdited(ti, gi, ii)`, the group-row `:draggable` is now `!tab.locked && !isGroupBeingEdited(ti, gi)`, and the three `v-if="!tab.locked"` drag handles (group header, stack header, regular-item header) gained the matching `&& !isItemBeingEdited(...)` / `&& !isGroupBeingEdited(...)` guard |
+
+---
+
 ## Complete bundled default favicon set + Firefox cache busting
 
 ### 🐛 Bug Fixes
