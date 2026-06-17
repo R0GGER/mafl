@@ -131,8 +131,11 @@
       <!-- Image logo fields -->
       <div v-if="state.logoType === 'image' || state.logoType === 'both'" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label class="admin-label">Logo Image (filename in data/)</label>
-          <input v-model="state.logoImage" type="text" class="admin-input w-full" placeholder="logo.png">
+          <label class="admin-label">Logo Image</label>
+          <AdminImagePicker v-model="state.logoImage" placeholder="logo.png" />
+          <p class="mt-1 text-xs text-fg-dimmed">
+            Pick an image from your <code class="text-[11px]">data/</code> folder, or use a custom path.
+          </p>
         </div>
       </div>
 

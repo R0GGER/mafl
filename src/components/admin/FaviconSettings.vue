@@ -66,6 +66,17 @@
             Reset to default
           </button>
         </div>
+        <div v-else-if="status" class="flex flex-col gap-2 items-end">
+          <button
+            type="button"
+            class="text-xs px-3 py-1.5 rounded border border-fg/15 text-fg hover:bg-fg/5 transition-colors disabled:opacity-50 whitespace-nowrap"
+            :disabled="busy || regenerating"
+            title="Rebuild every bundled default variant (favicon.ico, 16x16, 32x32, android-chrome, ...) from the largest master image on disk."
+            @click="regenerateDefaults"
+          >
+            {{ regenerating ? 'Regenerating...' : 'Regenerate defaults' }}
+          </button>
+        </div>
       </div>
 
       <!-- Drop / pick zone -->
@@ -188,6 +199,7 @@ const selectedPreviewUrl = ref<string | null>(null)
 const dragOver = ref(false)
 const busy = ref(false)
 const applyingAsLogo = ref(false)
+const regenerating = ref(false)
 const uploadError = ref('')
 const uploadWarnings = ref<string[]>([])
 const status = ref<FaviconStatus | null>(null)
@@ -351,6 +363,47 @@ async function resetFavicon() {
   }
   finally {
     busy.value = false
+  }
+}
+
+async function regenerateDefaults() {
+  if (busy.value || regenerating.value) return
+  if (!window.confirm('Regenerate the bundled default favicon set on disk? Existing default files will be overwritten from the largest master image.')) return
+  regenerating.value = true
+  uploadError.value = ''
+  uploadWarnings.value = []
+  try {
+    const res = await $fetch<{
+      ok: true
+      version: number
+      generated: string[]
+      failed: string[]
+      master: string
+    }>('/api/admin/favicon-defaults-regenerate', { method: 'POST' })
+
+    refreshPreview(res.version)
+
+    if (res.failed.length > 0) {
+      uploadWarnings.value = res.failed.map(name => `Could not regenerate ${name}`)
+    }
+
+    await loadStatus()
+
+    const count = res.generated.length
+    emit('toast', {
+      message: count > 0
+        ? `Regenerated ${count} default favicon${count === 1 ? '' : 's'} from ${res.master}`
+        : `No default favicons needed regenerating (master: ${res.master})`,
+      type: 'success',
+    })
+  }
+  catch (e: any) {
+    const msg = e.data?.data?.error || e.data?.statusMessage || e.statusMessage || 'Regenerate failed'
+    uploadError.value = msg
+    emit('toast', { message: 'Regenerate defaults failed', type: 'error' })
+  }
+  finally {
+    regenerating.value = false
   }
 }
 

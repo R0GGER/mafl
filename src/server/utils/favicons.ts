@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs'
+import { existsSync, statSync } from 'node:fs'
 import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { extname, resolve } from 'node:path'
 import sharp from 'sharp'
@@ -91,12 +91,40 @@ export async function getFaviconMeta(): Promise<FaviconMeta | null> {
 }
 
 /**
- * Cache-bust version used to invalidate browser-side favicon caches after a
- * new upload. Returns 0 when no custom favicon is set.
+ * Cache-bust version used to invalidate browser-side favicon caches.
+ *
+ * - When a custom favicon is uploaded, its meta.json `version` (Date.now() at
+ *   upload time) is authoritative.
+ * - Otherwise we fall back to the mtime of a bundled default file. This is
+ *   important for Firefox in particular: it caches favicon URLs (including
+ *   404s) very aggressively in places.sqlite, so without a query parameter
+ *   that changes whenever the on-disk file changes, users would never see a
+ *   freshly-regenerated default favicon without a manual cache wipe.
+ *
+ * Returns 0 only when neither a runtime upload nor any bundled default exists
+ * (e.g. dev mode with an empty src/public/favicons/).
  */
 export async function getFaviconVersion(): Promise<number> {
   const meta = await getFaviconMeta()
-  return meta?.version || 0
+  if (meta?.version) return meta.version
+
+  // Probe the most-likely-to-exist bundled file. We prefer favicon.ico because
+  // it's the only variant guaranteed by upstream MAFL; the others are filled
+  // in by ensureBundledDefaults() and would all share the same regenerate
+  // mtime anyway.
+  const probes = [
+    resolve(FAVICONS_PUBLIC_DIR, FAVICON_ICO_NAME),
+    resolve(FAVICONS_PUBLIC_DIR, 'pwa-512x512.png'),
+  ]
+  for (const p of probes) {
+    try {
+      const stat = statSync(p)
+      return Math.round(stat.mtimeMs)
+    }
+    catch {}
+  }
+
+  return 0
 }
 
 export interface GenerateInput {
@@ -236,4 +264,118 @@ export function findFaviconSourceAsset(): string | null {
     }
   }
   return null
+}
+
+// Ordered by preferred quality for downscale: the largest PNG that exists on
+// disk is used as the master for any missing/regenerated variant.
+const DEFAULT_MASTER_CANDIDATES = [
+  'pwa-512x512.png',
+  'pwa-192x192.png',
+  'apple-touch-icon.png',
+] as const
+
+export interface EnsureDefaultsResult {
+  /** Names of files actually written during this call. */
+  generated: string[]
+  /** Names that failed to generate (sharp / I/O error). */
+  failed: string[]
+  /** Master image used as the source, or null if none was found. */
+  master: string | null
+  /** True when FAVICONS_PUBLIC_DIR is missing (typically dev mode). */
+  skipped: boolean
+}
+
+/**
+ * Ensure the bundled `favicons-defaults/` directory contains a complete set of
+ * variants that match what `src/plugins/favicons.ts` and the web manifest
+ * reference. Upstream MAFL only ships a handful of source files
+ * (favicon.ico, apple-touch-icon, pwa-192, pwa-512), so without this step the
+ * favicon middleware 404s on /favicons/favicon-16x16.png, /favicons/favicon-
+ * 32x32.png and the android-chrome-* PWA icons after a user resets to defaults
+ * via /admin.
+ *
+ * - `force: false` (default) → only missing files are generated; existing
+ *   files are left untouched. Used at server startup.
+ * - `force: true`            → every variant (except the chosen master itself,
+ *   to avoid a lossy roundtrip) is rewritten from the master. Used by the
+ *   admin "Regenerate defaults" button.
+ *
+ * In dev mode (no FAVICONS_PUBLIC_DIR) the call is a no-op and returns
+ * `{ skipped: true }` so the caller can surface a friendly message.
+ */
+export async function ensureBundledDefaults(
+  { force = false }: { force?: boolean } = {},
+): Promise<EnsureDefaultsResult> {
+  if (!existsSync(FAVICONS_PUBLIC_DIR)) {
+    return { generated: [], failed: [], master: null, skipped: true }
+  }
+
+  const masterPath = DEFAULT_MASTER_CANDIDATES
+    .map(name => resolve(FAVICONS_PUBLIC_DIR, name))
+    .find(p => existsSync(p))
+
+  if (!masterPath) {
+    logger.warn(
+      `No master favicon found in ${FAVICONS_PUBLIC_DIR} `
+      + `(looked for ${DEFAULT_MASTER_CANDIDATES.join(', ')}) — skipping default-variant generation`,
+    )
+    return { generated: [], failed: [], master: null, skipped: false }
+  }
+
+  const masterName = masterPath.split(/[\\/]/).pop()!
+  const masterBuffer = await readFile(masterPath)
+
+  const generated: string[] = []
+  const failed: string[] = []
+
+  for (const variant of FAVICON_PNG_VARIANTS) {
+    // Never re-encode the master itself; that would replace a pristine source
+    // image with a downscale of itself.
+    if (variant.name === masterName) continue
+
+    const target = resolve(FAVICONS_PUBLIC_DIR, variant.name)
+    if (!force && existsSync(target)) continue
+
+    try {
+      const out = await sharp(masterBuffer)
+        .resize(variant.size, variant.size, {
+          fit: 'contain',
+          background: { r: 0, g: 0, b: 0, alpha: 0 },
+        })
+        .png()
+        .toBuffer()
+      await writeFile(target, out)
+      generated.push(variant.name)
+    }
+    catch (e) {
+      failed.push(variant.name)
+      logger.warn(`Failed to generate default ${variant.name}:`, e)
+    }
+  }
+
+  const icoPath = resolve(FAVICONS_PUBLIC_DIR, FAVICON_ICO_NAME)
+  if (force || !existsSync(icoPath)) {
+    try {
+      const icoSources = await Promise.all(
+        FAVICON_ICO_SIZES.map(size =>
+          sharp(masterBuffer)
+            .resize(size, size, {
+              fit: 'contain',
+              background: { r: 0, g: 0, b: 0, alpha: 0 },
+            })
+            .png()
+            .toBuffer(),
+        ),
+      )
+      const icoBuffer = await pngToIco(icoSources)
+      await writeFile(icoPath, icoBuffer)
+      generated.push(FAVICON_ICO_NAME)
+    }
+    catch (e) {
+      failed.push(FAVICON_ICO_NAME)
+      logger.warn(`Failed to generate default ${FAVICON_ICO_NAME}:`, e)
+    }
+  }
+
+  return { generated, failed, master: masterName, skipped: false }
 }

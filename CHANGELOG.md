@@ -1,6 +1,53 @@
 # Changelog
 
 
+## Complete bundled default favicon set + Firefox cache busting
+
+### 🐛 Bug Fixes
+
+- **server:** Fixed `/favicons/favicon-16x16.png`, `/favicons/favicon-32x32.png` and the `android-chrome-*` PWA icons returning a JSON 404 after **Reset to default** in `/admin` — upstream MAFL only ships 4 of the 8 favicon variants (`favicon.ico`, `apple-touch-icon.png`, `pwa-192x192.png`, `pwa-512x512.png`), so the favicon middleware had nothing to fall back to once a runtime upload was removed. A new server-startup Nitro plugin now generates every missing PNG variant (plus a multi-resolution `favicon.ico` if needed) from the largest available master image (preferring `pwa-512x512.png`) into `./server/favicons-defaults/`
+- **client / firefox:** Fixed the tab favicon staying blank in Firefox even after the bundled defaults were complete — the favicon plugin only appended `?v=<version>` when a *custom* upload was active, so for bundled defaults Firefox kept reusing its cached "no favicon" entry in `places.sqlite`. `getFaviconVersion()` now falls back to the mtime of `favicons-defaults/favicon.ico` (or `pwa-512x512.png`) when no custom meta exists, so the `<link>` URLs always change whenever the on-disk files change
+- **server:** Added `Cache-Control: no-cache, must-revalidate` to `/manifest.webmanifest` — browsers were caching the manifest aggressively and kept referencing the previous icon `?v=` URLs after a regenerate, so the PWA icons did not update until a hard refresh
+
+### 🚀 Enhancements
+
+- **admin:** New **Regenerate defaults** button in the **App Favicon** status row (visible only when no custom upload is active) — forces a full rebuild of every bundled default variant from the master image on disk. Useful when files got corrupted, the startup hook couldn't write (read-only fs that later got unmounted), or after an upstream MAFL update changed the bundled master. Confirms first, surfaces a toast with the variant count + master filename (e.g. *"Regenerated 4 default favicons from pwa-512x512.png"*), and cache-busts the live preview grid via `refreshPreview(res.version)`
+- **server:** Generation logic extracted to a single reusable `ensureBundledDefaults({ force })` in `src/server/utils/favicons.ts`. `force: false` (default) only fills in missing variants — used at server startup. `force: true` rewrites every variant except the chosen master itself (avoids a lossy roundtrip) — used by the admin button
+- **server:** Existing files in `favicons-defaults/` are never overwritten by the startup hook, so user-mounted overrides on `/app/public/favicons` continue to take precedence. Runtime uploads in `./data/favicons/` still win at the middleware layer regardless of what lives in `favicons-defaults`
+- **server:** The favicon middleware's existing `ETag` (built from `size + mtime`) means a regenerate causes browsers to re-fetch on their next conditional request within `max-age=300`, no manual refresh required for the tab icon
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/server/utils/favicons.ts` | Added `ensureBundledDefaults({ force })` returning `{ generated, failed, master, skipped }` — handles master-discovery (`pwa-512x512.png` → `pwa-192x192.png` → `apple-touch-icon.png`), per-variant sharp downscale into a transparent square canvas, `pngToIco` multi-res `.ico` assembly, and a skip for the chosen master to avoid re-encoding it; `getFaviconVersion()` now falls back to the mtime of `favicon.ico` (or `pwa-512x512.png`) so cache-busting `?v=` is present even for bundled defaults; imported `statSync` |
+| `src/server/plugins/02.favicon-defaults.ts` | New Nitro server-startup plugin — calls `ensureBundledDefaults({ force: false })` and logs success/failure (silently no-ops in dev where `FAVICONS_PUBLIC_DIR` doesn't exist) |
+| `src/server/api/admin/favicon-defaults-regenerate.post.ts` | New admin endpoint — `requireAdminSession`, calls `ensureBundledDefaults({ force: true })`, returns `{ ok, version, generated, failed, master }`; 409 in dev mode (no defaults dir), 500 when no master image found |
+| `src/server/routes/manifest.webmanifest.get.ts` | Set `Cache-Control: no-cache, must-revalidate` so the PWA manifest is revalidated on every navigation and always references the latest favicon `?v=` |
+| `src/components/admin/FaviconSettings.vue` | New "Regenerate defaults" button rendered in a second right-column block (`v-else-if="status"`) below the custom-upload buttons; added `regenerating` ref + `regenerateDefaults()` async handler with confirm prompt, busy state, toast feedback and `refreshPreview(res.version)` cache-bust |
+
+---
+
+## Logo Image picker — browse `data/` instead of typing filenames
+
+### 🚀 Enhancements
+
+- **admin:** The **Logo Image** field in the **Logo & Favicon** accordion is no longer a free-form text input — it's now a **dropdown picker** that lists every image present in the `data/` volume (root + one level deep). Each option shows a 32×32 thumbnail and file size, the trigger button shows the currently selected image as a 28×28 preview, and a checkmark highlights the active selection
+- **admin:** **Refresh** button inside the dropdown re-scans `data/` on demand so a freshly dropped PNG/SVG shows up without a page reload, and cache-busts the thumbnail URLs so a re-uploaded file with the same name renders its new bytes
+- **admin:** **Clear** button blanks the field in one click, and a **Custom path…** escape hatch falls back to a plain text input for paths that live outside the scan (e.g. deeply-nested subfolders) — the icon-only "back to picker" button returns to the dropdown without losing the typed value
+- **admin:** Dropdown closes on click-outside and on `Escape`; thumbnails load lazily and use the existing `/api/assets/<path>` route so no extra static-file plumbing is needed
+- **server:** New `GET /api/admin/data-images` endpoint scans `./data/` with a depth cap of 2 and an entry cap of 500, skips every entry starting with `.` (so the massive `.favicon-cache` and `.icon-url-cache` directories are ignored), filters to `.png` / `.jpg` / `.jpeg` / `.gif` / `.webp` / `.svg` / `.avif` / `.ico`, and returns each image with its name, path relative to `data/`, size, and mtime — root files are sorted before subfolder files so `logo.png` lands above `favicons/source.png`
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/server/api/admin/data-images.get.ts` | New admin-gated endpoint that walks `./data/` and returns the image list as `{ images: DataImage[] }`; recursion is bounded by `MAX_DEPTH = 2` and `MAX_ENTRIES = 500`, hidden entries (`.`-prefixed) are skipped, and results are sorted by path depth then alphabetically |
+| `src/components/admin/ImagePicker.vue` | New reusable component (auto-imported as `<AdminImagePicker>`) — `v-model:modelValue` compatible, custom dropdown with thumbnails + file sizes, Refresh / Clear / Custom path… controls, click-outside + Escape to close, lazy image loading, and cache-busted preview URLs |
+| `src/components/admin/GlobalSettings.vue` | Replaced the `Logo Image (filename in data/)` text input with `<AdminImagePicker v-model="state.logoImage" placeholder="logo.png" />`; renamed the label to **Logo Image** and added a hint paragraph explaining the picker / custom-path fallback |
+
+---
+
 ## Drag-and-drop + in-app copy/paste for items and groups
 
 ### 🚀 Enhancements

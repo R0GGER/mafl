@@ -9,6 +9,11 @@ export default defineEventHandler(async (event) => {
   const q = version > 0 ? `?v=${version}` : ''
 
   setResponseHeader(event, 'content-type', 'application/manifest+json')
+  // The manifest itself references favicon URLs with a ?v=<version> query.
+  // If browsers cache this manifest aggressively they keep using the old
+  // icon URLs even after a regenerate. no-cache forces a revalidation on
+  // every navigation so the icon URLs always reflect the latest version.
+  setResponseHeader(event, 'Cache-Control', 'no-cache, must-revalidate')
 
   return {
     id: '/',
