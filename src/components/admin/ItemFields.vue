@@ -392,16 +392,34 @@
         </label>
       </div>
 
-      <div v-if="item.iconType === 'favicon'" class="flex gap-2 items-end">
-        <div class="flex-1">
-          <label class="admin-label">Domain</label>
-          <input v-model="item.iconFavicon" type="text" class="admin-input w-full" placeholder="example.com">
+      <div v-if="item.iconType === 'favicon'">
+        <div class="flex gap-2 items-end">
+          <div class="flex-1">
+            <label class="admin-label">Domain</label>
+            <input v-model="item.iconFavicon" type="text" class="admin-input w-full" placeholder="example.com">
+          </div>
+          <div>
+            <label class="admin-label">&nbsp;</label>
+            <button
+              type="button"
+              class="admin-input inline-flex items-center gap-1 text-red-400 border-red-400/30 hover:bg-red-400/10 transition-colors disabled:opacity-50 cursor-pointer whitespace-nowrap"
+              :disabled="faviconCacheClearing || !item.iconFavicon"
+              title="Clear the cached favicon for this domain so it is re-downloaded"
+              @click="clearFaviconCache"
+            >
+              <Icon name="ph:trash" class="w-3.5 h-3.5" />
+              {{ faviconCacheClearing ? 'Clearing...' : 'Clear cache' }}
+            </button>
+          </div>
+          <div>
+            <label class="admin-label">&nbsp;</label>
+            <label class="inline-flex items-center gap-1 text-fg-dimmed admin-input cursor-pointer">
+              <input v-model="item.iconWrap" type="checkbox" style="accent-color: #69a870"> wrap
+            </label>
+          </div>
         </div>
-        <div>
-          <label class="admin-label">&nbsp;</label>
-          <label class="inline-flex items-center gap-1 text-fg-dimmed admin-input cursor-pointer">
-            <input v-model="item.iconWrap" type="checkbox" style="accent-color: #69a870"> wrap
-          </label>
+        <div v-if="faviconCacheMessage" class="mt-1 text-[10px]" :class="faviconCacheError ? 'text-red-400' : 'text-fg-dimmed'">
+          {{ faviconCacheMessage }}
         </div>
       </div>
       <div v-else-if="item.iconType === 'url'">
@@ -536,6 +554,36 @@ watch(() => props.item.iconType, (newType) => {
     props.item.iconFavicon = extractDomain(props.item.link)
   }
 })
+
+const faviconCacheClearing = ref(false)
+const faviconCacheMessage = ref('')
+const faviconCacheError = ref(false)
+
+async function clearFaviconCache() {
+  const domain = props.item.iconFavicon?.trim()
+  if (!domain || faviconCacheClearing.value) return
+
+  faviconCacheClearing.value = true
+  faviconCacheMessage.value = ''
+  faviconCacheError.value = false
+  try {
+    const res = await $fetch<{ ok: true; domain: string; removed: boolean }>(
+      '/api/admin/favicon-cache',
+      { method: 'DELETE', body: { domain } },
+    )
+    faviconCacheError.value = false
+    faviconCacheMessage.value = res.removed
+      ? `Cache cleared for ${res.domain}. The favicon will be re-downloaded.`
+      : `No cached favicon found for ${res.domain}.`
+  }
+  catch (e: any) {
+    faviconCacheError.value = true
+    faviconCacheMessage.value = e?.data?.statusMessage || e?.statusMessage || 'Failed to clear favicon cache'
+  }
+  finally {
+    faviconCacheClearing.value = false
+  }
+}
 
 const wrCountryCodeEffective = computed(() =>
   (props.item.wrCountryCode || 'NL').toUpperCase().slice(0, 2),

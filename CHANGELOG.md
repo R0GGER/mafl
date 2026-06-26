@@ -1,6 +1,26 @@
 # Changelog
 
 
+## Clear favicon cache per bookmark from the admin editor
+
+### 🚀 Enhancements
+
+- **admin:** Added a **Clear cache** button next to the **Domain** field of the **Icon Type → favicon** picker in the bookmark/item editor. Clicking it removes the cached favicon for that one domain so it is re-downloaded from the favicon API on the next load — handy when a site changed its favicon or a wrong/blank icon got cached. The button is disabled while a request is in flight or when no domain is filled in, and inline feedback reports whether a cached favicon was actually found and removed
+- **server:** New `DELETE /api/admin/favicon-cache` endpoint (admin-session protected) takes a `domain` in the body, normalizes it to the same key the favicon proxy caches under (`https://example.com/foo` → `example.com`), and deletes the matching `<domain>.dat` + `<domain>.json` files from `./data/.favicon-cache`. Returns `{ ok, domain, removed }`; rejects missing or path-traversal domains with a 400
+
+### Compatibility
+
+- **data:** Only affects the on-disk favicon cache (`./data/.favicon-cache`), which is regenerated on demand by the existing `/api/favicon/[...domain]` proxy. No config/schema changes, and the favicon proxy's 7-day TTL behaviour is unchanged — this just lets an admin force an early refresh for a single domain
+
+### Changed files
+
+| File | Change |
+|------|--------|
+| `src/server/api/admin/favicon-cache.delete.ts` | New admin endpoint — `requireAdminSession`, reads `domain` from the body, normalizes it (strip protocol + path) the same way the favicon proxy does, validates against path traversal, and `unlinkSync`s the `.dat` / `.json` cache files in `./data/.favicon-cache`; returns `{ ok, domain, removed }` |
+| `src/components/admin/ItemFields.vue` | Wrapped the favicon `Domain` row in a container and added a red **Clear cache** button (trash icon) plus inline status text; added `faviconCacheClearing` / `faviconCacheMessage` / `faviconCacheError` refs and a `clearFaviconCache()` handler that `$fetch`es the new `DELETE /api/admin/favicon-cache` endpoint and surfaces success/empty/error feedback |
+
+---
+
 ## Greeting service — multiline HTML editor in admin
 
 ### 🚀 Enhancements
